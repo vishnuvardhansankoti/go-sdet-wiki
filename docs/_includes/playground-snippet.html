@@ -1,0 +1,213 @@
+<!-- Reusable Go Playground Code Runner Snippet -->
+<!-- Include this in any markdown file using: {% include playground-snippet.html example="hello-world" %} -->
+
+<div class="go-playground" data-playground 
+     data-wasm-url="/assets/wasm/go.wasm"
+     data-input="#code-{{ include.example }}"
+     data-output="#output-{{ include.example }}"
+     data-run-button="#run-{{ include.example }}">
+    
+    <div class="playground-container">
+        <div class="playground-editor">
+            <div class="editor-header">
+                <span class="editor-title">Go Code</span>
+                <button class="btn-small" onclick="document.querySelector('#code-{{ include.example }}').select(); document.execCommand('copy');" type="button">
+                    Copy
+                </button>
+            </div>
+            <textarea 
+                id="code-{{ include.example }}" 
+                class="code-editor" 
+                spellcheck="false"
+                style="font-family: 'Courier New', monospace; font-size: 14px;">{{ include.code }}</textarea>
+        </div>
+
+        <div class="playground-controls">
+            <button id="run-{{ include.example }}" class="btn-primary" disabled type="button">
+                Run Code
+            </button>
+            <button class="btn-secondary" onclick="document.querySelector('#code-{{ include.example }}').value = ''; document.querySelector('#output-{{ include.example }}').innerHTML = '';" type="button">
+                Clear
+            </button>
+        </div>
+
+        <div class="playground-output">
+            <div class="output-header">
+                <span class="output-title">Output</span>
+            </div>
+            <div id="output-{{ include.example }}" class="code-output"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+.go-playground {
+    margin: 20px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.playground-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    min-height: 400px;
+}
+
+.playground-editor,
+.playground-output {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #ddd;
+}
+
+.playground-output {
+    border-right: none;
+}
+
+.editor-header,
+.output-header {
+    background-color: #f5f5f5;
+    padding: 10px 15px;
+    font-weight: 600;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.editor-title,
+.output-title {
+    font-size: 13px;
+    color: #333;
+}
+
+.code-editor {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    resize: none;
+    line-height: 1.5;
+    background-color: #fff;
+}
+
+.code-editor:focus {
+    outline: none;
+    background-color: #f9f9f9;
+}
+
+.code-output {
+    flex: 1;
+    padding: 15px;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    overflow-y: auto;
+    line-height: 1.5;
+}
+
+.log-entry {
+    margin: 2px 0;
+}
+
+.log-success {
+    color: #4ec9b0;
+}
+
+.log-error {
+    color: #f48771;
+}
+
+.log-warn {
+    color: #dcdcaa;
+}
+
+.log-info {
+    color: #9cdcfe;
+}
+
+.log-log {
+    color: #d4d4d4;
+}
+
+.playground-controls {
+    grid-column: 1 / -1;
+    background-color: #f5f5f5;
+    padding: 12px 15px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    gap: 8px;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-small {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #0e639c;
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: #1177bb;
+}
+
+.btn-primary:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-secondary {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background-color: #d0d0d0;
+}
+
+.btn-small {
+    padding: 4px 8px;
+    font-size: 12px;
+    background-color: #ddd;
+    color: #333;
+}
+
+.btn-small:hover {
+    background-color: #ccc;
+}
+
+@media (max-width: 768px) {
+    .playground-container {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+
+    .playground-editor,
+    .playground-output {
+        min-height: 300px;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .playground-output {
+        border-bottom: none;
+    }
+}
+</style>
+
+<!-- Load the Go WASM runtime and playground script -->
+<script src="/assets/wasm/wasm_exec.js"></script>
+<script src="/assets/js/playground.js"></script>

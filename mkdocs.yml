@@ -1,0 +1,115 @@
+site_name: Go SDET Wiki
+site_description: A complete Go learning portal for SDETs with runnable code, Testcontainers, and a capstone microservice.
+site_url: https://<your-github-username>.github.io/go-sdet-wiki
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - search.suggest
+    - search.highlight
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: deep purple
+
+extra_javascript:
+  - assets/js/playground.js
+  - assets/wasm/wasm_exec.js
+
+extra_css:
+  - assets/css/custom.css
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+  - tables
+  - footnotes
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+
+  - Introduction:
+      - Overview: 00-intro/overview.md
+      - Why Go for SDETs: 00-intro/why-go-for-sdets.md
+      - Install & Setup: 00-intro/install-and-setup.md
+      - Go Modules & Workspaces: 00-intro/go-modules-and-workspaces.md
+
+  - Go Basics:
+      - Variables & Types: 10-go-basics/variables-and-types.md
+      - Control Flow: 10-go-basics/control-flow.md
+      - Functions & Methods: 10-go-basics/functions-and-methods.md
+      - Structs & Interfaces: 10-go-basics/structs-and-interfaces.md
+      - Error Handling: 10-go-basics/error-handling.md
+      - Concurrency (Goroutines): 10-go-basics/concurrency-goroutines.md
+      - Channels & Select: 10-go-basics/channels-and-select.md
+      - HTTP Client/Server: 10-go-basics/http-client-and-server-basics.md
+
+  - Microservices:
+      - Overview: 20-microservices/microservices-overview.md
+      - Folder Structure: 20-microservices/project-folder-structure.md
+      - REST API Design: 20-microservices/rest-api-design.md
+      - Dependency Injection: 20-microservices/dependency-injection.md
+      - Config & Env Vars: 20-microservices/configuration-and-env-vars.md
+      - Logging & Observability: 20-microservices/logging-and-observability.md
+
+  - Testing Basics:
+      - Testing Package: 30-testing-basics/testing-package-basics.md
+      - Table-Driven Tests: 30-testing-basics/table-driven-tests.md
+      - Mocking with Interfaces: 30-testing-basics/mocking-with-interfaces.md
+      - Testing HTTP Handlers: 30-testing-basics/testing-http-handlers.md
+      - Testing DB Code with Fakes: 30-testing-basics/testing-database-code-with-fakes.md
+      - Test Organization: 30-testing-basics/test-organization-and-naming.md
+
+  - Integration Testing (Testcontainers):
+      - Intro: 40-integration-testing-testcontainers/intro-to-testcontainers.md
+      - Install Testcontainers-Go: 40-integration-testing-testcontainers/installing-testcontainers-go.md
+      - First Container Test: 40-integration-testing-testcontainers/first-container-test.md
+      - Postgres Tests: 40-integration-testing-testcontainers/postgres-integration-tests.md
+      - API E2E Tests: 40-integration-testing-testcontainers/api-end-to-end-tests.md
+      - CI Considerations: 40-integration-testing-testcontainers/testcontainers-ci-considerations.md
+
+  - Contract Testing:
+      - Why Contract Testing: 50-contract-testing/why-contract-testing.md
+      - Pact-Go Basics: 50-contract-testing/pact-go-basics.md
+      - Consumer Tests: 50-contract-testing/consumer-contract-tests.md
+      - Provider Verification: 50-contract-testing/provider-verification-tests.md
+      - Pact in CI: 50-contract-testing/pact-in-ci.md
+
+  - CI/CD & Quality Gates:
+      - GitHub Actions: 60-ci-cd-and-quality-gates/github-actions-for-go.md
+      - Running Tests: 60-ci-cd-and-quality-gates/running-unit-and-integration-tests.md
+      - Coverage Thresholds: 60-ci-cd-and-quality-gates/coverage-and-thresholds.md
+      - Linting & Static Analysis: 60-ci-cd-and-quality-gates/linting-and-static-analysis.md
+
+  - Patterns & Recipes:
+      - Golden Files: 70-patterns-and-recipes/golden-files-pattern.md
+      - Test Data Builders: 70-patterns-and-recipes/test-data-builders.md
+      - Flaky Test Diagnostics: 70-patterns-and-recipes/flaky-test-diagnostics.md
+      - Debugging Concurrent Tests: 70-patterns-and-recipes/debugging-concurrent-tests.md
+
+  - WASM Playground:
+      - Overview: 80-wasm-playground/playground-overview.md
+      - Embedding Playground: 80-wasm-playground/embedding-playground-in-pages.md
+      - Limitations: 80-wasm-playground/limitations-and-best-practices.md
+
+  - Capstone Project:
+      - Overview: 90-capstone/capstone-overview.md
+      - Requirements: 90-capstone/requirements-and-scope.md
+      - Data Model: 90-capstone/domain-and-data-model.md
+      - API Spec: 90-capstone/api-specification.md
+      - Implementation Guide: 90-capstone/implementation-guide.md
+      - Unit Testing: 90-capstone/unit-testing-strategy.md
+      - Integration Testing: 90-capstone/integration-testing-with-testcontainers.md
+      - Contract Testing: 90-capstone/contract-testing-strategy.md
+      - CI Pipeline: 90-capstone/ci-pipeline-for-capstone.md
