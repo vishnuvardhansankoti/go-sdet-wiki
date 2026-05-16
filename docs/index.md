@@ -14,6 +14,7 @@ Welcome to the Go Software Development Engineer in Test (SDET) Wiki. This compre
 - **[70 - Patterns & Recipes](70-patterns-and-recipes/golden-files-pattern.md)** - Advanced testing patterns
 - **[80 - WASM Playground](80-wasm-playground/playground-overview.md)** - Interactive Go examples
 - **[90 - Capstone](90-capstone/capstone-overview.md)** - End-to-end project
+- **[95 - Appendix](95-appendix/testing-reltio-mdm-with-go.md)** - Using Go for Reltio MDM testing
 
 ## Quick Start
 
