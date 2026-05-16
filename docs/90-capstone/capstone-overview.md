@@ -58,7 +58,6 @@ After completing this capstone, you will:
 6. **[Integration Testing](integration-testing-with-testcontainers.md)** - Test with real DB
 7. **[Contract Testing](contract-testing-strategy.md)** - Test service contracts
 8. **[CI Pipeline](ci-pipeline-for-capstone.md)** - Automate quality checks
-9. **[Deployment](deployment-guide.md)** - Production deployment
 
 ## Time Estimate
 
