@@ -18,6 +18,15 @@ theme:
     - scheme: default
       primary: indigo
       accent: deep purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: deep purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
 
 extra_javascript:
   - assets/js/playground.js
