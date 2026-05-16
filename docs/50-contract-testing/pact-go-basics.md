@@ -1,8 +1,14 @@
 # Pact Go Basics
 
+Pact Go turns contract expectations into executable tests and portable pact files. Instead of manually coordinating integration assumptions, consumers define behaviors once and providers verify them continuously.
+
+This section focuses on building high-signal interactions that remain stable as services evolve.
+
 ## What is Pact?
 
 Pact is a contract testing framework that enables consumer-driven contract testing.
+
+It provides a consumer-side mock server, contract generation, and provider verification workflow.
 
 ## Installation
 
@@ -29,6 +35,8 @@ JSON file containing all interactions (the "contract").
 - **Verification**: Provider confirms it matches contract
 
 ## Pact Consumer Test Structure
+
+Think of this structure as four phases: define, execute, assert, and publish.
 
 ```go
 import "github.com/pact-foundation/pact-go/v2/consumer"
@@ -73,6 +81,8 @@ func TestUserServiceConsumer(t *testing.T) {
 }
 ```
 
+A strong consumer test validates both client behavior and contract compatibility.
+
 ## Key Components
 
 ### Consumer Mock Server
@@ -89,6 +99,8 @@ body := map[string]interface{}{
 }
 ```
 
+Prefer matchers for dynamic values to avoid brittle contracts.
+
 ### State Management
 Setup data states for tests:
 
@@ -99,6 +111,8 @@ mockProvider.
 ```
 
 ## Example Consumer Test
+
+This example demonstrates request headers, mock invocation, and status validation under Pact-managed expectations.
 
 ```go
 func TestGetUserConsumer(t *testing.T) {
@@ -145,3 +159,100 @@ func TestGetUserConsumer(t *testing.T) {
     }
 }
 ```
+
+## Assignment: Create First Bookshelf Pact Consumer Test
+
+### Goal
+Generate a pact file from a consumer test for Bookshelf endpoints.
+
+This assignment establishes the baseline contract artifact for downstream provider verification.
+
+### Route Prefix Note
+Use the same route prefix as your running service for this stage (`/api` in tutorial sections, `/api/v1` in capstone).
+
+### Tasks
+
+1. Install pact-go:
+
+```bash
+go get github.com/pact-foundation/pact-go/v2
+```
+
+2. Create `tests/contract/consumer/bookshelf_consumer_test.go`.
+3. Define interactions for:
+  - `GET /api/books` success
+  - `POST /api/users` success
+  - `POST /api/users` validation failure
+
+Starter interaction:
+
+```go
+pact.AddInteraction().
+    Given("books exist").
+    UponReceiving("a request to list books").
+    WithRequest("GET", "/api/books").
+    WillRespondWith(200).
+    WithHeader("Content-Type", "application/json").
+    WithBody(matchers.EachLike(map[string]interface{}{
+        "id":            matchers.String(),
+        "title":         matchers.String(),
+        "author":        matchers.String(),
+        "isbn":          matchers.String(),
+        "publishedYear": matchers.Integer(),
+    }, 1))
+```
+
+4. Run and generate pact files:
+
+```bash
+go test ./tests/contract/consumer -v
+```
+
+### Done Criteria
+
+- Pact JSON is generated under `pacts/`.
+- Interactions map to real Bookshelf endpoints.
+
+Also ensure interaction descriptions are readable in CI output and reports.
+
+## Deep Dive: Pact Modeling Strategy
+
+### Interaction quality checklist
+
+1. Use precise provider states (`books exist`, `no books exist`).
+2. Include request headers that matter (`Accept`, `Content-Type`).
+3. Prefer matchers for dynamic values (IDs, timestamps, UUIDs).
+4. Add both happy-path and validation-path interactions.
+
+### Matcher philosophy
+
+Overly strict payload matching creates fragile contracts. Use type and format matchers so legitimate provider evolution does not break consumers.
+
+### Example matcher intent
+
+```go
+"id": matchers.String(),
+"publishedYear": matchers.Integer(),
+```
+
+This validates interface compatibility while avoiding brittle literal-value checks.
+
+### SDET tip
+
+Keep one behavioral intent per interaction description so pact reports are easy to diagnose in CI.
+
+## Common Anti-Patterns
+
+- Hardcoding dynamic IDs/timestamps instead of using matchers.
+- Combining unrelated assertions into one large interaction.
+- Omitting request headers that affect provider behavior.
+- Writing interactions that do not map to real client calls.
+
+## Quick Pact Authoring Checklist
+
+- Does each interaction represent one clear behavior?
+- Are headers and path parameters explicitly modeled?
+- Are matchers used for non-deterministic fields?
+- Are both success and failure scenarios included?
+- Will failure output be understandable to another team?
+

@@ -1,10 +1,16 @@
 # Requirements and Scope
 
+Requirements quality determines capstone delivery quality. A clear scope creates predictable implementation, test planning, and CI governance.
+
+This page should be treated as a contract between product intent and engineering execution.
+
 ## Project: Bookshelf API
 
 A microservice-based API for managing personal bookshelves and book recommendations.
 
 ## Functional Requirements
+
+Each functional item should map to at least one success scenario and one failure scenario.
 
 ### User Management
 - User registration with email
@@ -34,6 +40,8 @@ A microservice-based API for managing personal bookshelves and book recommendati
 
 ## Non-Functional Requirements
 
+Non-functional requirements are release criteria, not optional aspirations.
+
 ### Performance
 - Response time < 200ms for 95% of requests
 - Support 100+ concurrent users
@@ -56,6 +64,8 @@ A microservice-based API for managing personal bookshelves and book recommendati
 
 ## Scope
 
+Scope boundaries are what keep this capstone finishable and testable.
+
 ### In Scope
 - User CRUD operations
 - Book inventory management
@@ -73,6 +83,8 @@ A microservice-based API for managing personal bookshelves and book recommendati
 - Front-end application
 - Production deployment setup
 - Advanced security features
+
+Keep deferred features visible to avoid accidental scope creep.
 
 ## Tech Stack
 
@@ -184,6 +196,8 @@ CREATE TABLE reviews (
 
 ## Success Criteria
 
+Use this checklist as the project-level Definition of Done.
+
 - [ ] All endpoints implemented
 - [ ] 80%+ test coverage
 - [ ] All tests passing
@@ -202,8 +216,7 @@ bookshelf-api/
 │   ├── domain/
 │   ├── repository/
 │   ├── service/
-│   └── api/
-├── internal/
+│   ├── handler/
 │   ├── config/
 │   └── middleware/
 ├── tests/
@@ -221,3 +234,62 @@ bookshelf-api/
 ## Next Step
 
 Proceed to [Domain and Data Model](domain-and-data-model.md)
+
+## Assignment: Finalize Scope for Bookshelf v1
+
+### Goal
+Lock v1 scope so implementation and tests stay focused.
+
+### Must Have (v1)
+
+- Users: create and fetch
+- Books: create and list
+- Shelf entries: add and list
+- Reviews: create and list
+- Health endpoint
+
+### Deferred (v2)
+
+- Auth and RBAC
+- Recommendation engine
+- Full-text search
+- Advanced analytics
+
+### Done Criteria
+
+- `docs/CAPSTONE_SCOPE.md` lists v1/v2 split.
+- Acceptance criteria are testable and map to endpoints.
+
+## Deep Dive: Scope Governance for Delivery Confidence
+
+### Background
+
+Most capstone delays come from scope creep. A clear v1 boundary protects timeline, test stability, and implementation quality.
+
+### Governance model
+
+1. Convert each functional requirement into testable acceptance criteria.
+2. Tag every requirement as `v1 must-have` or `v2 deferred`.
+3. Reject unplanned feature additions after scope freeze.
+4. Track requirement-to-test mapping in a single checklist.
+
+### SDET recommendation
+
+For each v1 endpoint, define at least one success scenario and one failure scenario before coding.
+
+## Common Anti-Patterns
+
+- Defining requirements without measurable acceptance criteria.
+- Mixing v1 and v2 features during implementation.
+- Adding endpoints without updating scope and tests.
+- Ignoring non-functional requirements until final week.
+
+## Quick Scope Governance Checklist
+
+- Is every v1 requirement testable?
+- Is deferred scope explicitly documented?
+- Are endpoint and acceptance mappings maintained?
+- Are performance/reliability constraints represented in CI checks?
+- Are scope changes reviewed before implementation?
+
+

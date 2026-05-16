@@ -1,8 +1,14 @@
 # Capstone Overview
 
+The capstone is where all earlier topics converge into one delivery-grade system. The objective is not only to implement features, but to prove engineering quality through layered tests, clear contracts, and repeatable CI evidence.
+
+Use this page as the execution map for scope, implementation, and release readiness.
+
 ## Project Goal
 
 Build a complete, production-ready microservice with comprehensive test coverage using all the techniques learned throughout this wiki.
+
+Production-ready here means deterministic builds, verifiable behavior, and governance through quality gates.
 
 ## Project: Bookshelf API
 
@@ -12,6 +18,11 @@ A RESTful API for managing a digital bookshelf with:
 - Book inventory management
 - Reading lists and recommendations
 - Rating and review system
+
+### API Versioning Convention
+
+For capstone artifacts, use `/api/v1` consistently.
+Earlier tutorial sections may show `/api` for simpler progressive examples.
 
 ## What You'll Build
 
@@ -48,6 +59,8 @@ After completing this capstone, you will:
 ✓ Set up complete CI/CD pipeline
 ✓ Work with microservices architecture
 
+These outcomes are strongest when each milestone includes implementation plus test evidence.
+
 ## Capstone Structure
 
 1. **[Requirements and Scope](requirements-and-scope.md)** - Define project boundaries
@@ -64,6 +77,8 @@ After completing this capstone, you will:
 - **Beginner**: 40-50 hours
 - **Intermediate**: 20-30 hours
 - **Advanced**: 10-15 hours
+
+Treat estimates as planning guidance; quality-gate and debugging time is intentionally included.
 
 ## Prerequisites
 
@@ -92,3 +107,55 @@ Implement the project, then use sections as reference.
 ## Next Steps
 
 Start with [Requirements and Scope](requirements-and-scope.md)
+
+## Assignment: Capstone Delivery Plan (Bookshelf)
+
+### Goal
+Turn the tutorial project into a final capstone deliverable with clear milestones.
+
+### Milestones
+
+1. Freeze scope and API contract.
+2. Complete domain and repository implementation.
+3. Reach passing unit + integration + contract suites.
+4. Enforce CI quality gates and coverage.
+5. Publish final README and architecture notes.
+
+### Done Criteria
+
+- All section deliverables are complete.
+- Final app is buildable and testable from a clean clone.
+
+## Deep Dive: Capstone Execution Strategy
+
+### Background
+
+Capstone success depends less on coding speed and more on sequencing decisions that keep architecture, tests, and delivery criteria aligned.
+
+### Execution principles
+
+1. Keep one canonical API version (`/api/v1`) for all final artifacts.
+2. Define acceptance tests before implementing each milestone.
+3. Treat CI gates as release requirements, not optional checks.
+4. Keep scope stable once implementation starts.
+
+### SDET recommendation
+
+Use milestone demos with explicit evidence: endpoint checks, test reports, coverage, and CI screenshots.
+
+## Common Anti-Patterns
+
+- Building all features first and postponing test layers until the end.
+- Mixing route/version conventions mid-capstone.
+- Expanding scope after implementation has started.
+- Treating CI failures as optional cleanup instead of release blockers.
+
+## Quick Capstone Readiness Checklist
+
+- Is `/api/v1` used consistently across artifacts?
+- Does each milestone include acceptance tests?
+- Are unit, integration, and contract suites all passing?
+- Are coverage and lint gates enforced in CI?
+- Is the project reproducible from a clean clone?
+
+

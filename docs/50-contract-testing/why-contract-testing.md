@@ -1,5 +1,9 @@
 # Why Contract Testing?
 
+Contract testing is a scaling strategy for service integration confidence. It reduces the need to run every consumer-provider combination in full end-to-end environments, while still validating API compatibility before release.
+
+For SDETs, this means faster feedback loops and clearer ownership when integration behavior changes.
+
 ## The Problem: Integration Testing at Scale
 
 With many microservices, full end-to-end tests become:
@@ -8,9 +12,13 @@ With many microservices, full end-to-end tests become:
 - Hard to debug failures
 - Dependent on service availability
 
+As systems grow, integration drift often becomes a bigger risk than outright outages.
+
 ## What is Contract Testing?
 
 Contract testing verifies that services can communicate correctly by validating the "contract" (expected API structure) between them.
+
+In practice, it checks request paths, methods, status codes, and response shapes that consumers depend on.
 
 ## Types of Contracts
 
@@ -45,6 +53,8 @@ Provider says: "I provide GET /users/123 and return {id, name, email}"
 3. **Provider verifies** their API matches contracts
 4. **CI runs contract verification** before deployment
 
+This workflow allows independent teams to release safely without requiring synchronized deployments.
+
 ## Benefits
 
 - **Fast**: No need for full integration environments
@@ -52,6 +62,8 @@ Provider says: "I provide GET /users/123 and return {id, name, email}"
 - **Shift Left**: Find issues early
 - **Documentation**: Contracts document APIs
 - **Confidence**: Deploy independently
+
+Most importantly, failures point directly to compatibility mismatches, improving triage speed.
 
 ## Pact Workflow
 
@@ -89,3 +101,71 @@ Consumer Tests → Pact File (Contract) → Provider Verification
 ✗ Monolithic applications
 ✗ Tightly coupled services
 ✗ Rare deployments
+
+Use this section as a decision gate, not a rule carved in stone.
+
+## Assignment: Define Bookshelf Contract Boundaries
+
+### Goal
+Model the Bookshelf app as producer and consumer services so contract testing has a concrete target.
+
+### Scenario
+
+- `bookshelf-api` is the provider for book and review endpoints.
+- `reading-ui` (or a separate client package) is the consumer.
+
+### Tasks
+
+1. Document two consumer expectations:
+  - `GET /api/books` returns an array with `id`, `title`, `author`, `isbn`, `publishedYear`.
+  - `POST /api/users` returns `201` with a user payload containing `id` and `email`.
+2. Add one negative contract expectation:
+  - invalid `POST /api/users` returns `400` and an error response.
+3. Create `docs/CONTRACT_SCOPE.md` with:
+  - provider name
+  - consumer name
+  - initial endpoints covered
+
+### Done Criteria
+
+- Contract scope doc exists and is agreed by both sides.
+- Endpoints chosen are stable and versioned for future changes.
+
+## Deep Dive: Contracts as Change Safety Nets
+
+### Why this matters
+
+In distributed systems, many failures are not outages, but integration drift: one service changes a field, status code, or payload shape and silently breaks consumers. Contract tests catch this drift before release.
+
+### What contract tests should validate
+
+1. Resource path and method (`GET /api/books`).
+2. Status code expectations (`200`, `201`, `400`, `404`).
+3. Required response structure and key fields.
+4. Error envelope shape for failure scenarios.
+
+### What they should not over-constrain
+
+- Internal provider implementation details.
+- Optional fields the consumer does not use.
+- Exact ordering unless contractually required.
+
+### SDET guidance
+
+Design each contract as a user-observable behavior, not as an implementation snapshot. This keeps contracts stable across refactoring.
+
+## Common Anti-Patterns
+
+- Writing contracts that mirror provider internals instead of consumer needs.
+- Over-constraining optional fields and making contracts brittle.
+- Skipping negative scenarios such as validation and not-found paths.
+- Treating contracts as one-time setup and not evolving them with features.
+
+## Quick Boundary Checklist
+
+- Is each contract tied to a real consumer behavior?
+- Are required fields/status codes clearly specified?
+- Are optional fields modeled with flexibility?
+- Are error responses covered for key workflows?
+- Can both consumer and provider teams explain ownership?
+

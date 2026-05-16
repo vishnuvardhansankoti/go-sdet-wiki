@@ -122,3 +122,6 @@ nav:
       - Integration Testing: 90-capstone/integration-testing-with-testcontainers.md
       - Contract Testing: 90-capstone/contract-testing-strategy.md
       - CI Pipeline: 90-capstone/ci-pipeline-for-capstone.md
+
+  - Project Notes:
+      - Tutorial Changelog: BOOKSHELF_TUTORIAL_CHANGELOG.md

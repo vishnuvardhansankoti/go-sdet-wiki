@@ -1,8 +1,14 @@
 # Pact in CI
 
+Contract testing becomes truly valuable when integrated into CI and release governance. Running Pact locally is useful, but automated publication, verification, and deploy decisions are what prevent production compatibility regressions.
+
+This guide focuses on reliable CI workflow design for contract-based delivery.
+
 ## Pact Broker
 
 The Pact Broker is a central repository for pact files and verification results.
+
+It acts as the source of truth for compatibility history across teams and versions.
 
 ```bash
 # Run Pact Broker via Docker
@@ -10,6 +16,8 @@ docker run -d -p 8080:8080 pactfoundation/pact-broker:latest
 ```
 
 ## Publishing Consumer Pacts
+
+Consumer pipelines should publish pact artifacts every time API-calling behavior changes.
 
 ### GitHub Actions: Consumer Job
 
@@ -43,6 +51,8 @@ jobs:
 ```
 
 ## Provider Verification in CI
+
+Provider pipelines should fetch current relevant pacts and verify against the running provider.
 
 ### GitHub Actions: Provider Job
 
@@ -98,6 +108,8 @@ jobs:
 
 ## CLI Publishing
 
+CLI commands are useful for local checks, scripted pipelines, and emergency manual recovery workflows.
+
 ### Publish Consumer Pacts
 
 ```bash
@@ -117,6 +129,8 @@ pact-cli publish-provider-results ./verification-results \
 ```
 
 ## Programmatic Publishing
+
+Programmatic publishing is useful when you want publication tightly coupled to test execution code.
 
 ```go
 import "github.com/pact-foundation/pact-go/v2/publisher"
@@ -162,6 +176,8 @@ jobs:
             -provider-version=${{ matrix.provider-version }}
 ```
 
+Use matrix breadth carefully to balance coverage and CI runtime.
+
 ## Can I Deploy Decision
 
 The Pact Broker can determine if it's safe to deploy:
@@ -173,6 +189,8 @@ pact-cli can-i-deploy \
   --version=1.0.0 \
   --branch=main
 ```
+
+Treat this check as a release gate, not an optional informational step.
 
 In CI:
 
@@ -197,3 +215,87 @@ In CI:
 - Monitor pact verification trends
 - Fail deployment if verification fails
 - Review contracts regularly
+
+Additional guidance:
+
+- Use immutable app versions such as commit SHA.
+- Persist pact and verification artifacts for failed runs.
+- Keep broker connectivity checks explicit in pipeline setup.
+
+## Assignment: Add Bookshelf Contract Tests to CI
+
+### Goal
+Automate contract publication and provider verification in GitHub Actions.
+
+This assignment establishes continuous compatibility governance for the Bookshelf project.
+
+### Tasks
+
+1. Add `.github/workflows/contract-tests.yml` with two jobs:
+  - `consumer-contract`
+  - `provider-verification`
+2. Consumer job:
+  - runs `go test ./tests/contract/consumer -v`
+  - publishes pacts to broker (or stores as artifact initially)
+3. Provider job:
+  - starts provider app
+  - fetches pacts (broker or artifact)
+  - runs `go test ./tests/contract/provider -v`
+4. Add can-i-deploy gate before release.
+
+Minimal workflow commands:
+
+```bash
+go test ./tests/contract/consumer -v
+go test ./tests/contract/provider -v
+```
+
+### Done Criteria
+
+- PRs fail if consumer or provider contract tests fail.
+- Release pipeline checks can-i-deploy before deployment.
+
+Also ensure failure diagnostics are retained as downloadable artifacts.
+
+## Deep Dive: CI Contract Governance
+
+### Background
+
+Contract testing becomes high-value only when integrated into deployment governance. The broker history plus can-i-deploy provides traceable compatibility decisions.
+
+### Governance pipeline sequence
+
+1. Run consumer tests and publish pacts.
+2. Run provider verification against current relevant pacts.
+3. Publish verification results.
+4. Execute can-i-deploy for release candidate.
+
+### Operational safeguards
+
+1. Use immutable app versions (`git sha`).
+2. Include branch/environment tags where needed.
+3. Fail fast on missing pact files or broker connectivity errors.
+4. Preserve pact/verification artifacts for debugging.
+
+### SDET metrics to monitor
+
+- Contract verification pass rate by provider version.
+- Mean time to fix contract breakages.
+- Number of blocked deployments due to can-i-deploy.
+
+## Common Anti-Patterns
+
+- Publishing pacts without running corresponding consumer tests.
+- Verifying providers against stale local pact files instead of broker source.
+- Skipping can-i-deploy in release workflows.
+- Treating contract failures as flaky and rerunning without analysis.
+
+## Quick Contract CI Checklist
+
+- Are consumer pacts published per relevant change?
+- Does provider verification fetch current broker contracts?
+- Are verification results published back to broker?
+- Is can-i-deploy enforced before release?
+- Are diagnostics/artifacts available for failed runs?
+
+

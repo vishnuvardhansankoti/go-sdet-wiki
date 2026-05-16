@@ -1,10 +1,18 @@
 # Provider Verification Tests
 
+Provider verification ensures your service implementation satisfies consumer contracts before release. It is the provider-side compatibility gate that prevents breaking downstream clients.
+
+This page emphasizes deterministic provider state setup and realistic verification execution.
+
 ## What is Provider Verification?
 
 Provider verification confirms that your service meets all contracts defined by consumers.
 
+A passing verification means the provider can honor each published interaction under expected states.
+
 ## Basic Provider Test
+
+The baseline pattern is: load pact files, expose provider endpoint, map provider states, run verification.
 
 ```go
 package myapp_test
@@ -68,6 +76,8 @@ func setupUsers() error {
 }
 ```
 
+State handler quality usually determines whether verification is stable or flaky.
+
 ## With Testcontainers
 
 Combine provider verification with Testcontainers for realistic testing:
@@ -119,7 +129,11 @@ func TestProviderWithDatabase(t *testing.T) {
 }
 ```
 
+This setup is ideal when endpoint behavior depends on real database semantics.
+
 ## Multiple Pact Files
+
+As consumer count grows, verifying all relevant pact files becomes a release requirement.
 
 ```go
 verifier := provider.NewVerifier()
@@ -144,6 +158,8 @@ err := verifier.VerifyProvider(t, provider.VerifyRequest{
 ```
 
 ## Complex State Handlers
+
+Keep handlers focused, deterministic, and isolated to one interaction context.
 
 ```go
 StateHandlers: provider.StateHandlers{
@@ -190,6 +206,8 @@ err := verifier.VerifyProvider(t, provider.VerifyRequest{
 })
 ```
 
+Version and tag metadata improves broker history and deployment decision quality.
+
 ## Best Practices
 
 - Use realistic state handlers
@@ -198,3 +216,101 @@ err := verifier.VerifyProvider(t, provider.VerifyRequest{
 - Test all consumer pacts
 - Include error scenarios
 - Document state handler setup
+
+Additional guidance:
+
+- Reset mutable tables between state setups.
+- Keep test fixture values explicit and stable.
+- Ensure provider app configuration matches contract environment assumptions.
+
+## Assignment: Verify Bookshelf Provider Against Consumer Pacts
+
+### Goal
+Run provider verification for Bookshelf API against generated pact files.
+
+This assignment creates the provider-side contract gate for Bookshelf release confidence.
+
+### Tasks
+
+1. Create `tests/contract/provider/bookshelf_provider_test.go`.
+2. Start Bookshelf API test server in test setup.
+3. Wire state handlers for pact states:
+  - `books exist`
+  - `user can be created`
+  - `invalid user payload`
+4. Verify pacts from `pacts/`.
+
+Skeleton:
+
+```go
+err := verifier.VerifyProvider(t, provider.VerifyRequest{
+    ProviderName: "bookshelf-api",
+    Provider:     server.URL,
+    PactFiles: []string{
+        "pacts/reading-ui-bookshelf-api.json",
+    },
+    StateHandlers: provider.StateHandlers{
+        "books exist": func() error {
+            return seedBooks(db)
+        },
+        "user can be created": func() error {
+            return clearUsers(db)
+        },
+        "invalid user payload": func() error {
+            return nil
+        },
+    },
+})
+```
+
+### Verification
+
+```bash
+go test ./tests/contract/provider -v
+```
+
+### Done Criteria
+
+- Provider verification passes locally.
+- State handlers are deterministic and isolated.
+
+Also verify failures produce enough diagnostics to identify the mismatched interaction quickly.
+
+## Deep Dive: Provider State Handler Discipline
+
+### Why state handlers are critical
+
+Provider verification quality depends on deterministic setup for every interaction. Flaky state setup causes false negatives and erodes trust in contract checks.
+
+### Deterministic handler rules
+
+1. Seed only data needed for one interaction.
+2. Reset mutable tables between interactions.
+3. Use fixed test values and explicit IDs where possible.
+4. Avoid hidden external dependencies in setup logic.
+
+### Verification depth recommendations
+
+- Verify both success and failure interactions.
+- Include validation and not-found responses.
+- Ensure error envelope structure matches consumer expectations.
+
+### SDET tip
+
+Treat provider verification as a release gate equivalent to integration tests for API compatibility.
+
+## Common Anti-Patterns
+
+- Using state handlers that depend on pre-existing mutable data.
+- Verifying only one pact when multiple consumers exist.
+- Starting provider with configuration that differs from contract assumptions.
+- Ignoring verification output details and rerunning without root-cause analysis.
+
+## Quick Provider Verification Checklist
+
+- Are all relevant consumer pacts included?
+- Are state handlers deterministic and isolated?
+- Are success and error interactions both verified?
+- Is provider startup environment representative?
+- Are failures actionable from logs and reports?
+

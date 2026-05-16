@@ -1,8 +1,14 @@
 # Testing Database Code with Fakes
 
+Testing database-dependent code with fakes is a powerful way to keep unit tests fast, deterministic, and focused on business logic. Instead of hitting a real database for every scenario, you simulate persistence behavior in memory.
+
+This approach is especially useful when you want rapid feedback during development and CI.
+
 ## Fake Implementation
 
 Create a fake in-memory implementation for testing.
+
+A fake is different from a mock: it has working behavior (for example, map-backed storage) rather than only predefined expectations.
 
 ```go
 type UserRepository interface {
@@ -43,7 +49,11 @@ func (f *FakeUserRepository) DeleteUser(id int) error {
 }
 ```
 
+Design note: keep fake behavior aligned with repository contract so tests remain meaningful.
+
 ## Using the Fake in Tests
+
+In this pattern, the service under test uses the fake repository exactly like it would use the real repository.
 
 ```go
 func TestGetUser(t *testing.T) {
@@ -64,9 +74,13 @@ func TestGetUser(t *testing.T) {
 }
 ```
 
+This gives you realistic behavior checks without network, container, or database setup overhead.
+
 ## Spy Pattern
 
 Track calls to the fake:
+
+Spies are useful when interaction count/order matters, such as verifying that save is called after validation.
 
 ```go
 type SpyUserRepository struct {
@@ -100,6 +114,8 @@ func TestCallsRepository(t *testing.T) {
 
 Return preset values:
 
+Stubs are best for simple branch coverage where only one dependency outcome is needed.
+
 ```go
 type StubUserRepository struct {
     User *User
@@ -123,3 +139,102 @@ func TestUserNotFound(t *testing.T) {
     }
 }
 ```
+
+Use stubs for narrow scenarios; use fakes when stateful behavior is required.
+
+## Assignment: Build Fake Repositories for Bookshelf
+
+### Goal
+Implement fake repositories that mimic persistence behavior for unit tests.
+
+The goal is not to reproduce every database feature. It is to preserve the repository contract expected by services.
+
+### Tasks
+
+1. Create `tests/mocks/fake_book_repository.go` with map + mutex.
+2. Support operations:
+    - `Save`
+    - `FindByID`
+    - `List`
+    - `Delete`
+3. Return `domain.NewNotFoundError(...)` when missing.
+4. Add tests in `tests/unit/fake_repository_test.go`.
+
+Expected test cases:
+
+- `TestFakeBookRepository_SaveAndFindByID`
+- `TestFakeBookRepository_FindByID_NotFound`
+- `TestFakeBookRepository_List`
+
+### Done Criteria
+
+- Fake repository behavior matches interface contract
+- Unit tests are deterministic and fast
+
+Also ensure fake repositories are safe for parallel test execution when needed.
+
+## Deep Dive: Contract-Accurate Fakes
+
+### Background
+
+Fakes are useful only when they preserve the observable contract of the real repository. If fake behavior diverges from production semantics, tests become misleading.
+
+Think of fakes as "contract simulators," not shortcuts.
+
+### Contract Areas to Mirror
+
+1. Not found behavior
+2. Duplicate key behavior
+3. Ordering and pagination semantics (if applicable)
+4. Mutating operation side effects
+
+Add only the behaviors your service relies on. Avoid overengineering fake internals.
+
+### Concurrency Safety
+
+If production code can call repositories concurrently, fakes should use mutex protection to avoid race conditions in tests.
+
+Run fake-based tests with `-race` periodically to catch unsafe test doubles early.
+
+### Example: Deterministic List Ordering
+
+```go
+// Sort fake results before returning if production contract expects stable order.
+sort.Slice(books, func(i, j int) bool { return books[i].ID < books[j].ID })
+```
+
+### SDET Guidance
+
+Use fakes for logic-level tests and move transaction/isolation behavior checks to integration tests with real Postgres.
+
+## Fake vs Integration Test Boundary
+
+Use fakes when validating:
+
+- service branching logic,
+- error mapping,
+- domain orchestration behavior.
+
+Use real DB integration tests when validating:
+
+- SQL correctness,
+- constraints/index behavior,
+- transaction/isolation semantics,
+- query performance characteristics.
+
+## Common Anti-Patterns
+
+- Putting production-only SQL assumptions into fake implementations.
+- Returning unrealistic fake behavior that hides real edge cases.
+- Ignoring ordering/pagination semantics expected by consumers.
+- Sharing mutable fake state across tests without reset.
+
+## Quick Quality Checklist
+
+- Does fake behavior mirror repository contract?
+- Are not-found and duplicate scenarios covered?
+- Is fake state reset between tests?
+- Are fake operations race-safe when tests run in parallel?
+- Are DB-specific behaviors validated separately in integration tests?
+
+

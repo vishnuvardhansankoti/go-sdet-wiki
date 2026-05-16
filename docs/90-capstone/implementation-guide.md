@@ -1,6 +1,12 @@
 # Implementation Guide
 
+Implementation quality depends on sequence discipline. Building from stable core layers outward reduces rework and keeps tests meaningful throughout the project.
+
+This guide should be used as a runbook, not just a reference list.
+
 ## Project Setup
+
+Start with reproducible structure and dependency setup so all contributors share the same baseline.
 
 ### 1. Create Project Structure
 
@@ -10,20 +16,20 @@ cd bookshelf-api
 
 go mod init github.com/yourusername/bookshelf-api
 
-mkdir -p cmd/server pkg/{domain,repository,service,api} internal/{config,middleware} tests/{unit,integration,contract,fixtures}
+mkdir -p cmd/server pkg/{domain,repository,service,handler,config,middleware} tests/{unit,integration,contract,fixtures}
 ```
 
 ### 2. Initialize Go Modules
 
 ```bash
-go mod init github.com/yourusername/bookshelf-api
-
 # Add dependencies
 go get github.com/lib/pq              # PostgreSQL driver
 go get github.com/google/uuid         # UUID generation
 ```
 
 ## Implementation Phases
+
+The phase order matters: domain and repository decisions influence service and handler behavior.
 
 ### Phase 1: Domain Layer
 
@@ -86,9 +92,9 @@ func (s *UserService) RegisterUser(ctx context.Context, email, name, password st
 // ... implement all service methods
 ```
 
-### Phase 4: API Layer
+### Phase 4: Handler Layer
 
-Implement HTTP handlers in `pkg/api/`:
+Implement HTTP handlers in `pkg/handler/`:
 
 ```go
 // handler.go
@@ -128,15 +134,19 @@ func main() {
     // ... create other services
     
     // Create handler
-    handler := api.NewHandler(userService, /* ... */)
+    apiHandler := handler.NewHandler(userService, /* ... */)
     
     // Start server
-    http.HandleFunc("/api/v1/", handler.Route)
+    http.HandleFunc("/api/v1/", apiHandler.Route)
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
 ```
 
+Keep wiring explicit and testable; avoid hidden global initialization.
+
 ## Development Workflow
+
+Validate each phase with targeted checks before moving forward.
 
 ### 1. Setup Database
 
@@ -172,6 +182,8 @@ curl http://localhost:8080/api/v1/users/1 \
 ```
 
 ## Key Implementation Details
+
+These implementation details should be standardized early to avoid cross-layer inconsistencies.
 
 ### Database Connection
 
@@ -242,6 +254,8 @@ func getUserIDFromContext(r *http.Request) (int, error) {
 
 ## Checklist
 
+Treat this as a milestone gate before expanding endpoint scope.
+
 - [ ] Project structure created
 - [ ] Dependencies added
 - [ ] Domain entities defined
@@ -254,3 +268,68 @@ func getUserIDFromContext(r *http.Request) (int, error) {
 ## Next Step
 
 Proceed to [Unit Testing Strategy](unit-testing-strategy.md)
+
+## Assignment: Capstone Implementation Runbook
+
+### Goal
+Execute implementation in a strict sequence to avoid rework.
+
+### Sequence
+
+1. Configuration + logger initialization.
+2. Repository implementations.
+3. Service wiring/container.
+4. Handler wiring + router + middleware.
+5. Main entrypoint and health checks.
+
+### Verification Commands
+
+```bash
+go build ./...
+go test ./pkg/domain ./pkg/handler -v
+```
+
+### Done Criteria
+
+- Application boots cleanly.
+- Core endpoints are callable with sample requests.
+
+## Deep Dive: Implementation Sequencing to Minimize Rework
+
+### Background
+
+Implementation order directly affects defect rate. Building from core domain to edges reduces rewrites and keeps test feedback meaningful.
+
+### Recommended order
+
+1. Finalize configuration and startup wiring.
+2. Implement repositories and persistence error mapping.
+3. Implement services with domain validation and orchestration.
+4. Implement handlers and response envelopes last.
+
+### Verification cadence
+
+- Run package-level tests after each layer completion.
+- Validate one end-to-end happy path early.
+- Add negative-path checks before expanding endpoint count.
+
+### SDET recommendation
+
+Fail builds on compile/lint issues immediately to avoid accumulating integration debt.
+
+## Common Anti-Patterns
+
+- Implementing handlers before domain/repository contracts are stable.
+- Mixing infrastructure and business logic in service methods.
+- Deferring error-envelope consistency decisions until late stages.
+- Expanding endpoint count without completing layer-by-layer verification.
+
+## Quick Implementation Checklist
+
+- Is startup/configuration wiring deterministic?
+- Are repositories validated against real DB behavior?
+- Are services enforcing domain rules consistently?
+- Are handlers returning consistent envelopes and status codes?
+- Is each phase verified before moving to the next?
+
+

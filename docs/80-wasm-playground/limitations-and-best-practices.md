@@ -1,6 +1,12 @@
 # Limitations and Best Practices
 
+WASM playground quality depends on designing with constraints, not fighting them. Go-in-browser execution is powerful for education, but runtime, security, and platform limits must shape example design.
+
+This page helps you build examples that are reliable, understandable, and production-minded.
+
 ## WASM Limitations
+
+Treat limitations as explicit contract boundaries for tutorial content.
 
 ### Language Limitations
 
@@ -12,6 +18,8 @@ os.Open()        // No file system
 net.Dial()       // Limited to same-origin requests
 exec.Command()   // No process execution
 ```
+
+Document these constraints near examples that learners might try to adapt from server-side Go.
 
 #### No OS-Specific APIs
 ```go
@@ -38,6 +46,8 @@ syscall              // No system calls
 - Concurrency simulated with cooperative scheduling
 - No true parallelism
 
+Concurrency examples should focus on coordination patterns, not throughput assumptions.
+
 #### Memory Constraints
 - Maximum 2GB addressable memory (in theory)
 - Browser typically limits to available RAM
@@ -48,7 +58,11 @@ syscall              // No system calls
 - After gzip: 500 KB - 1 MB
 - Cold start time: 100-500ms depending on size
 
+Cold-start variance can significantly affect perceived docs responsiveness.
+
 ### Browser Limitations
+
+Browser policy constraints are a frequent source of confusion when examples involve external calls.
 
 #### Same-Origin Policy
 ```go
@@ -64,6 +78,8 @@ WebSocket support is browser-dependent and limited.
 File uploads require JavaScript bridge code.
 
 ## Best Practices
+
+Best practices here aim to maximize learning value while minimizing runtime fragility.
 
 ### 1. Keep Code Small
 
@@ -153,7 +169,11 @@ GOOS=js GOARCH=wasm go test ./...
 go test -c -o test.exe
 ```
 
+Include browser smoke checks in addition to compile-time checks.
+
 ## Common Gotchas
+
+Most gotchas are lifecycle and determinism issues that appear after examples grow in complexity.
 
 ### Goroutines Don't Exit Automatically
 
@@ -292,6 +312,8 @@ func main() {
 
 ## Monitoring and Debugging
 
+Treat observability as part of docs runtime quality, not an afterthought.
+
 ### Browser DevTools
 
 - Use Chrome DevTools JavaScript console
@@ -315,3 +337,44 @@ func log(message string) {
 - Test thoroughly before publishing
 - Compress for faster download
 - Document limitations for users
+
+Use this as a decision guide for what belongs in browser playgrounds versus local project exercises.
+
+## Deep Dive: Production-minded WASM Documentation
+
+### Background
+
+Interactive docs are part of the product experience. Treating playground pages like production surfaces improves trust and maintainability.
+
+### Production-minded practices
+
+1. Document unsupported APIs and runtime constraints clearly.
+2. Normalize outputs so examples remain deterministic.
+3. Add fallback messages for unsupported browser environments.
+4. Monitor bundle size and startup latency on docs pages.
+
+### Common failure prevention
+
+- Avoid long-running loops without cancellation strategy.
+- Prevent memory growth from unmanaged goroutine lifetimes.
+- Prefer explicit progress messages for longer computations.
+
+### SDET recommendation
+
+Include browser compatibility checks in regression testing when updating WASM runtime assets.
+
+## Common Anti-Patterns
+
+- Porting server-side examples directly without adapting for browser constraints.
+- Using long-running loops without cancellation or progress feedback.
+- Ignoring binary size growth and startup latency impact.
+- Demonstrating unsupported APIs without clear warning notes.
+
+## Quick WASM Best-Practice Checklist
+
+- Are unsupported capabilities documented where relevant?
+- Are examples deterministic and short-running?
+- Are module size and compression monitored?
+- Are user-facing errors and fallbacks clear?
+- Are browser compatibility checks part of regression flow?
+

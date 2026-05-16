@@ -1,6 +1,12 @@
 # Embedding Playground in Pages
 
+Embedding a playground is a docs-engineering task as much as a code task. Reliability depends on correct asset loading, predictable runtime behavior, and clear user feedback when execution fails.
+
+This guide describes a practical embedding path from build output to browser execution.
+
 ## Basic Setup
+
+Follow setup in strict order to avoid runtime initialization issues.
 
 ### 1. Compile Go to WASM
 
@@ -8,11 +14,15 @@
 GOOS=js GOARCH=wasm go build -o main.wasm cmd/main.go
 ```
 
+Pin build scripts in repo tooling so docs builds remain reproducible.
+
 ### 2. Copy wasm_exec.js
 
 ```bash
 cp $(go env GOROOT)/misc/wasm/wasm_exec.js .
 ```
+
+Keep `wasm_exec.js` version aligned with Go toolchain version.
 
 ### 3. Create HTML Page
 
@@ -79,7 +89,11 @@ cp $(go env GOROOT)/misc/wasm/wasm_exec.js .
 </html>
 ```
 
+In production pages, prefer defensive guards against multiple run triggers and repeated instantiation.
+
 ## Go Code for Playground
+
+Playground Go code should favor deterministic output and short execution lifecycle.
 
 ### Simple Example
 
@@ -111,6 +125,8 @@ func main() {
 ```
 
 ## Advanced Embedding
+
+Interactive editors are useful, but they introduce extra security and resource considerations.
 
 ### Interactive Code Editor
 
@@ -190,7 +206,11 @@ func main() {
 }
 ```
 
+Never expose unrestricted compilation endpoints in public environments without sandboxing and abuse controls.
+
 ## Serving WASM Files
+
+Serving headers and MIME types are non-negotiable for reliable browser execution.
 
 ### Correct MIME Type
 
@@ -209,6 +229,8 @@ w.Header().Set("Content-Type", "application/wasm")
 ```
 
 ## Performance Optimization
+
+Performance optimization should target both payload size and first-run interactivity.
 
 ### Use gzip
 
@@ -233,6 +255,8 @@ Break large applications into smaller WASM modules loaded on demand.
 
 ## Testing Playground Code
 
+Add smoke tests for boot/run/output flow whenever runtime assets or scripts change.
+
 ```go
 func TestPlaygroundCode(t *testing.T) {
     // Test code that will run in playground
@@ -246,3 +270,42 @@ func TestPlaygroundCode(t *testing.T) {
     }
 }
 ```
+
+## Deep Dive: Robust Embedding and Runtime Safety
+
+### Background
+
+Embedding reliability depends on script initialization order, error visibility, and predictable module loading behavior.
+
+### Robust embedding checklist
+
+1. Load `wasm_exec.js` before instantiating the module.
+2. Provide explicit error messages for fetch/instantiate failures.
+3. Guard against duplicate runs from repeated button clicks.
+4. Use proper MIME type (`application/wasm`) on the server.
+
+### Performance guidance
+
+- Lazy-load large WASM modules when user action triggers execution.
+- Keep compiled examples small to reduce first-run delay.
+- Use compression in hosted docs environments.
+
+### SDET recommendation
+
+Add smoke checks for playground boot, run button behavior, and output rendering to catch regressions in docs infrastructure.
+
+## Common Anti-Patterns
+
+- Loading `wasm_exec.js` after module instantiation attempt.
+- Re-running the same module instance without lifecycle guards.
+- Serving `.wasm` without correct MIME type.
+- Exposing compile endpoints without sandbox/resource controls.
+
+## Quick Embedding Checklist
+
+- Are build artifacts generated reproducibly?
+- Is `wasm_exec.js` version matched to Go version?
+- Are fetch/instantiate errors clearly surfaced to users?
+- Are MIME type and caching headers configured correctly?
+- Are boot/run/output smoke checks part of docs validation?
+

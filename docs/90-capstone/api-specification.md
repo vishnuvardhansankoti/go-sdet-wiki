@@ -1,14 +1,22 @@
 # API Specification
 
+The API specification is the canonical compatibility document for implementation, testing, and contract verification. If this page is precise, downstream development and CI diagnostics become significantly easier.
+
+Treat API changes as governed changes with explicit review and test impact.
+
 ## Authentication
 
 For simplicity, this capstone uses a UserID header. In production, use JWT.
+
+Documenting this simplification avoids confusion between tutorial constraints and production expectations.
 
 ```
 X-User-ID: 1
 ```
 
 ## Response Format
+
+Consistent response envelopes are essential for consumer reliability and contract test stability.
 
 ### Success Response
 
@@ -39,7 +47,11 @@ X-User-ID: 1
 - `CONFLICT` - 409 Conflict
 - `INTERNAL_ERROR` - 500 Internal Server Error
 
+Map these codes consistently from domain/service errors to transport responses.
+
 ## Endpoints
+
+Each endpoint section should define request schema, success response, and at least one representative failure.
 
 ### Users
 
@@ -344,6 +356,8 @@ Response: 204 No Content
 
 ## Validation Rules
 
+Validation rules must match domain constructor and service-level checks exactly.
+
 ### User
 - Email: Valid email format, unique
 - Name: Non-empty, max 255 chars
@@ -361,3 +375,61 @@ Response: 204 No Content
 ## Next Step
 
 Proceed to [Implementation Guide](implementation-guide.md)
+
+## Assignment: Freeze Bookshelf API Contract
+
+### Goal
+Prepare a stable API contract for implementation and contract testing.
+
+### Tasks
+
+1. Confirm canonical prefix: `/api/v1`.
+2. Ensure every endpoint has:
+  - request schema
+  - response schema
+  - error schema
+  - status codes
+3. Align validation rules with domain constructors.
+4. Add explicit examples for:
+  - success
+  - validation failure
+  - not found
+
+### Done Criteria
+
+- API spec can be used directly by consumer and provider contract tests.
+- Error code mapping is consistent across all endpoints.
+
+## Deep Dive: API Contract Quality Controls
+
+### Background
+
+An API specification is executable documentation when it is consistent enough to drive tests, mocks, and provider verification without interpretation gaps.
+
+### Contract quality checklist
+
+1. Every endpoint defines request, success response, and error response.
+2. Status codes align with domain error mapping.
+3. Field names and casing are consistent across all examples.
+4. Validation constraints are explicitly reflected in error examples.
+
+### SDET recommendation
+
+Treat spec diffs as high-risk changes: require review from both API implementers and test owners.
+
+## Common Anti-Patterns
+
+- Inconsistent response envelope fields across endpoints.
+- Returning different error code semantics for similar failures.
+- Updating implementation without reflecting spec examples.
+- Omitting failure examples for validation and not-found scenarios.
+
+## Quick API Contract Checklist
+
+- Do all endpoints include success and error examples?
+- Are status codes aligned with documented error codes?
+- Are field names and casing consistent throughout?
+- Are validation constraints reflected in error responses?
+- Are spec changes reviewed by both provider and consumer sides?
+
+

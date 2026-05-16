@@ -1,6 +1,12 @@
 # Consumer Contract Tests
 
+Consumer contract tests validate whether a client can safely integrate with a provider contract before provider deployment. They protect the consumer experience by checking API assumptions close to client code.
+
+Treat this suite as consumer behavior verification, not as a replacement for full API integration tests.
+
 ## Writing Consumer Contract Tests
+
+A reliable consumer suite should include deterministic interaction setup, meaningful assertion messages, and reusable client helpers.
 
 ### Setup
 
@@ -88,7 +94,11 @@ func defineUserServiceInteractions(pact *consumer.Pact) {
 }
 ```
 
+Keep interaction descriptions human-readable because they become part of triage output.
+
 ## Testing Different Scenarios
+
+Cover one happy path and at least one failure path per endpoint family.
 
 ### Success Cases
 
@@ -149,7 +159,11 @@ matchers.EachLike(...)       // Array of similar items
 matchers.Uuid()              // UUID format
 ```
 
+Use strict equality only when exact values are part of the API guarantee.
+
 ## Table-Driven Consumer Tests
+
+Table-driven style can reduce repetition, but keep behavior boundaries clear.
 
 ```go
 func TestUserServiceConsumerInteractions(t *testing.T) {
@@ -203,6 +217,8 @@ func TestUserServiceConsumerInteractions(t *testing.T) {
 }
 ```
 
+If tables become too large, split by endpoint group for maintainability.
+
 ## Best Practices
 
 - Define realistic interactions
@@ -210,3 +226,95 @@ func TestUserServiceConsumerInteractions(t *testing.T) {
 - Test both success and failure paths
 - Keep contracts simple and focused
 - Review generated pact files
+
+Additional guidance:
+
+- Prefer endpoint-specific helpers over global interaction builders.
+- Include validation and authorization failures where relevant.
+- Keep provider states explicit and deterministic.
+
+## Assignment: Consumer Contract Suite for Bookshelf
+
+### Goal
+Create an incremental consumer contract suite aligned to the tutorial app features.
+
+### Test Plan
+
+1. `GET /api/books` returns list.
+2. `POST /api/users` creates a user.
+3. `POST /api/books` creates a book.
+4. `POST /api/users` invalid body returns `400`.
+
+### File Layout
+
+```text
+tests/
+    contract/
+        consumer/
+            bookshelf_consumer_test.go
+            test_client.go
+```
+
+### Suggested Subtests
+
+```go
+t.Run("list books", ...)
+t.Run("create user", ...)
+t.Run("create book", ...)
+t.Run("create user invalid payload", ...)
+```
+
+### Verification
+
+```bash
+go test ./tests/contract/consumer -v
+```
+
+### Done Criteria
+
+- At least 4 interactions generated.
+- Matchers are used instead of hardcoding dynamic values.
+
+Also verify pact files are committed or published according to team workflow.
+
+## Deep Dive: Building Reliable Consumer Suites
+
+### Background
+
+Consumer tests should verify what the consuming client actually needs to function. They are not full API tests; they are dependency behavior tests.
+
+### Practical suite design
+
+1. Start with critical user journeys (list books, create user).
+2. Add one negative path per endpoint family.
+3. Keep interaction naming consistent and human-readable.
+4. Avoid duplicating interaction setup logic by extracting helpers.
+
+### Failure diagnosis pattern
+
+When a consumer test fails, determine whether it is:
+
+- A client-side request mismatch (wrong path/header/body), or
+- A provider expectation mismatch (status/body shape).
+
+This classification speeds up ownership and triage between teams.
+
+### SDET practice
+
+Run consumer contract tests in PR checks for any client-side code changes that touch API integrations.
+
+## Common Anti-Patterns
+
+- Asserting only status code without response shape expectations.
+- Reusing generic provider states that hide data intent.
+- Creating interactions for endpoints the client does not actually call.
+- Letting pact files drift from current client behavior.
+
+## Quick Consumer Suite Checklist
+
+- Are critical client journeys represented?
+- Are request and response expectations explicit?
+- Are dynamic values modeled with matchers?
+- Are negative interactions present for key endpoints?
+- Is pact output reviewed in CI or code review?
+

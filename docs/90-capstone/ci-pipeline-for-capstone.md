@@ -1,6 +1,12 @@
 # CI Pipeline for Capstone
 
+The CI pipeline is the enforcement engine for capstone quality. It should provide fast, reliable feedback while blocking merges that violate correctness, compatibility, or maintainability gates.
+
+This page defines a practical pipeline architecture for deterministic delivery.
+
 ## GitHub Actions Workflow
+
+Split checks by concern where possible to improve failure isolation and rerun efficiency.
 
 Create `.github/workflows/ci.yml`:
 
@@ -94,6 +100,8 @@ jobs:
 
 ## Makefile
 
+Make targets should mirror CI job commands to preserve local/CI parity.
+
 Create `Makefile` for local development:
 
 ```makefile
@@ -147,6 +155,8 @@ docker-down:
 
 ## Docker Compose
 
+Local infrastructure setup should be predictable and aligned with integration test expectations.
+
 Create `docker-compose.yml` for local development:
 
 ```yaml
@@ -182,6 +192,8 @@ volumes:
 ```
 
 ## Quality Checks
+
+Quality checks should fail fast and emit actionable diagnostics.
 
 ### Code Coverage
 
@@ -224,6 +236,8 @@ chmod +x .git/hooks/pre-commit
 
 ## Workflow
 
+Use this workflow as a delivery policy, not just a suggested sequence.
+
 1. **Local Development**
    ```bash
    make docker-up
@@ -247,6 +261,8 @@ chmod +x .git/hooks/pre-commit
    - Merge to main
 
 ## Troubleshooting
+
+Troubleshooting guidance should prioritize reproducibility and root-cause visibility.
 
 ### Database Connection Issues
 
@@ -286,3 +302,66 @@ You've completed the capstone project! Review and refactor your code, then consi
 6. Implementing caching
 
 Congratulations on completing the Go SDET Wiki Capstone!
+
+## Assignment: Final Capstone Pipeline Hardening
+
+### Goal
+Finalize a deterministic CI pipeline for the complete Bookshelf system.
+
+### Required Jobs
+
+1. Formatting + lint + vet
+2. Unit tests with race detector
+3. Integration tests with timeout budget
+4. Contract tests (consumer + provider)
+5. Coverage gate (>= 80%)
+6. Build artifact verification
+
+### Final Validation
+
+```bash
+go test -v -race ./...
+go test -v ./tests/integration/...
+go test -v ./tests/contract/...
+go build ./...
+```
+
+### Done Criteria
+
+- CI green on a fresh branch.
+- Coverage gate and quality gates enforced.
+- Capstone is ready for portfolio/demo.
+
+## Deep Dive: Pipeline Reliability and Developer Feedback
+
+### Background
+
+CI should be both strict and informative: strict enough to prevent risky merges, informative enough to make failures quickly actionable.
+
+### Reliability architecture
+
+1. Keep jobs focused by concern (`quality`, `unit`, `integration`, `contract`, `build`).
+2. Use deterministic tool versions and explicit timeouts.
+3. Persist artifacts for failing suites (coverage, logs, pact files).
+4. Keep local commands aligned with CI targets.
+
+### SDET recommendation
+
+Measure median CI duration and failure categories to continuously improve feedback speed and pipeline health.
+
+## Common Anti-Patterns
+
+- Running all concerns in one monolithic job with poor diagnostics.
+- Using floating tool/action versions that change behavior unexpectedly.
+- Missing artifacts/log capture for failed integration or contract checks.
+- Letting local commands drift from CI execution commands.
+
+## Quick Pipeline Hardening Checklist
+
+- Are quality/unit/integration/contract/build gates clearly separated?
+- Are versions, timeouts, and environments deterministic?
+- Are failure diagnostics and artifacts retained?
+- Are coverage and lint thresholds enforced?
+- Do local Make targets mirror CI behavior?
+
+

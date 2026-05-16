@@ -1,5 +1,7 @@
 # Go Modules and Workspaces
 
+Go Modules are the dependency management system that gives every Go project a self-contained, reproducible build. For SDETs, module discipline prevents environment-specific test failures caused by dependency version drift.
+
 ## The Problem Before Modules
 
 Before Go 1.11, Go used a single global directory called `GOPATH` to store all code and dependencies. Every project lived under `$GOPATH/src/`, and there was no way to have two projects use different versions of the same library. This was a major pain point:
@@ -195,3 +197,41 @@ go mod graph | head -20
 | `go get`      | Adds/updates a dependency                            | `mvn dependency:add`           |
 | `go mod tidy` | Removes unused, adds missing dependencies            | `mvn dependency:analyze`       |
 | `go work`     | Links multiple local modules for development         | Maven multi-module / monorepo  |
+
+## Deep Dive: Dependency Hygiene for Test Engineering
+
+### Background
+
+Dependency drift is a common source of inconsistent test results across machines and CI systems. Module discipline is essential for stable automation.
+
+### Hygiene practices
+
+1. Pin explicit versions for critical test libraries.
+2. Run `go mod tidy` after dependency changes.
+3. Review `go.mod` and `go.sum` diffs in PRs.
+4. Avoid unnecessary `replace` directives in shared branches.
+
+### Workspace guidance
+
+- Use `go work` for local multi-module development.
+- Keep workspace files local unless team workflow explicitly requires commit.
+- Verify builds in a clean clone to ensure no hidden local coupling.
+
+### SDET recommendation
+
+Add a CI step that fails on untidy modules to prevent dependency inconsistencies from entering main.
+
+## Common Anti-Patterns
+
+- Using `replace` directives in shared branches to patch upstream libraries without team visibility.
+- Committing `go.work` files that couple unrelated module development across the team.
+- Skipping `go mod tidy` after dependency changes, leaving stale or missing entries in `go.sum`.
+- Pinning to pseudo-versions (`v0.0.0-20230101-abc123`) for test libraries instead of released tags.
+
+## Quick Module Hygiene Checklist
+
+- Is `go.mod` committed alongside the first commit of every new module?
+- Does CI include a `go mod tidy && git diff --exit-code` step?
+- Are all test dependencies pinned to released semantic versions?
+- Are `go.work` files excluded from shared branches unless a multi-module workflow is documented?
+

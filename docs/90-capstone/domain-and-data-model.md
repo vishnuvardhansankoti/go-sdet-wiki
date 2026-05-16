@@ -1,6 +1,12 @@
 # Domain and Data Model
 
+The domain model is the long-term stability layer of the capstone. Handlers, storage details, and infrastructure may evolve, but domain invariants and ownership rules should remain explicit and testable.
+
+Use this page to align entities, repository contracts, and service responsibilities.
+
 ## Domain Entities
+
+Entities should encode business meaning, not transport-specific concerns.
 
 ### User
 
@@ -87,6 +93,8 @@ User review of a book.
 
 ## Domain Interfaces
 
+Repository interfaces represent persistence capabilities required by services, not table-level CRUD convenience.
+
 ### UserRepository
 
 ```go
@@ -149,6 +157,8 @@ type ReviewRepository interface {
 ```
 
 ## Domain Services
+
+Services should orchestrate use cases and enforce business rules while keeping infrastructure concerns out of the domain layer.
 
 ### UserService
 
@@ -218,6 +228,8 @@ User
 
 ## Error Types
 
+Typed errors are key to consistent API error mapping and predictable test assertions.
+
 ```go
 type ValidationError struct {
     Field   string
@@ -236,6 +248,8 @@ type ConflictError struct {
 
 ## Value Objects
 
+Value objects make invariants explicit and reduce invalid state propagation.
+
 ```go
 type Email string
 type Rating int  // 1-5
@@ -252,3 +266,55 @@ func (r Rating) Valid() bool {
 ## Next Step
 
 Proceed to [API Specification](api-specification.md)
+
+## Assignment: Align Domain Model with Existing Bookshelf Implementation
+
+### Goal
+Reconcile capstone domain model with the tutorial's current domain package.
+
+### Tasks
+
+1. Map identifiers to existing types:
+    - `UserID`, `BookID`, `ReviewID`
+2. Ensure rating invariants are enforced in constructors.
+3. Keep repository interfaces context-aware (`context.Context`).
+4. Document entity relationships and ownership rules.
+
+### Done Criteria
+
+- Domain docs match code in `pkg/domain`.
+- Repository interfaces are consistent with service usage.
+
+## Deep Dive: Domain Integrity and Ownership
+
+### Background
+
+The domain model is the stability core of the system. Handler and repository code can evolve, but entity invariants and ownership rules should remain explicit.
+
+### Integrity rules
+
+1. Enforce invariants in constructors and update methods.
+2. Keep repository interfaces focused on aggregate behaviors.
+3. Use typed IDs/value objects to avoid cross-entity misuse.
+4. Document ownership boundaries (for example, review belongs to user+book).
+
+### SDET recommendation
+
+Add unit tests that assert domain invariants independently from persistence or transport layers.
+
+## Common Anti-Patterns
+
+- Encoding transport concerns directly into domain entities.
+- Leaving invariants unenforced until handler/repository layers.
+- Using primitive IDs everywhere instead of typed identifiers.
+- Creating repository interfaces that leak storage implementation details.
+
+## Quick Domain Integrity Checklist
+
+- Are invariants enforced in constructors/methods?
+- Are ownership boundaries documented and tested?
+- Are repository contracts aligned with service behavior?
+- Are typed errors/value objects used consistently?
+- Do domain tests run without DB or HTTP dependencies?
+
+

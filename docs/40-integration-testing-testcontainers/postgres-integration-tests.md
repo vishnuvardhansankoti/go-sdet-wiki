@@ -1,6 +1,12 @@
 # PostgreSQL Integration Tests
 
+PostgreSQL integration tests validate real database semantics that unit tests cannot faithfully simulate. This is where you confirm SQL behavior under realistic conditions: constraints, transactions, query ordering, and error mapping.
+
+In this page, the goal is to build predictable, high-signal integration tests that fail for meaningful reasons.
+
 ## Setting Up PostgreSQL Container
+
+Start with a reusable setup function that provisions containerized Postgres, opens a real SQL connection, and exposes explicit cleanup.
 
 ```go
 import (
@@ -53,7 +59,11 @@ func setupPostgres(t *testing.T) (*sql.DB, func()) {
 }
 ```
 
+This helper establishes a repeatable baseline for repository and persistence-level tests.
+
 ## Testing Database Operations
+
+These tests verify write/read behavior against real storage, not in-memory assumptions.
 
 ```go
 func TestInsertUser(t *testing.T) {
@@ -93,7 +103,11 @@ func TestGetUser(t *testing.T) {
 }
 ```
 
+Keep assertions focused on business-visible outcomes and persistence correctness.
+
 ## Table-Driven Integration Tests
+
+Table-driven style works well when validating the same operation across multiple data variants.
 
 ```go
 func TestUserOperations(t *testing.T) {
@@ -128,7 +142,11 @@ func TestUserOperations(t *testing.T) {
 }
 ```
 
+Avoid combining unrelated behaviors in one table to keep failures easy to triage.
+
 ## Testing Transactions
+
+Transaction tests are critical because rollback/commit semantics are often a source of production bugs.
 
 ```go
 func TestUserTransactionRollback(t *testing.T) {
@@ -152,6 +170,8 @@ func TestUserTransactionRollback(t *testing.T) {
 }
 ```
 
+When possible, assert both immediate query result and final persisted state.
+
 ## Best Practices
 
 - Use init scripts for schema setup
@@ -159,3 +179,106 @@ func TestUserTransactionRollback(t *testing.T) {
 - Use table-driven tests for similar scenarios
 - Test both success and failure cases
 - Keep database setup time minimal
+
+Additional guidance:
+
+- Pin image versions for deterministic behavior.
+- Keep schema setup in migration/init scripts under version control.
+- Prefer explicit test names that describe database behavior being verified.
+
+## Integration Scope Boundaries
+
+Use Postgres integration tests for behavior that depends on the real database engine.
+
+Good candidates:
+
+- unique/foreign-key constraint behavior,
+- SQL query semantics,
+- transaction guarantees,
+- repository-to-database mapping correctness.
+
+Do not overload this layer with pure domain logic that unit tests can validate faster.
+
+## Assignment: Repository Integration Tests for Bookshelf
+
+### Goal
+Verify real PostgreSQL behavior for repository operations.
+
+This assignment establishes the persistence confidence layer for Bookshelf before API-level E2E expansion.
+
+### Tasks
+
+1. Create migration script in `tests/integration/testdata/init.sql`:
+
+```sql
+CREATE TABLE IF NOT EXISTS books (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    author TEXT NOT NULL,
+    isbn TEXT UNIQUE NOT NULL,
+    published_year INT NOT NULL
+);
+```
+
+2. Implement `pkg/repository/postgres/book_repository.go` with `Save`, `FindByID`, `List`.
+3. Add integration tests in `tests/integration/book_repository_test.go`:
+    - `TestBookRepository_SaveAndFindByID`
+    - `TestBookRepository_List`
+    - `TestBookRepository_FindByID_NotFound`
+
+### Done Criteria
+
+- Tests run against containerized Postgres
+- NotFound path maps to `domain.NotFoundError`
+
+Also verify tests are deterministic across repeated local runs and CI executions.
+
+## Deep Dive: Verifying Real Database Semantics
+
+### Background
+
+Integration tests are where you validate behavior impossible to trust in mocks: constraints, indexes, transactions, and SQL-level error behavior.
+
+The value of this layer is realism with control: production-like behavior in disposable test infrastructure.
+
+### High-Value Cases
+
+1. Unique constraint violations (`isbn`, `email`).
+2. Foreign key integrity checks.
+3. Transaction rollback guarantees.
+4. Query ordering and pagination behavior.
+
+### Practical Assertion Advice
+
+- Assert on both functional result and persisted database state.
+- Use explicit SQL checks after writes/rollbacks.
+- Keep one behavior focus per test case for clearer failures.
+
+Include error-path assertions for common failures (duplicate keys, not found, invalid transitions).
+
+### Example: Unique Violation Test
+
+```go
+// Insert same ISBN twice; second insert should fail.
+```
+
+### SDET Benefit
+
+These tests form the confidence layer between domain logic and production database reality.
+
+## Common Anti-Patterns
+
+- Validating only happy paths and ignoring constraint failures.
+- Reusing mutable data across tests without reset strategy.
+- Treating `db.Ping()` as sufficient integration coverage.
+- Asserting too many independent behaviors in one test.
+
+## Quick Postgres Integration Checklist
+
+- Does setup create deterministic schema/data state?
+- Are success and failure paths both validated?
+- Are transaction semantics explicitly tested?
+- Are errors mapped to domain-level expectations?
+- Can tests run repeatedly without flakes?
+
+
