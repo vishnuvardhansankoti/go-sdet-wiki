@@ -1,6 +1,6 @@
 site_name: Go SDET Wiki
 site_description: A complete Go learning portal for SDETs with runnable code, Testcontainers, and a capstone microservice.
-site_url: https://<your-github-username>.github.io/go-sdet-wiki
+site_url: https://vishnuvardhansankoti.github.io/go-sdet-wiki/
 
 theme:
   name: material
