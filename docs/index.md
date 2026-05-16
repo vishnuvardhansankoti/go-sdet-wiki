@@ -22,6 +22,14 @@ Welcome to the Go Software Development Engineer in Test (SDET) Wiki. This compre
 2. [Variables and Types](10-go-basics/variables-and-types.md)
 3. [Testing Package Basics](30-testing-basics/testing-package-basics.md)
 
+## Go Basics Assignment Jumps
+
+Use these direct links to jump into the hands-on exercises:
+
+- [Variables and Types Assignment](10-go-basics/variables-and-types.md#assignment-part-1-define-domain-constants-and-types)
+- [Pointers Assignment](10-go-basics/pointers-in-go.md#assignment-pointer-based-updates-in-bookshelf-domain)
+- [Packages Assignment](10-go-basics/packages-in-go.md#assignment-design-packages-for-bookshelf-api)
+
 ## Key Topics
 
 - Unit Testing and Test Organization

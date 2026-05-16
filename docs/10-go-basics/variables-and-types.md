@@ -313,3 +313,10 @@ Then write tests asserting only valid progress values are accepted.
 - Are all exported types and functions usable from external packages without type assertions?
 - Have type-related test cases been added for boundary values and invalid inputs?
 
+## Continue Learning
+
+To build on this chapter, continue in this order:
+
+1. [Pointers in Go](pointers-in-go.md) - Understand mutation, pointer receivers, and Go vs C/C++ pointer behavior.
+2. [Packages in Go](packages-in-go.md) - Learn package boundaries, exports/imports, and Java/C++ parallels.
+
