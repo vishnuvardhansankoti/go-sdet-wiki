@@ -118,6 +118,26 @@ func main() {
 }
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">func say(s string) {
+    for i := 0; i < 5; i++ {
+        fmt.Println(s)
+        time.Sleep(100 * time.Millisecond)
+    }
+}
+
+func main() {
+    go say("Hello")
+    say("World")
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 ## Waiting for Goroutines
 
 ### Using time.Sleep (Not Recommended)

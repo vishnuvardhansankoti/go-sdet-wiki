@@ -27,3 +27,6 @@ Thumbs.db
 
 docs/BOOKSHELF_TUTORIAL_CHANGELOG.md
 BOOKSHELF_IMPLEMENTATION_PROGRESS.md
+
+# Local maintenance scripts used for one-off doc automation
+scripts/playground-tools/

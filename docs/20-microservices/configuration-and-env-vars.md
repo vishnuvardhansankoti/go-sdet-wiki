@@ -288,6 +288,7 @@ func main() {
 }
 ```
 
+
 #### 5. Test Configuration
 
 Configuration tests prevent hidden deployment regressions. At minimum, validate defaults, overrides, and required-value failures.

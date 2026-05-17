@@ -368,6 +368,22 @@ func main() {
 }
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("Bookshelf API - Starting in Section 10")
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 Create `go.mod` is already created. Verify it exists:
 
 ```bash

@@ -13,6 +13,58 @@ function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function extractGoImports(code) {
+    const imports = [];
+
+    // Single import form: import "fmt"
+    const singleImportRegex = /^\s*import\s+"([^"]+)"/gm;
+    let singleMatch;
+    while ((singleMatch = singleImportRegex.exec(code)) !== null) {
+        imports.push(singleMatch[1]);
+    }
+
+    // Group import form:
+    // import (
+    //   "fmt"
+    // )
+    const groupImportRegex = /^\s*import\s*\(([\s\S]*?)\)/gm;
+    let groupMatch;
+    while ((groupMatch = groupImportRegex.exec(code)) !== null) {
+        const groupBody = groupMatch[1];
+        const itemRegex = /"([^"]+)"/g;
+        let itemMatch;
+        while ((itemMatch = itemRegex.exec(groupBody)) !== null) {
+            imports.push(itemMatch[1]);
+        }
+    }
+
+    return imports;
+}
+
+function isUnsupportedInlineImport(importPath) {
+    // Relative/absolute imports and repo module imports need multi-file/module context.
+    if (importPath.startsWith(".") || importPath.startsWith("/")) {
+        return true;
+    }
+
+    if (importPath.startsWith("go-sdet-wiki/")) {
+        return true;
+    }
+
+    // Domain-style paths (example.com/pkg, github.com/org/repo, etc.) are not stdlib.
+    const firstSegment = importPath.split("/")[0];
+    if (firstSegment.includes(".")) {
+        return true;
+    }
+
+    // Common teaching placeholders for local module examples.
+    if (importPath.includes("yourusername") || importPath.includes("example.com/")) {
+        return true;
+    }
+
+    return false;
+}
+
 async function waitForBridgeFunction(timeoutMs) {
     const startedAt = Date.now();
     while (typeof window.__run_go_code__ !== "function") {
@@ -69,6 +121,17 @@ async function runGoPlayground(button) {
     const container = button.closest(".go-playground");
     const code = container.querySelector(".go-code").value;
     const output = container.querySelector(".go-output");
+
+    const imports = extractGoImports(code);
+    const unsupportedImports = imports.filter(isUnsupportedInlineImport);
+
+    if (unsupportedImports.length > 0) {
+        output.textContent =
+            "This snippet uses package imports that require a multi-file/module setup and cannot run inline here.\n\n" +
+            `Detected imports: ${unsupportedImports.join(", ")}\n` +
+            "Tip: use the self-contained runnable version, or run this example locally in a full Go project.\n";
+        return;
+    }
 
     output.textContent = "Running...\n";
     button.disabled = true;

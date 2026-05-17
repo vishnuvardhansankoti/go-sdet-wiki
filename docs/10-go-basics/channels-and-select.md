@@ -131,6 +131,55 @@ func main() {
 // ...
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">func worker(id int, jobs <-chan int, results chan<- int) {
+    for job := range jobs {
+        fmt.Printf("Worker %d processing job %d\n", id, job)
+        time.Sleep(time.Second)  // Simulate work
+        results <- job * 2
+    }
+}
+
+func main() {
+    const numWorkers = 3
+    jobs := make(chan int, 10)
+    results := make(chan int, 10)
+    
+    // Start worker goroutines
+    for w := 1; w <= numWorkers; w++ {
+        go worker(w, jobs, results)
+    }
+    
+    // Send jobs
+    go func() {
+        for j := 1; j <= 10; j++ {
+            jobs <- j
+        }
+        close(jobs)  // Signal workers that no more jobs
+    }()
+    
+    // Collect results
+    for r := 0; r < 10; r++ {
+        fmt.Println("Result:", <-results)
+    }
+}
+
+// Output:
+// Worker 1 processing job 1
+// Worker 2 processing job 2
+// Worker 3 processing job 3
+// Result: 2
+// Result: 4
+// Result: 6
+// ...
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 **Use Case:** SDET testing with multiple parallel test runners processing test cases from a queue.
 
 ### 2. Pipeline Pattern
@@ -187,6 +236,63 @@ func main() {
     }
 }
 ```
+
+<div class="go-playground">
+  <textarea class="go-code" rows="12">// Stage 1: Generate numbers
+func generate(max int) <-chan int {
+    out := make(chan int)
+    go func() {
+        for i := 1; i <= max; i++ {
+            out <- i
+        }
+        close(out)
+    }()
+    return out
+}
+
+// Stage 2: Square numbers
+func square(in <-chan int) <-chan int {
+    out := make(chan int)
+    go func() {
+        for num := range in {
+            out <- num * num
+        }
+        close(out)
+    }()
+    return out
+}
+
+// Stage 3: Filter even numbers
+func filterEven(in <-chan int) <-chan int {
+    out := make(chan int)
+    go func() {
+        for num := range in {
+            if num%2 == 0 {
+                out <- num
+            }
+        }
+        close(out)
+    }()
+    return out
+}
+
+func main() {
+    // Chain the pipeline
+    numbers := generate(10)
+    squares := square(numbers)
+    evens := filterEven(squares)
+    
+    for num := range evens {
+        fmt.Println(num)  // 4, 16, 36, 64, 100
+    }
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
 
 ## Advanced Select Patterns and Troubleshooting
 
@@ -255,6 +361,39 @@ func main() {
 }
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">func worker(id int, job string) string {
+    fmt.Printf("Worker %d handling: %s\n", id, job)
+    time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+    return fmt.Sprintf("Result from worker %d", id)
+}
+
+func fanOut(jobs []string) <-chan string {
+    out := make(chan string, len(jobs))
+    for i, job := range jobs {
+        go func(id int, j string) {
+            out <- worker(id, j)
+        }(i+1, job)
+    }
+    return out
+}
+
+func main() {
+    jobs := []string{"test1", "test2", "test3", "test4", "test5"}
+    results := fanOut(jobs)
+    
+    for range jobs {
+        fmt.Println(<-results)
+    }
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 **Use Case:** Run multiple test suites in parallel and collect all results.
 
 ### 4. Timeout Pattern
@@ -289,6 +428,40 @@ func main() {
 }
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">func fetchTestResult(timeout time.Duration) (string, error) {
+    resultCh := make(chan string)
+    
+    go func() {
+        time.Sleep(2 * time.Second)  // Simulate slow operation
+        resultCh <- "Test passed"
+    }()
+    
+    select {
+    case result := <-resultCh:
+        return result, nil
+    case <-time.After(timeout):
+        return "", fmt.Errorf("operation timed out after %v", timeout)
+    }
+}
+
+func main() {
+    // This will timeout
+    result, err := fetchTestResult(1 * time.Second)
+    if err != nil {
+        fmt.Println("Error:", err)  // Error: operation timed out after 1s
+    } else {
+        fmt.Println(result)
+    }
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 ### 5. Broadcast Pattern
 
 Send the same message to multiple receivers:
@@ -313,6 +486,33 @@ func main() {
     time.Sleep(100 * time.Millisecond)
 }
 ```
+
+<div class="go-playground">
+  <textarea class="go-code" rows="12">func main() {
+    // Create a buffered channel for notifications
+    done := make(chan struct{})  // Empty struct uses no memory
+    
+    // Multiple goroutines waiting for the same signal
+    for i := 1; i <= 5; i++ {
+        go func(id int) {
+            <-done
+            fmt.Printf("Goroutine %d received shutdown signal\n", id)
+        }(i)
+    }
+    
+    time.Sleep(1 * time.Second)
+    fmt.Println("Broadcasting shutdown signal...")
+    close(done)  // All waiting goroutines wake up
+    
+    time.Sleep(100 * time.Millisecond)
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
 
 **Use Case:** Coordinating test shutdown across multiple concurrent test runners.
 
@@ -387,6 +587,47 @@ func main() {
 // Response from ServiceC
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">func fetchFromService(name string, delay time.Duration) <-chan string {
+    out := make(chan string)
+    go func() {
+        time.Sleep(delay)
+        out <- fmt.Sprintf("Response from %s", name)
+    }()
+    return out
+}
+
+func main() {
+    // Fetch from multiple services in parallel
+    serviceA := fetchFromService("ServiceA", 100*time.Millisecond)
+    serviceB := fetchFromService("ServiceB", 50*time.Millisecond)
+    serviceC := fetchFromService("ServiceC", 150*time.Millisecond)
+    
+    // Process results as they arrive (fastest first)
+    for i := 0; i < 3; i++ {
+        select {
+        case result := <-serviceA:
+            fmt.Println(result)
+        case result := <-serviceB:
+            fmt.Println(result)
+        case result := <-serviceC:
+            fmt.Println(result)
+        }
+    }
+}
+
+// Output (order may vary):
+// Response from ServiceB
+// Response from ServiceA
+// Response from ServiceC
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 ### Select in a Loop (Multiplexing)
 
 ```go
@@ -412,6 +653,36 @@ func main() {
     }
 }
 ```
+
+<div class="go-playground">
+  <textarea class="go-code" rows="12">func main() {
+    ticker := time.NewTicker(500 * time.Millisecond)
+    defer ticker.Stop()
+    
+    quit := make(chan bool)
+    
+    go func() {
+        time.Sleep(2 * time.Second)
+        quit <- true
+    }()
+    
+    for {
+        select {
+        case <-ticker.C:
+            fmt.Println("Tick")
+        case <-quit:
+            fmt.Println("Quitting")
+            return
+        }
+    }
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
 
 **Use Case:** SDET test runner that processes test results as they arrive, with a timeout for overall test execution.
 
@@ -656,6 +927,31 @@ func main() {
 }
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">// Sender owns the channel
+func produce(ch chan<- int) {
+    for i := 1; i <= 5; i++ {
+        ch <- i
+    }
+    close(ch)  // Sender closes
+}
+
+func main() {
+    ch := make(chan int)
+    go produce(ch)
+    
+    for val := range ch {
+        fmt.Println(val)
+    }
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 ✅ **Use receive-only channels** to enforce correct usage:
 ```go
 func worker(jobs <-chan int) {  // Can only receive
@@ -782,6 +1078,83 @@ func main() {
 }
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">type TestResult struct {
+    TestName string
+    Passed   bool
+    Duration time.Duration
+}
+
+func runTest(name string, duration time.Duration) <-chan TestResult {
+    result := make(chan TestResult)
+    go func() {
+        start := time.Now()
+        time.Sleep(duration)  // Simulate test
+        result <- TestResult{
+            TestName: name,
+            Passed:   true,
+            Duration: time.Since(start),
+        }
+        close(result)
+    }()
+    return result
+}
+
+func main() {
+    tests := []struct {
+        name     string
+        duration time.Duration
+    }{
+        {"LoginTest", 100 * time.Millisecond},
+        {"CheckoutTest", 200 * time.Millisecond},
+        {"PaymentTest", 150 * time.Millisecond},
+    }
+    
+    results := make(chan TestResult)
+    var wg sync.WaitGroup
+    
+    // Fan-out: start all tests
+    for _, test := range tests {
+        wg.Add(1)
+        go func(t struct {
+            name     string
+            duration time.Duration
+        }) {
+            defer wg.Done()
+            res := <-runTest(t.name, t.duration)
+            results <- res
+        }(test)
+    }
+    
+    // Wait for all and close results
+    go func() {
+        wg.Wait()
+        close(results)
+    }()
+    
+    // Fan-in: collect all results
+    passed := 0
+    for result := range results {
+        status := "PASSED"
+        if !result.Passed {
+            status = "FAILED"
+        }
+        fmt.Printf("[%s] %s (%.2fms)\n", status, result.TestName, 
+            result.Duration.Seconds()*1000)
+        if result.Passed {
+            passed++
+        }
+    }
+    fmt.Printf("\nTotal: %d/%d passed\n", passed, len(tests))
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 ### Example 2: API Response Collection with Timeout
 
 ```go
@@ -836,6 +1209,65 @@ func main() {
     }
 }
 ```
+
+<div class="go-playground">
+  <textarea class="go-code" rows="12">type APIResponse struct {
+    Endpoint string
+    Status   int
+    Error    error
+}
+
+func queryAPI(endpoint string, timeout time.Duration) <-chan APIResponse {
+    out := make(chan APIResponse)
+    go func() {
+        select {
+        case <-time.After(timeout):
+            out <- APIResponse{
+                Endpoint: endpoint,
+                Status:   0,
+                Error:    fmt.Errorf("timeout after %v", timeout),
+            }
+        }
+    }()
+    return out
+}
+
+func main() {
+    endpoints := []string{
+        "/api/users",
+        "/api/products",
+        "/api/orders",
+    }
+    
+    // Collect responses as they arrive
+    responses := make([]APIResponse, 0)
+    timeout := 5 * time.Second
+    
+    for _, endpoint := range endpoints {
+        select {
+        case resp := <-queryAPI(endpoint, timeout):
+            responses = append(responses, resp)
+        case <-time.After(timeout):
+            fmt.Println("Overall timeout exceeded")
+            break
+        }
+    }
+    
+    for _, resp := range responses {
+        if resp.Error != nil {
+            fmt.Printf("%s: Error - %v\n", resp.Endpoint, resp.Error)
+        } else {
+            fmt.Printf("%s: Status %d\n", resp.Endpoint, resp.Status)
+        }
+    }
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
 
 ## Common Anti-Patterns
 

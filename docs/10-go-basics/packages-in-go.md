@@ -44,6 +44,7 @@ func main() {
 }
 ```
 
+
 ## Why Packages Matter
 
 In small scripts, packages may feel optional. In real microservices, packages enforce structure.

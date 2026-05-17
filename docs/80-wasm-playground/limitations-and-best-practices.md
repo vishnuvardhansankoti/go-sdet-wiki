@@ -97,6 +97,7 @@ package main
 import "mycompany.com/internal/service"
 ```
 
+
 ### 2. Avoid Heavy Initialization
 
 ```go
@@ -142,6 +143,7 @@ func main() {
 }
 ```
 
+
 ### 5. Provide User Feedback
 
 ```go
@@ -158,6 +160,7 @@ func main() {
     fmt.Println("Finished!")
 }
 ```
+
 
 ### 6. Test Before Deployment
 
@@ -204,6 +207,40 @@ func main() {
     <-done
 }
 ```
+
+<div class="go-playground">
+  <textarea class="go-code" rows="12">// BAD - infinite goroutine
+func main() {
+    go func() {
+        for {
+            time.Sleep(1 * time.Second)
+            fmt.Println("Running")
+        }
+    }()
+    // Never returns, program hangs
+}
+
+// GOOD - controlled exit
+func main() {
+    done := make(chan bool)
+    
+    go func() {
+        for i := 0; i < 10; i++ {
+            fmt.Println("Running", i)
+            time.Sleep(1 * time.Second)
+        }
+        done <- true
+    }()
+    
+    <-done
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
 
 ### Time-Based Operations
 
@@ -265,6 +302,47 @@ func fibonacci(n int) int {
 }
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">package main
+
+import (
+    "fmt"
+    "runtime/debug"
+    "syscall/js"
+)
+
+func init() {
+    debug.SetMaxStack(1 << 20)  // Limit stack
+}
+
+func main() {
+    fmt.Println("Ready")
+    
+    // Expose function to JavaScript
+    js.Global().Set("runAlgorithm", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+        input := args[0].Int()
+        result := fibonacci(input)
+        return result
+    }))
+    
+    // Block forever
+    select {}
+}
+
+func fibonacci(n int) int {
+    if n <= 1 {
+        return n
+    }
+    return fibonacci(n-1) + fibonacci(n-2)
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 ## Documentation Examples
 
 ### For Simple Concepts
@@ -279,6 +357,23 @@ func main() {
     fmt.Println("Hello, World!")
 }
 ```
+
+<div class="go-playground">
+  <textarea class="go-code" rows="12">package main
+
+import "fmt"
+
+func main() {
+    // One-liner examples
+    fmt.Println("Hello, World!")
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
 
 ### For Complex Topics
 
@@ -309,6 +404,40 @@ func main() {
     fmt.Println("All workers done!")
 }
 ```
+
+<div class="go-playground">
+  <textarea class="go-code" rows="12">package main
+
+import (
+    "fmt"
+    "sync"
+    "time"
+)
+
+func main() {
+    // Show real-world pattern
+    var wg sync.WaitGroup
+    
+    for i := 1; i <= 5; i++ {
+        wg.Add(1)
+        go func(id int) {
+            defer wg.Done()
+            fmt.Printf("Worker %d started\n", id)
+            time.Sleep(time.Duration(id*100) * time.Millisecond)
+            fmt.Printf("Worker %d finished\n", id)
+        }(i)
+    }
+    
+    wg.Wait()
+    fmt.Println("All workers done!")
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
 
 ## Monitoring and Debugging
 

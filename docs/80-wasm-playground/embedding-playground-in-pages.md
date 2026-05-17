@@ -124,6 +124,39 @@ func main() {
 }
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+    fmt.Println("Welcome to Go WASM Playground!")
+    fmt.Println("Current time:", time.Now().Format("2006-01-02 15:04:05"))
+    
+    // Demonstrate concurrency
+    done := make(chan bool)
+    
+    go func() {
+        time.Sleep(100 * time.Millisecond)
+        fmt.Println("Goroutine finished!")
+        done <- true
+    }()
+    
+    fmt.Println("Waiting for goroutine...")
+    <-done
+    fmt.Println("All done!")
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 ## Advanced Embedding
 
 Interactive editors are useful, but they introduce extra security and resource considerations.
@@ -205,6 +238,47 @@ func main() {
     http.ListenAndServe(":8080", nil)
 }
 ```
+
+<div class="go-playground">
+  <textarea class="go-code" rows="12">// server.go
+package main
+
+import (
+    "net/http"
+    "os"
+    "os/exec"
+)
+
+func compileHandler(w http.ResponseWriter, r *http.Request) {
+    code := r.FormValue("code")
+    
+    // Write code to temp file
+    tmpfile, _ := os.CreateTemp("", "*.go")
+    defer tmpfile.Close()
+    tmpfile.WriteString(code)
+    
+    // Compile to WASM
+    cmd := exec.Command("go", "build", "-o", "output.wasm", tmpfile.Name())
+    cmd.Env = append(os.Environ(), "GOOS=js", "GOARCH=wasm")
+    cmd.Run()
+    
+    // Serve compiled WASM
+    wasmData, _ := os.ReadFile("output.wasm")
+    w.Header().Set("Content-Type", "application/wasm")
+    w.Write(wasmData)
+}
+
+func main() {
+    http.HandleFunc("/compile", compileHandler)
+    http.ListenAndServe(":8080", nil)
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
 
 Never expose unrestricted compilation endpoints in public environments without sandboxing and abuse controls.
 

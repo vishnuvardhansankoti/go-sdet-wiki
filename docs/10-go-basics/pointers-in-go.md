@@ -37,6 +37,30 @@ func main() {
 }
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">package main
+
+import "fmt"
+
+func main() {
+    x := 42
+    p := &x
+
+    fmt.Println("x:", x)
+    fmt.Println("p (address):", p)
+    fmt.Println("*p (value at address):", *p)
+
+    *p = 100
+    fmt.Println("x after *p = 100:", x)
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 Key takeaway: writing through `*p` updates the original value.
 
 ## Nil Pointers and Zero Values
@@ -86,6 +110,35 @@ func main() {
     fmt.Println("after incrementByPointer:", a) // 11
 }
 ```
+
+<div class="go-playground">
+  <textarea class="go-code" rows="12">package main
+
+import "fmt"
+
+func incrementByValue(n int) {
+    n++
+}
+
+func incrementByPointer(n *int) {
+    (*n)++
+}
+
+func main() {
+    a := 10
+    incrementByValue(a)
+    fmt.Println("after incrementByValue:", a) // 10
+
+    incrementByPointer(&a)
+    fmt.Println("after incrementByPointer:", a) // 11
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
 
 Use pointer parameters when the function needs to modify caller-owned data or avoid large copies.
 

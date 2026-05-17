@@ -142,6 +142,38 @@ func main() {
 }
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">func main() {
+    // Load configuration
+    cfg := config.Load()
+    
+    // Connect to database
+    db, err := sql.Open("postgres", cfg.DatabaseURL)
+    // Handle error
+    
+    // Create repositories
+    userRepo := repository.NewPostgresUserRepository(db)
+    // ... create other repositories
+    
+    // Create services
+    userService := service.NewUserService(userRepo)
+    // ... create other services
+    
+    // Create handler
+    apiHandler := handler.NewHandler(userService, /* ... */)
+    
+    // Start server
+    http.HandleFunc("/api/v1/", apiHandler.Route)
+    log.Fatal(http.ListenAndServe(":8080", nil))
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 Keep wiring explicit and testable; avoid hidden global initialization.
 
 ## Development Workflow

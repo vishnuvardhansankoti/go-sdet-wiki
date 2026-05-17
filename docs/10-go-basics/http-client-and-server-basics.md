@@ -40,6 +40,23 @@ func main() {
 }
 ```
 
+<div class="go-playground">
+  <textarea class="go-code" rows="12">func handler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hello, %s!", r.URL.Path[1:])
+}
+
+func main() {
+    http.HandleFunc("/", handler)
+    log.Fatal(http.ListenAndServe(":8080", nil))
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+
 Key ideas:
 
 - http.HandleFunc binds a URL pattern to a handler function.
@@ -64,6 +81,27 @@ func main() {
     http.ListenAndServe(":8080", h)
 }
 ```
+
+<div class="go-playground">
+  <textarea class="go-code" rows="12">type Handler struct {
+    db *sql.DB
+}
+
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    // Handle request
+}
+
+func main() {
+    h := &Handler{db: db}
+    http.ListenAndServe(":8080", h)
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
 
 This pattern improves testability because your handler can be created with mock or fake dependencies in unit tests.
 
