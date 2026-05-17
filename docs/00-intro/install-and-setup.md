@@ -5,7 +5,7 @@ Environment setup is the first quality gate of any Go project. A reproducible se
 ## Installing Go
 
 ### Windows
-1. Download from https://golang.org/dl/
+1. Download from [Go Downloads](https://go.dev/dl/)
 2. Run the installer
 3. Follow the prompts
 
@@ -38,11 +38,125 @@ cd ~/go-projects
 ## IDE Setup
 
 ### VS Code
-1. Install Go extension
-2. Install Go tools via the extension prompt
+
+#### 1. Install VS Code
+- Download: [Visual Studio Code](https://code.visualstudio.com/)
+
+#### 2. Install Required Extensions
+
+Install these first:
+
+1. Go (required)
+    - Marketplace: [Go extension](https://marketplace.visualstudio.com/items?itemName=golang.Go)
+    - Extension ID: `golang.go`
+2. GitHub Actions (recommended for CI sections)
+    - Marketplace: [GitHub Actions extension](https://marketplace.visualstudio.com/items?itemName=github.vscode-github-actions)
+    - Extension ID: `github.vscode-github-actions`
+3. YAML (recommended for CI and config files)
+    - Marketplace: [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
+    - Extension ID: `redhat.vscode-yaml`
+
+Optional but useful for this tutorial:
+
+1. Docker
+    - Marketplace: [Docker extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker)
+2. Error Lens
+    - Marketplace: [Error Lens extension](https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens)
+
+#### 3. Open the Project and Install Go Tools
+
+1. Open your project folder in VS Code.
+2. Press `Ctrl+Shift+P` and run `Go: Install/Update Tools`.
+3. Install at least these tools:
+    - `gopls`
+    - `dlv`
+    - `goimports`
+    - `staticcheck`
+    - `gotests`
+
+#### 4. Recommended VS Code Settings
+
+Create `.vscode/settings.json` in your project with:
+
+```json
+{
+  "go.useLanguageServer": true,
+  "go.formatTool": "goimports",
+  "editor.formatOnSave": true,
+  "go.lintTool": "staticcheck",
+  "go.testFlags": [
+     "-v"
+  ],
+  "go.toolsManagement.autoUpdate": true
+}
+```
+
+#### 5. Verify VS Code Setup
+
+Run in terminal:
+
+```bash
+go version
+go env GOPATH GOROOT
+go test ./...
+```
+
+Then in VS Code:
+
+1. Open any `.go` file and confirm autocompletion works.
+2. Run a test using the CodeLens `Run Test` link.
+3. Press `F5` to verify debugger (`dlv`) starts.
 
 ### GoLand / IntelliJ IDEA
-- Native Go support with excellent refactoring tools
+
+#### 1. Install GoLand (recommended)
+
+- Product page: [GoLand Product Page](https://www.jetbrains.com/go/)
+- Download: [GoLand Download](https://www.jetbrains.com/go/download/)
+
+If using IntelliJ IDEA instead of GoLand, install the Go plugin first:
+
+- Go plugin: [Go Plugin for IntelliJ](https://plugins.jetbrains.com/plugin/9568-go)
+
+#### 2. Install/Enable Required Plugins
+
+In `Settings > Plugins`, verify:
+
+1. Go (required in IntelliJ, bundled in GoLand)
+2. Docker (recommended for container-based testing)
+3. YAML (recommended for CI and config editing)
+
+#### 3. Configure Go SDK
+
+1. Go to `Settings > Go > GOROOT`.
+2. Select your local Go installation.
+3. Ensure the project SDK is detected correctly.
+
+#### 4. Configure Formatting and Imports
+
+1. Go to `Settings > Go > Imports`.
+2. Enable automatic import optimization.
+3. Enable format on save (or use `Ctrl+Alt+L` regularly).
+
+#### 5. Configure Test and Debug
+
+1. Open `Run/Debug Configurations`.
+2. Add a `Go Test` configuration for package tests.
+3. Add a `Go Build` or `Go Application` configuration for entrypoints.
+
+#### 6. Verify GoLand Setup
+
+1. Open a `.go` file and confirm code insight/navigation works.
+2. Run a unit test from gutter icons.
+3. Start debugger on a test or main package.
+
+### Reference Links
+
+- [Go Downloads](https://go.dev/dl/)
+- [Go Documentation](https://go.dev/doc/)
+- [VS Code Documentation](https://code.visualstudio.com/docs)
+- [VS Code Go Extension Documentation](https://github.com/golang/vscode-go)
+- [JetBrains GoLand Documentation](https://www.jetbrains.com/help/go/)
 
 ## Assignment: Project Setup for Bookshelf API
 

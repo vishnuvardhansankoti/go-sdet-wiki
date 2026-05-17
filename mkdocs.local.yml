@@ -1,0 +1,4 @@
+INHERIT: mkdocs.yml
+
+# Local preview config: use root URL so asset paths resolve under mkdocs serve.
+site_url: http://127.0.0.1:8011/

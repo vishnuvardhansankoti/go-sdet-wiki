@@ -38,6 +38,9 @@ extra_css:
 markdown_extensions:
   - admonition
   - codehilite
+  - pymdownx.snippets:
+      base_path:
+        - docs/_includes
   - toc:
       permalink: true
   - tables
@@ -51,6 +54,7 @@ nav:
   - Introduction:
       - Overview: 00-intro/overview.md
       - Why Go for SDETs: 00-intro/why-go-for-sdets.md
+      - Hello World with WASM: 00-intro/hello-world-with-wasm.md
       - Install & Setup: 00-intro/install-and-setup.md
       - Go Modules & Workspaces: 00-intro/go-modules-and-workspaces.md
 
