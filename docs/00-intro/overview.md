@@ -48,7 +48,10 @@ Each section introduces new concepts **and** guides you to implement them in the
 | 50-Contract Testing | Multiple microservices with Pact |
 | 60-CI/CD | Automated testing pipeline |
 | 70-Patterns | Advanced testing techniques |
+| 80-WASM Playground | Inline runnable Go examples in the docs |
 | 90-Capstone | Polish, document, and deploy |
+| 95-Appendix | Practical setup guides and contribution/help docs |
+| 99-Final Project | Requirements-only independent practice project |
 
 **By learning this way, you'll understand how all the pieces fit together in a real-world application.**
 
