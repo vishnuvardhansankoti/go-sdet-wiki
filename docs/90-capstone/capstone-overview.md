@@ -97,6 +97,26 @@ Jump to sections most relevant to your learning goals.
 ### Option 3: Build First, Learn Later
 Implement the project, then use sections as reference.
 
+## How This Relates to Earlier Assignments
+
+The capstone is an extension of the same Bookshelf API you start in earlier sections.
+
+It is not a second, separate project.
+
+Think of the tutorial flow in two phases:
+
+1. Learning phase (section assignments): build the API incrementally to learn one concept at a time.
+2. Delivery phase (capstone): consolidate everything into one release-ready implementation with stronger quality gates.
+
+What changes in capstone:
+
+1. Scope is finalized and documented.
+2. API versioning is standardized (`/api/v1`) for final artifacts.
+3. Unit, integration, contract, and end-to-end testing are treated as mandatory release evidence.
+4. CI quality gates become release requirements, not optional checks.
+
+If you already implemented section assignments, reuse and harden that code in capstone rather than rewriting from scratch.
+
 ## Getting Help
 
 - Refer back to earlier wiki sections

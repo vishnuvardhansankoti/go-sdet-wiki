@@ -55,6 +55,7 @@ nav:
       - Overview: 00-intro/overview.md
       - Why Go for SDETs: 00-intro/why-go-for-sdets.md
       - Hello World with WASM: 00-intro/hello-world-with-wasm.md
+      - Official Go Playground: 00-intro/official-go-playground.md
       - Install & Setup: 00-intro/install-and-setup.md
       - Go Modules & Workspaces: 00-intro/go-modules-and-workspaces.md
 
@@ -129,9 +130,11 @@ nav:
       - Contract Testing: 90-capstone/contract-testing-strategy.md
       - CI Pipeline: 90-capstone/ci-pipeline-for-capstone.md
 
+  - Final Project:
+      - Independent Practice Requirements: 99-final-project/independent-practice-requirements.md
+
   - Appendix:
       - Testing Reltio MDM with Go: 95-appendix/testing-reltio-mdm-with-go.md
       - Reltio Relation MDM Testing: 95-appendix/reltio-relation-mdm-testing.md
-
-  - Project Notes:
-      - Tutorial Changelog: BOOKSHELF_TUTORIAL_CHANGELOG.md
+      - Rancher Desktop Setup for Local Containers: 95-appendix/rancher-desktop-setup-for-local-containers.md
+      - How to Report Issues: 95-appendix/how-to-report-issues.md
