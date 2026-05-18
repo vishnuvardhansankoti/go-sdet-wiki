@@ -247,6 +247,133 @@ Go pointers are designed for clarity and safety in service-level programming, no
 | Return pointer to local | Safe with escape analysis | Unsafe (dangling pointer risk) |
 | Arbitrary pointer casts | Restricted (`unsafe` needed) | Commonly allowed |
 
+## Go Garbage Collector (GC)
+
+Go uses an automatic garbage collector to reclaim heap memory that is no longer reachable.
+
+For SDETs and service engineers, this matters because memory pressure and GC pauses can affect test stability, latency, and throughput under load.
+
+### What GC Does
+
+At a high level, Go's GC is a concurrent mark-and-sweep collector:
+
+1. Mark: find objects still reachable from live references.
+2. Sweep: reclaim objects that are no longer reachable.
+3. Repeat: run continuously as allocation pressure grows.
+
+Most of this work happens concurrently with your program, which keeps stop-the-world pauses relatively small in typical workloads.
+
+### Stack vs Heap and Escape Analysis
+
+Not every value is GC-managed.
+
+- Stack allocations are typically cheap and released automatically when a function returns.
+- Heap allocations are tracked by GC.
+
+Go's compiler uses escape analysis to decide where a value lives. If a value must outlive the current stack frame, it "escapes" to heap.
+
+Practical tip: fewer unnecessary heap allocations usually means less GC work.
+
+### Minimal Example: Forcing and Observing GC
+
+```go
+package main
+
+import (
+    "fmt"
+    "runtime"
+)
+
+func main() {
+    var m runtime.MemStats
+
+    runtime.ReadMemStats(&m)
+    fmt.Printf("Before allocation: HeapAlloc=%d KB, NumGC=%d\n", m.HeapAlloc/1024, m.NumGC)
+
+    // Allocate several MB to create memory pressure.
+    data := make([][]byte, 0, 20)
+    for i := 0; i < 20; i++ {
+        data = append(data, make([]byte, 512*1024)) // 512 KB each
+    }
+
+    runtime.ReadMemStats(&m)
+    fmt.Printf("After allocation:  HeapAlloc=%d KB, NumGC=%d\n", m.HeapAlloc/1024, m.NumGC)
+
+    // Drop references so memory becomes collectible.
+    data = nil
+    runtime.GC()
+
+    runtime.ReadMemStats(&m)
+    fmt.Printf("After GC:          HeapAlloc=%d KB, NumGC=%d\n", m.HeapAlloc/1024, m.NumGC)
+}
+```
+
+### GC Tuning Basics
+
+Default behavior works well for most services. Tune only when profiling shows memory/latency pain.
+
+- `GOGC` controls how aggressively GC runs.
+- Lower `GOGC` -> more frequent collection, lower memory footprint, potentially more CPU overhead.
+- Higher `GOGC` -> less frequent collection, higher memory footprint, potentially lower GC CPU overhead.
+
+You can set it with environment variable:
+
+```bash
+GOGC=100 go test ./...
+```
+
+Or at runtime for experiments:
+
+```go
+import "runtime/debug"
+
+func main() {
+    old := debug.SetGCPercent(200)
+    _ = old // keep old value if you want to restore later
+}
+```
+
+### Common GC-Aware Coding Patterns
+
+1. Reuse buffers where practical to reduce allocation churn.
+2. Avoid keeping long-lived references to large objects unintentionally.
+3. Prefer streaming for large payloads instead of loading everything into memory.
+4. Profile first: use `pprof` and allocation profiles before tuning.
+
+### Example: Reusing Temporary Objects with sync.Pool
+
+```go
+package main
+
+import (
+    "bytes"
+    "fmt"
+    "sync"
+)
+
+var bufPool = sync.Pool{
+    New: func() interface{} {
+        return new(bytes.Buffer)
+    },
+}
+
+func formatMessage(name string) string {
+    b := bufPool.Get().(*bytes.Buffer)
+    b.Reset()
+    defer bufPool.Put(b)
+
+    b.WriteString("Hello, ")
+    b.WriteString(name)
+    return b.String()
+}
+
+func main() {
+    fmt.Println(formatMessage("SDET"))
+}
+```
+
+Use pooling selectively. Overusing pools can add complexity and sometimes hurt performance if objects are small or usage is low.
+
 ## Pointers and "Reference-like" Types in Go
 
 Some Go types already behave like references without explicit pointer syntax:
