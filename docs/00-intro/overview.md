@@ -98,3 +98,8 @@ Maintain a short section checklist for delivered endpoints, tests added, and unr
 - Are failing tests from earlier sections resolved before adding new ones?
 - Is your current branch focused on the current section milestone only?
 
+
+
+## Next Step
+
+Continue with [Why Go for SDETs?](why-go-for-sdets.md).

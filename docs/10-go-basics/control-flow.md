@@ -114,6 +114,32 @@ defer resp.Body.Close()
 
 Write `CanTransitionStatus(from, to string) bool` with `switch`, then add table-driven tests for valid and invalid transitions.
 
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next chapter.
+
+### Exercise 1: Status Transition Validator
+
+Goal: Practice `if` + `switch` with testable branch logic.
+
+1. Implement `ValidateTransition(from, to string) error` for reading states (`WANT_TO_READ`, `CURRENTLY_READING`, `COMPLETED`).
+2. Reject invalid transitions (for example, `COMPLETED -> CURRENTLY_READING`).
+3. Return descriptive errors with context (`from`, `to`).
+4. Add table-driven tests for all valid and invalid transition pairs.
+
+Stretch: Add a helper that groups errors by transition type for diagnostics.
+
+### Exercise 2: Deferred Cleanup in Test Helpers
+
+Goal: Practice reliable cleanup paths with early returns.
+
+1. Create function `FetchAndValidate(url string) error`.
+2. Use early returns for status-code and body validation failures.
+3. Ensure `defer resp.Body.Close()` is called exactly once after a successful request.
+4. Write tests for success and failure paths to prove cleanup-safe control flow.
+
+Stretch: Add a timeout path and assert that cleanup still runs.
+
 ## Common Anti-Patterns
 
 - Nesting multiple `if` blocks instead of using early returns to reduce indentation.
@@ -128,3 +154,8 @@ Write `CanTransitionStatus(from, to string) bool` with `switch`, then add table-
 - Is `defer` used consistently for all resource cleanup in functions that open connections or files?
 - Have loop variable capture bugs been tested with the race detector?
 
+
+
+## Next Step
+
+Continue with [Functions and Methods](functions-and-methods.md).

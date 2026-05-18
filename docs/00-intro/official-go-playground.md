@@ -73,3 +73,8 @@ Switch to local development (VS Code/GoLand + terminal) when you need:
 - [Hello World with WASM](hello-world-with-wasm.md)
 - [Install & Setup](install-and-setup.md)
 - [Go Modules & Workspaces](go-modules-and-workspaces.md)
+
+
+## Next Step
+
+Continue with [Install and Setup](install-and-setup.md).

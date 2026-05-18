@@ -160,6 +160,33 @@ func TestGetUserConsumer(t *testing.T) {
 }
 ```
 
+
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next section.
+
+### Exercise 1: Consumer Contract for Error Cases
+
+Goal: Capture both happy and failure behavior in the contract.
+
+1. Define consumer expectations for one success response.
+2. Add at least two error interactions (validation + not found).
+3. Verify status code, headers, and payload fields.
+4. Publish or store contract artifact.
+
+Stretch: Add backward-compatible optional field and update expectations.
+
+### Exercise 2: Provider Verification in CI Style
+
+Goal: Ensure provider remains contract-compatible.
+
+1. Load latest contract artifact in provider test stage.
+2. Verify provider responses satisfy all interactions.
+3. Fail verification on payload drift.
+4. Print actionable mismatch diagnostics.
+
+Stretch: Add branch-based contract version selection.
+
 ## Assignment: Create First Bookshelf Pact Consumer Test
 
 ### Goal
@@ -256,3 +283,8 @@ Keep one behavioral intent per interaction description so pact reports are easy 
 - Are both success and failure scenarios included?
 - Will failure output be understandable to another team?
 
+
+
+## Next Step
+
+Continue with [Consumer Contract Tests](consumer-contract-tests.md).

@@ -79,6 +79,33 @@ Use a simple decision model:
 
 This keeps total suite runtime reasonable while preserving confidence where it matters.
 
+
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next section.
+
+### Exercise 1: Containerized Dependency Sanity Test
+
+Goal: Validate app behavior against a real dependency in a container.
+
+1. Start a dependency container (for example PostgreSQL) in test setup.
+2. Run migration/init step.
+3. Execute one create + one read test case.
+4. Tear down container cleanly after test run.
+
+Stretch: Add a test that verifies behavior when container startup is delayed.
+
+### Exercise 2: Test Isolation and Cleanup Validation
+
+Goal: Prevent flaky integration tests.
+
+1. Seed test data with unique IDs per test case.
+2. Ensure each test cleans up created records/resources.
+3. Run tests multiple times and assert stable outcomes.
+4. Add one assertion for no leaked state between tests.
+
+Stretch: Run tests in parallel with isolated resources.
+
 ## Assignment: Introduce Bookshelf Integration Test Layer
 
 ### Goal
@@ -149,3 +176,8 @@ By running integration tests against real Postgres in both local and CI, you cat
 - Can the same tests run reliably in local and CI?
 
 
+
+
+## Next Step
+
+Continue with [Installing Testcontainers Go](installing-testcontainers-go.md).

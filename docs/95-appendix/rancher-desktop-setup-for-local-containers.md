@@ -160,3 +160,8 @@ wsl --update
 - [Install Testcontainers-Go](../40-integration-testing-testcontainers/installing-testcontainers-go.md)
 - [First Container Test](../40-integration-testing-testcontainers/first-container-test.md)
 - [Testcontainers CI Considerations](../40-integration-testing-testcontainers/testcontainers-ci-considerations.md)
+
+
+## Next Step
+
+Continue with [How to Report Issues for This Wiki](how-to-report-issues.md).

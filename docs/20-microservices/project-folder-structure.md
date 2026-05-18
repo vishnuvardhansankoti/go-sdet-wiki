@@ -90,6 +90,33 @@ This pattern emphasizes flow by technical layers and is often easier for new tea
 
 A consistent layout also reduces onboarding time for new contributors.
 
+
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next section.
+
+### Exercise 1: Config + Health Validation
+
+Goal: Verify service startup behavior under real config conditions.
+
+1. Create two env profiles: valid and invalid (missing required key).
+2. Start service and assert startup succeeds only for valid profile.
+3. Call `/health` and assert status and response shape.
+4. Add one negative test for malformed env value.
+
+Stretch: Capture startup logs and assert a clear config error message.
+
+### Exercise 2: API Contract Smoke for One Endpoint
+
+Goal: Validate one endpoint end-to-end with deterministic assertions.
+
+1. Pick one endpoint (for example create/list/get flow).
+2. Write tests for success, validation error, and not-found path.
+3. Assert status code, JSON schema shape, and key business fields.
+4. Verify error payload stays stable across runs.
+
+Stretch: Add idempotency or duplicate-request case.
+
 ## Assignment: Organize Bookshelf Project Structure
 
 ### Goal
@@ -265,3 +292,8 @@ These boundaries make it easier to diagnose failures by layer and reduce flaky c
 - Is startup wiring isolated from business logic?
 - Can newcomers find core flow (`cmd` -> handler -> service -> repository) quickly?
 
+
+
+## Next Step
+
+Continue with [REST API Design](rest-api-design.md).

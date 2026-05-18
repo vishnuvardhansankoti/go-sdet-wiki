@@ -126,6 +126,37 @@ For test automation and service diagnostics, a consistent error model gives you:
 - Stable HTTP error mapping for contract and E2E testing.
 - Less brittle tests than message-based matching.
 
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the assignment.
+
+### Exercise 1: Typed Validation Errors + Table-Driven Tests
+
+Goal: Practice creating structured errors and asserting them safely in tests.
+
+1. Implement function `ValidateBookInput(title, author string) error`.
+2. Return a typed `ValidationError` with field-specific context.
+3. Create table-driven tests with at least 6 cases (valid + invalid).
+4. Use `errors.As` to assert error type and inspect `Field`/`Message`.
+5. Avoid direct string-equality checks except for one message snapshot test.
+
+Stretch: Add one wrapped error path and assert it with both `errors.Is` and `errors.As`.
+
+### Exercise 2: HTTP Error Mapping Function
+
+Goal: Build deterministic handler-level error conversion used in API tests.
+
+1. Implement `MapDomainErrorToHTTP(err error) (int, map[string]string)`.
+2. Map:
+	- `ValidationError` -> `400`,
+	- `NotFoundError` -> `404`,
+	- `DuplicateError` -> `409`,
+	- unknown -> `500`.
+3. Return a stable payload shape with fields: `code`, `message`.
+4. Write tests that verify status code and payload for each error type.
+
+Stretch: Add correlation ID support to the payload for easier CI diagnostics.
+
 ## Assignment: Part 3 - Enhanced Error Handling
 
 ### Goal
@@ -579,3 +610,8 @@ Add tests to assert:
 - Are typed errors used for domain failures so handlers can use `errors.As` for status mapping?
 - Do tests assert specific error types and unwrapped causes, not just error message strings?
 
+
+
+## Next Step
+
+Continue with [Concurrency: Goroutines](concurrency-goroutines.md).

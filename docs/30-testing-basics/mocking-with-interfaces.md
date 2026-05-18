@@ -136,6 +136,33 @@ Additional guidance:
 - Reserve strict mocks for protocol/interaction contracts.
 - Keep assertions focused on observable outcomes.
 
+
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next section.
+
+### Exercise 1: Table-Driven Boundary Tests
+
+Goal: Improve correctness coverage with compact test cases.
+
+1. Select one function with input validation.
+2. Write table-driven tests for min, max, empty, and invalid values.
+3. Assert expected result and expected error path.
+4. Add case names that clearly describe intent.
+
+Stretch: Add fuzz-style randomized inputs for one field.
+
+### Exercise 2: Replace Real Dependency with Test Double
+
+Goal: Make tests deterministic and fast.
+
+1. Introduce a small interface for one external dependency.
+2. Implement fake/stub behavior for success and failure paths.
+3. Assert function behavior for both paths.
+4. Ensure tests run without network/database access.
+
+Stretch: Measure and compare runtime before/after dependency isolation.
+
 ## Assignment: Mock Repositories for Service Tests (Bookshelf)
 
 ### Goal
@@ -236,3 +263,8 @@ A fake repository with map storage is usually more maintainable than a highly sc
 Well-chosen test doubles shorten feedback loops and improve reliability. They let you reserve heavier integration tests for boundary validation while keeping most behavior checks fast and local.
 
 
+
+
+## Next Step
+
+Continue with [Testing HTTP Handlers](testing-http-handlers.md).

@@ -217,6 +217,33 @@ Additional guidance:
 - Highlight uncovered hotspots in PR summaries.
 - Treat sudden drops as investigation triggers, not just numeric failures.
 
+
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next section.
+
+### Exercise 1: Quality Gate Pipeline Step
+
+Goal: Enforce minimum quality before merge.
+
+1. Add pipeline steps for lint, unit tests, and coverage.
+2. Set a coverage threshold and fail when below threshold.
+3. Publish test and coverage reports as artifacts.
+4. Verify failure output is easy to diagnose.
+
+Stretch: Add separate fast/slow test stages.
+
+### Exercise 2: Safe Integration Test Stage
+
+Goal: Keep CI reliable while running heavier tests.
+
+1. Add integration tests in a dedicated stage/job.
+2. Gate stage execution by branch or label rule.
+3. Capture logs and container output on failure.
+4. Ensure secrets are injected securely via CI variables.
+
+Stretch: Add retry policy only for known flaky external dependency failures.
+
 ## Assignment: Coverage Gate Policy for Bookshelf
 
 ### Goal
@@ -304,3 +331,8 @@ Track trend over time and prioritize adding tests where change frequency and bus
 - Are failures actionable for contributors?
 
 
+
+
+## Next Step
+
+Continue with [Linting and Static Analysis](linting-and-static-analysis.md).

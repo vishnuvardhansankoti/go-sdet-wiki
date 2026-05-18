@@ -133,6 +133,33 @@ func TestWithCustomServer(t *testing.T) {
 
 This style is ideal for testing client behavior, redirects, middleware chaining, or integration-style handler interactions.
 
+
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next section.
+
+### Exercise 1: Table-Driven Boundary Tests
+
+Goal: Improve correctness coverage with compact test cases.
+
+1. Select one function with input validation.
+2. Write table-driven tests for min, max, empty, and invalid values.
+3. Assert expected result and expected error path.
+4. Add case names that clearly describe intent.
+
+Stretch: Add fuzz-style randomized inputs for one field.
+
+### Exercise 2: Replace Real Dependency with Test Double
+
+Goal: Make tests deterministic and fast.
+
+1. Introduce a small interface for one external dependency.
+2. Implement fake/stub behavior for success and failure paths.
+3. Assert function behavior for both paths.
+4. Ensure tests run without network/database access.
+
+Stretch: Measure and compare runtime before/after dependency isolation.
+
 ## Assignment: Test Bookshelf HTTP Handlers
 
 ### Goal
@@ -234,3 +261,8 @@ Keep handler tests fast and deterministic by using in-memory fakes for service d
 - Are failure messages detailed enough for CI triage?
 
 
+
+
+## Next Step
+
+Continue with [Testing Database Code with Fakes](testing-database-code-with-fakes.md).

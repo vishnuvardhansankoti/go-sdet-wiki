@@ -301,6 +301,33 @@ Additional guidance:
 - Validate defaults periodically as domain rules evolve.
 - Avoid embedding randomness in builder defaults.
 
+
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next section.
+
+### Exercise 1: Reproduce and Stabilize a Flaky Test
+
+Goal: Practice a repeatable flake-debugging workflow.
+
+1. Select one flaky test scenario.
+2. Run it repeatedly and capture failure evidence.
+3. Identify root cause (timing, shared state, ordering, etc.).
+4. Apply one stabilization fix and re-run to confirm.
+
+Stretch: Add a regression test that would have caught the original flake.
+
+### Exercise 2: Add a Reusable Test Helper Pattern
+
+Goal: Improve readability and reduce duplication.
+
+1. Identify repeated setup/assertion code in tests.
+2. Extract a helper (builder, fixture, or assertion helper).
+3. Refactor at least two tests to use it.
+4. Verify tests remain clear and deterministic.
+
+Stretch: Document when to use and avoid this helper.
+
 ## Assignment: Builders for Bookshelf Test Data
 
 ### Goal
@@ -379,3 +406,8 @@ Keep builders in test/fixture packages and version them with domain model change
 - Do tests read as behavior narratives rather than setup scripts?
 
 
+
+
+## Next Step
+
+Continue with [Flaky Test Diagnostics](flaky-test-diagnostics.md).

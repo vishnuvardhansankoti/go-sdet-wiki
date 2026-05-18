@@ -366,6 +366,32 @@ Benefit: clean dependency direction and testability with repository mocks.
 - Letting framework code leak into domain package
 - Ignoring cycles until refactor becomes expensive
 
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the assignment.
+
+### Exercise 1: Package Boundary Refactor
+
+Goal: Practice separating domain logic from transport/framework concerns.
+
+1. Create `pkg/domain` with a `Book` struct and validation logic.
+2. Create `pkg/handler` with HTTP-specific DTOs and parsing.
+3. Ensure `pkg/domain` has no `net/http` imports.
+4. Write one unit test proving domain validation runs without handler code.
+
+Stretch: Add an `internal/config` package and show it is not imported by `pkg/domain`.
+
+### Exercise 2: Interface-Driven Repository Package
+
+Goal: Practice dependency direction for testability.
+
+1. Define `BookRepository` interface in `pkg/repository`.
+2. Inject it into `pkg/service.BookService`.
+3. Implement a fake repository in tests to simulate save failures.
+4. Write tests asserting service behavior for success and repository error.
+
+Stretch: Add a compile-time interface check to prevent signature drift.
+
 ## Assignment: Design Packages for Bookshelf API
 
 ### Goal

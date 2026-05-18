@@ -102,6 +102,33 @@ Viper is an optional higher-level config library that supports config files, env
 go get github.com/spf13/viper
 ```
 
+
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next section.
+
+### Exercise 1: Config + Health Validation
+
+Goal: Verify service startup behavior under real config conditions.
+
+1. Create two env profiles: valid and invalid (missing required key).
+2. Start service and assert startup succeeds only for valid profile.
+3. Call `/health` and assert status and response shape.
+4. Add one negative test for malformed env value.
+
+Stretch: Capture startup logs and assert a clear config error message.
+
+### Exercise 2: API Contract Smoke for One Endpoint
+
+Goal: Validate one endpoint end-to-end with deterministic assertions.
+
+1. Pick one endpoint (for example create/list/get flow).
+2. Write tests for success, validation error, and not-found path.
+3. Assert status code, JSON schema shape, and key business fields.
+4. Verify error payload stays stable across runs.
+
+Stretch: Add idempotency or duplicate-request case.
+
 ## Assignment: Configuration Management
 
 ### Goal
@@ -425,3 +452,8 @@ if err := cfg.Validate(); err != nil {
 - Are secret values sourced securely and never printed in logs?
 - Can config behavior be fully reproduced in tests without real environment files?
 
+
+
+## Next Step
+
+Continue with [Logging and Observability](logging-and-observability.md).

@@ -66,3 +66,8 @@ Use Go's standard tooling (`go test`, `go vet`, race detector) as default qualit
 - Have you run `go vet` and the race detector (`-race`) as part of your normal test cycle?
 - Are new team members introduced to Go's standard tooling before project-specific conventions?
 
+
+
+## Next Step
+
+Continue with [Hello World with Inline WASM Runner](hello-world-with-wasm.md).

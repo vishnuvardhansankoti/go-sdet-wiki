@@ -273,6 +273,34 @@ Create:
 - one handler that returns validation error response
 - one client helper that retries transient 5xx errors
 
+## Quick Exercises
+
+Try these short exercises before moving to the next chapter.
+
+### Exercise 1: Build a Minimal JSON API Handler
+
+Goal: Practice request validation, status codes, and consistent JSON responses.
+
+1. Create handler `CreateBookHandler(w http.ResponseWriter, r *http.Request)`.
+2. Accept only `POST`; return `405` for other methods.
+3. Parse JSON body with fields `title` and `author`.
+4. If either field is empty, return `400` with JSON error payload.
+5. On success, return `201` with JSON data payload.
+
+Stretch: Add a request ID response header (`X-Request-ID`) and include it in logs.
+
+### Exercise 2: Implement a Resilient HTTP Client Helper
+
+Goal: Practice timeout control, retry policy, and response handling.
+
+1. Create function `GetWithRetry(url string, attempts int) ([]byte, int, error)`.
+2. Use a reusable `http.Client` with timeout.
+3. Retry only on transient statuses (`502`, `503`, `504`) and network errors.
+4. Do not retry on `4xx` validation/client errors.
+5. Always close `resp.Body` and return both body and status code.
+
+Stretch: Add exponential backoff between retries and make backoff configurable.
+
 ## Common Anti-Patterns
 
 - Reading `resp.Body` without deferring `resp.Body.Close()`, causing connection leaks.
@@ -288,3 +316,8 @@ Create:
 - Is client timeout configurable and set to a sensible default?
 - Are error responses mapped to consistent status codes across all endpoints?
 
+
+
+## Next Step
+
+Continue with [Microservices Overview](../20-microservices/microservices-overview.md).

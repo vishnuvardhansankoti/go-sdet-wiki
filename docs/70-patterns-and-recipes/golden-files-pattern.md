@@ -227,6 +227,33 @@ CI should detect unexpected golden updates and force explicit review.
     fi
 ```
 
+
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next section.
+
+### Exercise 1: Reproduce and Stabilize a Flaky Test
+
+Goal: Practice a repeatable flake-debugging workflow.
+
+1. Select one flaky test scenario.
+2. Run it repeatedly and capture failure evidence.
+3. Identify root cause (timing, shared state, ordering, etc.).
+4. Apply one stabilization fix and re-run to confirm.
+
+Stretch: Add a regression test that would have caught the original flake.
+
+### Exercise 2: Add a Reusable Test Helper Pattern
+
+Goal: Improve readability and reduce duplication.
+
+1. Identify repeated setup/assertion code in tests.
+2. Extract a helper (builder, fixture, or assertion helper).
+3. Refactor at least two tests to use it.
+4. Verify tests remain clear and deterministic.
+
+Stretch: Document when to use and avoid this helper.
+
 ## Assignment: Golden Files for Bookshelf API Responses
 
 ### Goal
@@ -300,3 +327,8 @@ Use golden tests for high-value response schemas and generated artifacts, not as
 - Is each golden update reviewed in PR context?
 
 
+
+
+## Next Step
+
+Continue with [Test Data Builders](test-data-builders.md).

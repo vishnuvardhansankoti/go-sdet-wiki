@@ -449,3 +449,8 @@ Start with one deterministic lifecycle test, then expand to matrix coverage with
 ## Related Appendix
 
 For broader entity-focused guidance, see [Testing Reltio MDM with Go](testing-reltio-mdm-with-go.md).
+
+
+## Next Step
+
+Continue with [Rancher Desktop Setup for Local Containers](rancher-desktop-setup-for-local-containers.md).

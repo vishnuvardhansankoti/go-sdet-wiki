@@ -240,6 +240,33 @@ Go usually requires less ceremony for concurrent test code:
 
 That simplicity is why Go is a strong fit for test automation, load tooling, and service orchestration.
 
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the assignment.
+
+### Exercise 1: Parallel Endpoint Health Checks
+
+Goal: Practice goroutines + `WaitGroup` with deterministic test assertions.
+
+1. Implement `CheckEndpoints(endpoints []string) map[string]error`.
+2. Launch one goroutine per endpoint.
+3. Use `sync.WaitGroup` to wait for completion.
+4. Store results safely (mutex or channel collector).
+5. Write tests for all-success and partial-failure scenarios.
+
+Stretch: Add per-endpoint timeout using `context.WithTimeout`.
+
+### Exercise 2: Race-Safe Shared Counter
+
+Goal: Understand race conditions and safe synchronization.
+
+1. Create `ConcurrentCounter` with methods `Inc()` and `Value()`.
+2. Run 100 goroutines that increment the counter 100 times each.
+3. Verify final value is exactly `10000`.
+4. Run with race detector and ensure no data races.
+
+Stretch: Implement the same counter using channels and compare readability.
+
 ## Assignment: Part 5 - Concurrent Book Processing
 
 ### Goal
@@ -687,3 +714,8 @@ These patterns directly apply to parallel test execution, batch API checks, and 
 - Does CI run tests with `-race` to surface data race conditions?
 - Are goroutine leaks checked using `goleak` or equivalent in long-running test suites?
 
+
+
+## Next Step
+
+Continue with [Channels and Select](channels-and-select.md).

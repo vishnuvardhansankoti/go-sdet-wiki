@@ -192,3 +192,8 @@ By the end of this project, students should produce a production-style codebase 
 ## Final Note
 
 This section is intentionally requirements-only. Students should plan, design, implement, and validate the project independently as capstone-level practice.
+
+
+## Next Step
+
+Continue with [Testing Reltio MDM with Go](../95-appendix/testing-reltio-mdm-with-go.md).

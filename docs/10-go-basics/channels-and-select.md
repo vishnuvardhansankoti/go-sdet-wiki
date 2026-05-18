@@ -1269,6 +1269,36 @@ func main() {
 </div>
 
 
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next chapter.
+
+### Exercise 1: Fan-Out/Fan-In API Checks
+
+Goal: Practice channel-based worker coordination for test automation.
+
+1. Create worker function that receives endpoint URLs from an input channel.
+2. Each worker performs an HTTP check and sends a result struct to an output channel.
+3. Start 3 workers and feed 10 endpoints.
+4. Collect all results and assert counts for success/failure.
+
+Stretch: Add a `context.Context` cancellation path and stop workers cleanly.
+
+### Exercise 2: Timeout-Aware Select Router
+
+Goal: Use `select` for deterministic timeout handling.
+
+1. Implement function that waits on:
+    - a response channel,
+    - an error channel,
+    - `time.After(timeout)`.
+2. Return a typed result indicating success, failure, or timeout.
+3. Write tests for all three branches.
+4. Ensure no goroutine leak when timeout happens first.
+
+Stretch: Replace `time.After` with reusable timer to reduce allocations in loops.
+
+
 ## Common Anti-Patterns
 
 - Sending on a closed channel, causing a panic that is difficult to trace across goroutines.
@@ -1282,3 +1312,8 @@ func main() {
 - Are all goroutines that write to a channel guaranteed to exit when the channel is closed?
 - Is a `done` or context channel used to signal goroutine shutdown in tests?
 - Has the race detector (`-race`) been run against all channel-based test helpers?
+
+
+## Next Step
+
+Continue with [HTTP Client and Server Basics](http-client-and-server-basics.md).

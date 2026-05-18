@@ -92,6 +92,39 @@ fmt.Println(increment(5))
 
 Use closures carefully when loops are involved; always be explicit about captured variables to avoid subtle bugs.
 
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the assignment.
+
+### Exercise 1: Table-Driven Validation Function
+
+Goal: Practice function design with explicit error handling and test coverage.
+
+1. Write function `ValidateUsername(name string) error` with rules:
+	- minimum length 3,
+	- maximum length 20,
+	- only letters, numbers, and underscore.
+2. Return descriptive errors for each failed rule.
+3. Write a table-driven test with at least 6 cases (valid + invalid).
+4. Assert both pass/fail behavior and expected error messages.
+
+Stretch: Add benchmark `BenchmarkValidateUsername` for short and long inputs.
+
+### Exercise 2: Method-Based Retry Policy for HTTP Checks
+
+Goal: Practice methods, receiver choices, and deterministic behavior for automation code.
+
+1. Define struct `RetryPolicy` with fields `MaxAttempts int` and `BackoffMs int`.
+2. Add method `ShouldRetry(statusCode int, err error, attempt int) bool`.
+3. Rules:
+	- retry on network error,
+	- retry on `502`, `503`, `504`,
+	- do not retry on `4xx`,
+	- stop at `MaxAttempts`.
+4. Write tests for each rule, including boundary case when `attempt == MaxAttempts`.
+
+Stretch: Add method `NextDelay(attempt int) time.Duration` using exponential backoff.
+
 ## Assignment: Part 4 - Business Logic Methods and Functions
 
 ### Goal
@@ -579,3 +612,8 @@ Functions and methods designed with clear inputs, outputs, and error contracts a
 - Does every error return include sufficient context to diagnose the failure?
 - Are domain operations free of infrastructure concerns like logging or HTTP encoding?
 
+
+
+## Next Step
+
+Continue with [Structs and Interfaces](structs-and-interfaces.md).

@@ -121,6 +121,46 @@ You will use these concepts directly in the domain layer:
 
 This combination enables fast feedback in unit tests and clean separation of concerns in service and handler layers.
 
+## Quick Exercises
+
+Try these short exercises before moving to the assignment.
+
+### Exercise 1: Struct + Methods
+
+Goal: Practice struct design and pointer/value receiver methods.
+
+1. Create a `Book` struct with fields: `Title`, `Author`, `Pages`, `ReadPages`.
+2. Add method `Progress() float64` (value receiver) that returns read percentage.
+3. Add method `MarkRead(pages int)` (pointer receiver) that updates `ReadPages` safely.
+4. Print progress before and after calling `MarkRead`.
+
+Stretch: Prevent `ReadPages` from exceeding `Pages`.
+
+### Exercise 2: Interface-Based Search Service
+
+Goal: Use interfaces to decouple search behavior from implementation.
+
+1. Define interface `BookFinder` with method `FindByTitle(title string) (Book, bool)`.
+2. Implement `Library` type with a `[]Book` field that satisfies `BookFinder`.
+3. Implement `FindByTitle` with a case-insensitive linear search.
+4. Add a small `main` function that demonstrates found/not-found cases.
+
+Stretch: Return `(Book, error)` and define a custom `ErrBookNotFound`.
+
+### Exercise 3: Sort + Binary Search with Interfaces
+
+Goal: Combine structs, interfaces, and algorithms in one practical exercise.
+
+1. Add method `SortByTitle()` on `Library` using `sort.Slice`.
+2. Update `FindByTitle` to use binary search on sorted data.
+3. Keep the interface contract unchanged (`FindByTitle(title string) (Book, bool)`).
+4. Write 3 table-driven test cases: first item, last item, missing item.
+
+Hints:
+
+- Compare lowercase titles for stable behavior.
+- Keep sort and search logic deterministic for tests.
+
 ## Assignment: Part 2 - Build Domain Models with Methods
 
 ### Goal
@@ -577,3 +617,8 @@ Add a `ShelfRepository` interface with `Save`, `FindByUser`, and `Delete` method
 - Are interface types narrow — containing only the methods a single consumer actually needs?
 - Can each struct dependency be swapped for a test fake without changing the consumer?
 
+
+
+## Next Step
+
+Continue with [Error Handling](error-handling.md).

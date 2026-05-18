@@ -235,3 +235,8 @@ Add a CI step that fails on untidy modules to prevent dependency inconsistencies
 - Are all test dependencies pinned to released semantic versions?
 - Are `go.work` files excluded from shared branches unless a multi-module workflow is documented?
 
+
+
+## Next Step
+
+Continue with [Variables and Types](../10-go-basics/variables-and-types.md).

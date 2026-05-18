@@ -103,6 +103,33 @@ func setupUserService() *UserService {
 }
 ```
 
+
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next section.
+
+### Exercise 1: Config + Health Validation
+
+Goal: Verify service startup behavior under real config conditions.
+
+1. Create two env profiles: valid and invalid (missing required key).
+2. Start service and assert startup succeeds only for valid profile.
+3. Call `/health` and assert status and response shape.
+4. Add one negative test for malformed env value.
+
+Stretch: Capture startup logs and assert a clear config error message.
+
+### Exercise 2: API Contract Smoke for One Endpoint
+
+Goal: Validate one endpoint end-to-end with deterministic assertions.
+
+1. Pick one endpoint (for example create/list/get flow).
+2. Write tests for success, validation error, and not-found path.
+3. Assert status code, JSON schema shape, and key business fields.
+4. Verify error payload stays stable across runs.
+
+Stretch: Add idempotency or duplicate-request case.
+
 ## Assignment: Implement Dependency Injection
 
 ### Goal  
@@ -352,3 +379,8 @@ It also improves failure analysis because dependency boundaries are explicit, ma
 - Are interfaces narrow — each consumer receives only the methods it needs?
 - Is wiring code (container, main) separated from business logic?
 
+
+
+## Next Step
+
+Continue with [Configuration and Environment Variables](configuration-and-env-vars.md).

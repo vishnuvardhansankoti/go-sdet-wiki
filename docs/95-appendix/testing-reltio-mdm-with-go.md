@@ -457,3 +457,8 @@ Start small with one smoke lifecycle test, then expand coverage with relation, s
 ## Related Appendix
 
 For relation-focused scenarios, see [Reltio Relation MDM Testing with Go](reltio-relation-mdm-testing.md).
+
+
+## Next Step
+
+Continue with [Reltio Relation MDM Testing with Go](reltio-relation-mdm-testing.md).

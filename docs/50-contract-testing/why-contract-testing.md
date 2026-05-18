@@ -104,6 +104,33 @@ Consumer Tests → Pact File (Contract) → Provider Verification
 
 Use this section as a decision gate, not a rule carved in stone.
 
+
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next section.
+
+### Exercise 1: Consumer Contract for Error Cases
+
+Goal: Capture both happy and failure behavior in the contract.
+
+1. Define consumer expectations for one success response.
+2. Add at least two error interactions (validation + not found).
+3. Verify status code, headers, and payload fields.
+4. Publish or store contract artifact.
+
+Stretch: Add backward-compatible optional field and update expectations.
+
+### Exercise 2: Provider Verification in CI Style
+
+Goal: Ensure provider remains contract-compatible.
+
+1. Load latest contract artifact in provider test stage.
+2. Verify provider responses satisfy all interactions.
+3. Fail verification on payload drift.
+4. Print actionable mismatch diagnostics.
+
+Stretch: Add branch-based contract version selection.
+
 ## Assignment: Define Bookshelf Contract Boundaries
 
 ### Goal
@@ -169,3 +196,8 @@ Design each contract as a user-observable behavior, not as an implementation sna
 - Are error responses covered for key workflows?
 - Can both consumer and provider teams explain ownership?
 
+
+
+## Next Step
+
+Continue with [Pact Go Basics](pact-go-basics.md).

@@ -100,3 +100,8 @@ If you already know the fix, you can open a pull request directly after creating
 
 - Repository: [go-sdet-wiki](https://github.com/vishnuvardhansankoti/go-sdet-wiki)
 - Issues: [Issue Tracker](https://github.com/vishnuvardhansankoti/go-sdet-wiki/issues)
+
+
+## Next Step
+
+You have completed the guided wiki path. Revisit [Home](../index.md) or continue with independent practice in the Final Project section.

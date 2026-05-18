@@ -284,6 +284,35 @@ Prefer values when:
 - Using pointers for tiny immutable data where value semantics are clearer
 - Assuming pointer use always improves performance (measure first)
 
+## Quick Exercises
+
+Try these exercises before starting the assignment.
+
+### Exercise 1: Pointer Mutation and Nil Safety
+
+Goal: Build confidence with address-of, dereference, in-place updates, and nil checks.
+
+1. Create function `ApplyBonus(score *int, bonus int) error`.
+2. If `score == nil`, return an error instead of panicking.
+3. Update the original value through the pointer.
+4. In `main`, demonstrate:
+    - a successful update,
+    - a nil-pointer call and handled error.
+
+Stretch: Reject negative resulting scores and keep the old value unchanged when invalid.
+
+### Exercise 2: Value vs Pointer Receiver Behavior
+
+Goal: Understand method receiver semantics in a realistic domain model.
+
+1. Create struct `Session` with fields: `ID string`, `Retries int`, `Active bool`.
+2. Add method `Touch()` with value receiver that tries to increment retries.
+3. Add method `Activate()` with pointer receiver that sets `Active = true` and increments retries.
+4. In `main`, call both methods and print the struct after each call.
+5. Explain in comments why one mutation persists and the other does not.
+
+Stretch: Convert `Touch()` to pointer receiver and compare outputs.
+
 ## Assignment: Pointer-Based Updates in Bookshelf Domain
 
 ### Goal

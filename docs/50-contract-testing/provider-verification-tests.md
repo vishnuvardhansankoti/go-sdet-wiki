@@ -223,6 +223,33 @@ Additional guidance:
 - Keep test fixture values explicit and stable.
 - Ensure provider app configuration matches contract environment assumptions.
 
+
+## Quick Exercises (SDET Focus)
+
+Try these exercises before moving to the next section.
+
+### Exercise 1: Consumer Contract for Error Cases
+
+Goal: Capture both happy and failure behavior in the contract.
+
+1. Define consumer expectations for one success response.
+2. Add at least two error interactions (validation + not found).
+3. Verify status code, headers, and payload fields.
+4. Publish or store contract artifact.
+
+Stretch: Add backward-compatible optional field and update expectations.
+
+### Exercise 2: Provider Verification in CI Style
+
+Goal: Ensure provider remains contract-compatible.
+
+1. Load latest contract artifact in provider test stage.
+2. Verify provider responses satisfy all interactions.
+3. Fail verification on payload drift.
+4. Print actionable mismatch diagnostics.
+
+Stretch: Add branch-based contract version selection.
+
 ## Assignment: Verify Bookshelf Provider Against Consumer Pacts
 
 ### Goal
@@ -314,3 +341,8 @@ Treat provider verification as a release gate equivalent to integration tests fo
 - Is provider startup environment representative?
 - Are failures actionable from logs and reports?
 
+
+
+## Next Step
+
+Continue with [Pact in CI](pact-in-ci.md).

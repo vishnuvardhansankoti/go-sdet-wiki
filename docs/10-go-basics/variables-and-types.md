@@ -81,6 +81,21 @@ Every Go type has a default zero value. Understanding these defaults is critical
 
 SDET tip: many bugs come from assuming a collection is initialized. In Go, a nil slice can be ranged over safely, but a nil map cannot be assigned into without initialization.
 
+## Quick Exercises
+
+Try these short exercises before moving to the assignment.
+
+### Exercise 1: Typed Price Calculator
+
+Goal: Practice variables, constants, type conversion, and zero values.
+
+1. Create constants `TaxRate` and `DiscountRate`.
+2. Declare variables for `basePrice`, `quantity`, and `couponApplied`.
+3. Compute final total as `float64` and print it.
+4. Add one edge-case check for zero quantity.
+
+Stretch: Create a named type `Currency float64` and use it in your calculation.
+
 ## Assignment: Part 1 - Define Domain Constants and Types
 
 ### Goal
