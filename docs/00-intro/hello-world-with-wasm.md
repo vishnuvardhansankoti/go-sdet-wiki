@@ -55,6 +55,61 @@ When you click Run, you should see:
 Hello, World!
 ```
 
+## Build and Run Locally
+
+You can also run the same Go program from the command line using the Go CLI.
+
+### Option 1: Build a Binary and Run It
+
+Use `go build` when you want to compile the program into an executable first.
+
+```bash
+go build -o hello-world
+./hello-world
+```
+
+What happens here:
+
+1. `go build -o hello-world` compiles the current package and creates a binary named `hello-world`.
+2. `./hello-world` runs that compiled binary.
+
+This approach is useful when:
+
+- you want to run the same binary multiple times,
+- you want to distribute or inspect the compiled executable,
+- you are testing startup behavior of a built artifact.
+
+### Option 2: Run Directly with `go run`
+
+Use `go run` when you want to compile and execute in a single step.
+
+```bash
+go run .
+```
+
+What happens here:
+
+1. Go compiles the program in memory or in a temporary location.
+2. Go immediately runs the resulting executable.
+
+This approach is useful when:
+
+- you are iterating quickly during development,
+- you do not need to keep the binary afterward,
+- you want the shortest feedback loop.
+
+### Build vs Run: When to Use Each
+
+| Approach | Best For | Output |
+| --- | --- | --- |
+| `go build` + `./hello-world` | Repeated runs, release checks, binary inspection | A named executable on disk |
+| `go run .` | Fast iteration, demos, quick experiments | Temporary compiled execution |
+
+Rule of thumb:
+
+- Use `go run` while learning or editing quickly.
+- Use `go build` when you want to validate the final binary or run it more than once.
+
 ## Try These Quick Experiments
 
 1. Change the message to your name.
