@@ -614,4 +614,4 @@ Add tests to assert:
 
 ## Next Step
 
-Continue with [Concurrency: Goroutines](concurrency-goroutines.md).
+Continue with [Generics in Go](generics-in-go.md).

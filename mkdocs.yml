@@ -61,6 +61,7 @@ nav:
 
   - Go Basics:
       - Variables & Types: 10-go-basics/variables-and-types.md
+      - Generics in Go: 10-go-basics/generics-in-go.md
       - Pointers in Go: 10-go-basics/pointers-in-go.md
       - Packages in Go: 10-go-basics/packages-in-go.md
       - Control Flow: 10-go-basics/control-flow.md

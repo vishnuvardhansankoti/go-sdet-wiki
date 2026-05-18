@@ -45,8 +45,9 @@ case "Friday":
 default:
     fmt.Println("Middle of week")
 }
-Use `defer` when cleanup or finalization should always run after the surrounding function finishes.
 ```
+
+Use `defer` when cleanup or finalization should always run after the surrounding function finishes.
 
 ## Defer Statement
 
@@ -55,6 +56,49 @@ defer fmt.Println("Last")
 fmt.Println("First")
 fmt.Println("Second")
 // Output: First, Second, Last
+```
+
+`defer` schedules a call to run right before the current function returns. This makes cleanup reliable, even when the function exits early due to an error.
+
+Key rules to remember:
+
+- Deferred calls run in **LIFO order** (last deferred, first executed).
+- Arguments to deferred functions are evaluated **immediately** when `defer` is encountered, not when it executes later.
+- Deferred calls still run when a function panics (unless the program exits abruptly).
+
+```go
+func demo() {
+    defer fmt.Println("cleanup 1")
+    defer fmt.Println("cleanup 2")
+    fmt.Println("work")
+}
+// Output:
+// work
+// cleanup 2
+// cleanup 1
+```
+
+For SDET workflows, this is especially useful in tests and integration helpers:
+
+Common use cases where `defer` is especially helpful:
+
+- Closing resources opened in the same function (`file.Close()`, `resp.Body.Close()`, `rows.Close()`).
+- Releasing locks safely with `defer mu.Unlock()` right after `mu.Lock()`.
+- Rolling back database transactions on failure paths (`defer tx.Rollback()` before commit logic).
+- Capturing final metrics/logs such as elapsed time at function exit.
+- Cleaning up temporary test state (temp files, environment variables, mock servers).
+
+```go
+func LoadConfig(path string) error {
+    f, err := os.Open(path)
+    if err != nil {
+        return err
+    }
+    defer f.Close() // guaranteed cleanup on every return path
+
+    // parse file
+    return nil
+}
 ```
 
 ## Deep Dive: Control Flow for Testable Code
