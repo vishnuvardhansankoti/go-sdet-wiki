@@ -171,6 +171,16 @@ time.Sleep(1 * time.Second)
 
 ### Using sync.WaitGroup (Recommended)
 
+`sync.WaitGroup` lets one part of your program wait until a set of goroutines finishes. This is important because `main()` does not automatically wait for background goroutines. If `main()` returns too early, the program exits and any still-running goroutines are stopped.
+
+Think of a `WaitGroup` as a counter:
+
+- `wg.Add(n)` says, "there are `n` goroutines I need to wait for"
+- `wg.Done()` reduces that counter by 1 when one goroutine finishes
+- `wg.Wait()` blocks until the counter reaches 0
+
+That makes it a good fit when you want to start several independent tasks and continue only after all of them complete.
+
 ```go
 var wg sync.WaitGroup
 
@@ -188,7 +198,50 @@ go func() {
 wg.Wait()
 ```
 
+In this example:
+
+- `wg.Add(2)` tells Go that two goroutines must finish
+- each goroutine uses `defer wg.Done()` so the counter is decremented even if the function returns early
+- `wg.Wait()` blocks the main goroutine until both worker goroutines call `Done()`
+
+The `defer` pattern is recommended because it keeps the bookkeeping next to the goroutine start and reduces the chance of forgetting to signal completion.
+
+Two practical rules matter here:
+
+- Call `Add()` before starting the goroutine, so the counter is correct before work begins
+- Make sure every goroutine that was counted eventually calls `Done()`, or `Wait()` can block forever
+
+For SDET workflows, `WaitGroup` is useful when running parallel API checks, launching multiple validation steps, or coordinating concurrent test helpers where you only care that all tasks finish, not that they exchange data.
+
 ## Race Conditions
+
+A race condition happens when two or more goroutines access the same data at the same time, and at least one of them writes to that data without proper synchronization.
+
+The danger is not just that the program may produce the wrong answer. A race means the result depends on timing, so the bug can appear in one run and disappear in the next. That makes race bugs frustrating in test automation and service code because they are often intermittent.
+
+For example, this code has a race:
+
+```go
+var counter int
+
+go func() {
+	counter++
+}()
+
+go func() {
+	counter++
+}()
+```
+
+Both goroutines read, modify, and write `counter`. Those operations are not guaranteed to happen atomically, so the updates can overlap and produce inconsistent results.
+
+Common signs of a race include:
+
+- flaky tests that sometimes pass and sometimes fail
+- counters, maps, or shared structs ending in unexpected states
+- crashes caused by unsafe concurrent access
+
+Go provides a built-in race detector that instruments your program and reports suspicious concurrent accesses while the code runs.
 
 Use the race detector:
 
@@ -197,12 +250,81 @@ go run -race main.go
 go test -race ./...
 ```
 
+Use it regularly when writing concurrent code, especially around shared maps, cached state, counters, or test helpers reused across goroutines.
+
+The main ways to prevent race conditions are:
+
+- avoid sharing mutable state when possible
+- use channels to pass data between goroutines
+- protect shared state with synchronization primitives like `Mutex` or `RWMutex`
+
 ## Synchronization Primitives
+
+Synchronization primitives are tools from the `sync` package that help goroutines coordinate safely. You use them when goroutines share data or when one goroutine must wait for a specific condition created by another.
+
+These primitives solve different problems, so choosing the right one matters.
 
 - **sync.Mutex**: Mutual exclusion lock
 - **sync.RWMutex**: Read-write lock
 - **sync.Cond**: Condition variable
 - **sync.Once**: Execute exactly once
+
+### sync.Mutex
+
+A `Mutex` protects shared data so only one goroutine can access the critical section at a time.
+
+Use it when multiple goroutines need to update the same variable, map, or struct.
+
+```go
+var mu sync.Mutex
+var counter int
+
+mu.Lock()
+counter++
+mu.Unlock()
+```
+
+Without the lock, concurrent writes can race. With the lock, only one goroutine updates `counter` at a time.
+
+### sync.RWMutex
+
+An `RWMutex` is similar to `Mutex`, but it distinguishes between readers and writers:
+
+- many readers can hold the lock at the same time
+- only one writer can hold it, and writers exclude readers
+
+This is useful when reads happen much more often than writes, such as reading a cached configuration or shared lookup table.
+
+### sync.Cond
+
+A `Cond` lets goroutines wait until some condition becomes true.
+
+This is more specialized than `Mutex` or `WaitGroup`. You usually use it when goroutines need to sleep until shared state changes, such as waiting for work to appear in a queue.
+
+In day-to-day Go code, channels often provide a simpler alternative, but `sync.Cond` is still useful for lower-level coordination.
+
+### sync.Once
+
+`Once` guarantees that a piece of code runs exactly one time, even if many goroutines call it concurrently.
+
+This is commonly used for one-time initialization, such as loading configuration, creating a shared client, or setting up expensive resources.
+
+```go
+var once sync.Once
+
+once.Do(func() {
+	fmt.Println("Initialize shared resource")
+})
+```
+
+If multiple goroutines call `Do`, only the first call executes the function; the rest wait and then continue.
+
+For SDET work, these primitives are especially useful when test workers share counters, result collectors, caches, or setup logic. The general rule is:
+
+- use `WaitGroup` to wait for work to finish
+- use `Mutex` or `RWMutex` to protect shared mutable state
+- use `Once` for one-time setup
+- prefer channels when goroutines should communicate by passing data
 
 ## Parallel in Java and C#
 
