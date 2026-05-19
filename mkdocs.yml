@@ -139,3 +139,4 @@ nav:
       - Reltio Relation MDM Testing: 95-appendix/reltio-relation-mdm-testing.md
       - Rancher Desktop Setup for Local Containers: 95-appendix/rancher-desktop-setup-for-local-containers.md
       - How to Report Issues: 95-appendix/how-to-report-issues.md
+      - Debug a Single Go File in VS Code: 95-appendix/debug-single-go-file-in-vscode.md

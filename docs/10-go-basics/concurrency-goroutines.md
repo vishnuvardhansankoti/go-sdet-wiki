@@ -68,6 +68,22 @@ So in Go, concurrency is the design pattern, while parallelism is an optimizatio
 
 Go's goroutine model is especially attractive when compared with the most common concurrency models in Java and C#.
 
+## Thread vs Goroutine
+
+The table below summarizes practical differences between OS threads and Go goroutines.
+
+| Thread | Goroutine |
+|------|---------|
+| OS threads are managed by the kernel and have hardware/OS-level scheduling dependencies. | Goroutines are managed by the Go runtime and are multiplexed over OS threads. |
+| OS threads generally have a fixed stack size (often around 1-2 MB by default, platform-dependent). | Goroutines start with a very small stack (historically a few KB) and grow/shrink dynamically as needed. |
+| Stack size is usually allocated upfront and does not grow in the same lightweight way as goroutine stacks. | Goroutine stack size is managed at runtime and can grow significantly (up to implementation/runtime limits) by moving data as needed. |
+| There is no built-in language primitive for thread-to-thread communication; coordination often relies on locks/condition variables and may add overhead. | Goroutines use `channels` for structured communication and synchronization, often with lower coordination overhead in Go code paths ([read more](https://blog.twitch.tv/gos-march-to-low-latency-gc-a6fa96f06eb7)). |
+| Threads have identity (for example, TID at OS level). | Goroutines intentionally do not expose stable identity in the language/runtime model. This aligns with Go's design (no direct TLS-style goroutine identity API) ([Thread Local Storage reference](https://msdn.microsoft.com/en-us/library/windows/desktop/ms686749(v=vs.85).aspx)). |
+| Threads have higher setup/teardown cost because they involve heavier OS resource allocation. | Goroutines are created and destroyed by the Go runtime and are typically much cheaper than creating OS threads. |
+| Threads are preemptively scheduled by the OS; context switches are relatively expensive due to full thread state management. | Goroutines are scheduled by Go's runtime scheduler; modern Go (1.14+) supports asynchronous preemption and low-cost goroutine switching compared with OS thread switching ([preemptive threads](https://stackoverflow.com/questions/4147221/preemptive-threads-vs-non-preemptive-threads), [goroutine scheduling discussion](https://stackoverflow.com/questions/37469995/goroutines-are-cooperatively-scheduled-does-that-mean-that-goroutines-that-don)). |
+
+SDET note: this is why fan-out I/O checks (API probes, health checks, parallel validations) are often simpler and more resource-efficient with goroutines than one-thread-per-task designs.
+
 ### Lower Overhead Than OS Threads
 
 Goroutines are much lighter than Java or C# threads. That means you can create many more concurrent tasks without paying the same memory and scheduling cost that traditional threads require.
@@ -119,7 +135,13 @@ func main() {
 ```
 
 <div class="go-playground">
-  <textarea class="go-code" rows="12">func say(s string) {
+  <textarea class="go-code" rows="12">package main
+
+import (
+	"fmt"
+	"time"
+)
+func say(s string) {
     for i := 0; i < 5; i++ {
         fmt.Println(s)
         time.Sleep(100 * time.Millisecond)
@@ -239,6 +261,10 @@ Go usually requires less ceremony for concurrent test code:
 - Share data safely with mutexes or channels.
 
 That simplicity is why Go is a strong fit for test automation, load tooling, and service orchestration.
+
+## Additional Reading
+
+- [Go concurrency video](https://www.youtube.com/watch?v=f6kdp27TYZs)
 
 ## Quick Exercises (SDET Focus)
 

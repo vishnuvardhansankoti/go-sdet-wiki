@@ -60,6 +60,154 @@ fmt.Println("Second")
 
 `defer` schedules a call to run right before the current function returns. This makes cleanup reliable, even when the function exits early due to an error.
 
+If you have used `finally` in Java or C#, the closest mental model is "cleanup that runs at the end of the current scope." The similarity is useful, but the implementation details are different enough that it is easy to make wrong assumptions when moving between languages.
+
+### `defer` vs `finally`
+
+Similarities:
+
+- Both are commonly used for cleanup.
+- Both help ensure resources are released even when a function exits early.
+- Both are useful for closing files, releasing locks, and restoring state.
+
+Differences:
+
+- `finally` is a language block attached to `try/catch`; `defer` is a statement that registers a function call.
+- `finally` runs after the `try` or `catch` block finishes; `defer` runs when the surrounding function returns.
+- Go allows multiple deferred calls, and they run in reverse order.
+- `defer` arguments are evaluated immediately, not when the function exits.
+- `defer` can work with `panic` and `recover`; `finally` is usually discussed in exception-based control flow.
+
+### Comparing the Same Cleanup Pattern
+
+Java/C# style:
+
+```java
+BufferedReader reader = null;
+try {
+    reader = new BufferedReader(new FileReader("config.txt"));
+    System.out.println(reader.readLine());
+} catch (IOException ex) {
+    System.out.println("read failed: " + ex.getMessage());
+} finally {
+    if (reader != null) {
+        try {
+            reader.close();
+        } catch (IOException ex) {
+            System.out.println("close failed: " + ex.getMessage());
+        }
+    }
+}
+```
+
+Go style:
+
+```go
+f, err := os.Open("config.txt")
+if err != nil {
+    return err
+}
+defer f.Close()
+
+data, err := io.ReadAll(f)
+if err != nil {
+    return err
+}
+fmt.Println(string(data))
+```
+
+The Go version is shorter because cleanup is expressed as a deferred function call instead of a separate `finally` block. That makes the happy path easier to read.
+
+### Important Behavior Differences
+
+#### 1. Deferred arguments are captured immediately
+
+```go
+func demo() {
+    value := 1
+    defer fmt.Println("value:", value)
+    value = 2
+}
+// Output: value: 1
+```
+
+This is different from many developers' intuition about `finally`, where they expect the cleanup block to read the "latest" values at the end of execution.
+
+#### 2. Multiple deferred calls run in reverse order
+
+```go
+func demo() {
+    defer fmt.Println("first defer")
+    defer fmt.Println("second defer")
+    fmt.Println("work")
+}
+// Output:
+// work
+// second defer
+// first defer
+```
+
+That reverse order matters when cleanup has dependencies, such as unlocking a mutex after closing a span or rolling back a transaction before closing a connection.
+
+#### 3. `defer` can modify named return values
+
+```go
+func divide(a, b int) (result int, err error) {
+    defer func() {
+        if err != nil {
+            err = fmt.Errorf("divide failed: %w", err)
+        }
+    }()
+
+    if b == 0 {
+        return 0, fmt.Errorf("division by zero")
+    }
+
+    return a / b, nil
+}
+```
+
+This is a Go-specific pattern. It has no direct equivalent in a standard `finally` block because `finally` is not designed around named return values.
+
+#### 4. `defer` still runs during panic unwinding
+
+```go
+func demo() {
+    defer fmt.Println("cleanup runs")
+    panic("boom")
+}
+```
+
+This makes `defer` very useful for cleanup in test helpers, goroutines, and resource managers.
+
+### When `defer` Is the Better Choice
+
+- Closing files, sockets, HTTP response bodies, and database rows.
+- Unlocking mutexes immediately after locking.
+- Deferring transaction rollback before a later commit.
+- Making test setup and teardown easier to read.
+- Capturing cleanup close to the point where the resource is acquired.
+
+### When `finally` Feels Different in Practice
+
+In Java or C#, developers often rely on `try/finally` around a block of code. In Go, the idiom is usually to acquire a resource and immediately defer its cleanup in the same function.
+
+That means Go code often looks like this:
+
+```go
+func handleRequest() error {
+    conn, err := db.Open()
+    if err != nil {
+        return err
+    }
+    defer conn.Close()
+
+    return doWork(conn)
+}
+```
+
+The cleanup intent stays local, which makes the function easier to scan than a distant cleanup block.
+
 Key rules to remember:
 
 - Deferred calls run in **LIFO order** (last deferred, first executed).

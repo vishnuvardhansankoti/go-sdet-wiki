@@ -81,6 +81,204 @@ Every Go type has a default zero value. Understanding these defaults is critical
 
 SDET tip: many bugs come from assuming a collection is initialized. In Go, a nil slice can be ranged over safely, but a nil map cannot be assigned into without initialization.
 
+## Understanding `nil` in Go
+
+`nil` is Go's predeclared identifier for the zero value of reference-like types.
+
+It applies to:
+
+- pointers
+- slices
+- maps
+- channels
+- functions
+- interfaces
+
+`nil` is **not** a universal value for all types. For example, `int`, `bool`, and `string` never become `nil`; their zero values are `0`, `false`, and `""`.
+
+### Quick Examples
+
+```go
+var p *int          // nil pointer
+var s []string      // nil slice
+var m map[string]int // nil map
+var ch chan int     // nil channel
+var fn func()       // nil function
+var x interface{}   // nil interface
+```
+
+### Operations on Nil Values
+
+Different nil-capable types behave differently. Knowing this avoids many runtime panics.
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	var s []int
+	fmt.Println(s == nil) // true
+	fmt.Println(len(s))   // 0
+	for _, v := range s { // safe: loop executes zero times
+		fmt.Println(v)
+	}
+
+	var m map[string]int
+	fmt.Println(m == nil) // true
+	fmt.Println(m["x"])  // 0 (read is safe)
+	// m["x"] = 1        // panic: assignment to entry in nil map
+}
+```
+
+### Nil Interface Trap (Very Important)
+
+An interface is `nil` only when both its dynamic type and value are nil.
+
+```go
+package main
+
+import "fmt"
+
+type MyErr struct{}
+
+func (e *MyErr) Error() string { return "boom" }
+
+func maybeError(fail bool) error {
+	if !fail {
+		return nil
+	}
+	var e *MyErr = nil
+	return e // non-nil interface holding a nil *MyErr
+}
+
+func main() {
+	err := maybeError(true)
+	fmt.Println(err == nil) // false
+}
+```
+
+SDET tip: this pattern can make tests fail in surprising ways. Prefer explicit error creation (for example, `errors.New(...)`) and direct `nil` returns.
+
+## `nil` in Go vs `null` in Java (and similar languages)
+
+At a high level, `nil` and `null` both represent "no object/reference". The details are different and matter in production systems.
+
+### Similarities
+
+- Both are used to represent absence of a referenced value.
+- Dereferencing without checks can crash (panic in Go, `NullPointerException` in Java).
+
+### Key Differences
+
+1. **Type system behavior**
+   - Go: only certain types can be `nil`.
+   - Java: any reference type can be `null`; primitives (`int`, `boolean`) cannot.
+
+2. **Collection defaults**
+   - Go: zero-value slice/map is `nil`.
+   - Java: collections are usually `null` unless initialized with `new ...`.
+
+3. **Read/write behavior**
+   - Go: reading from a nil map is safe; writing panics.
+   - Java: calling methods on a null map/list throws `NullPointerException`.
+
+4. **Language design style**
+   - Go: encourages zero-value usability (for example, nil slices are often usable with `len`, `range`, append).
+   - Java: often uses constructors and explicit initialization patterns.
+
+### Side-by-Side Example
+
+```go
+// Go
+var users []string
+fmt.Println(len(users)) // 0
+users = append(users, "alice") // works even when initially nil
+```
+
+```java
+// Java
+List<String> users = null;
+// users.size(); // NullPointerException
+users = new ArrayList<>();
+users.add("alice");
+```
+
+## Practical Use Cases for `nil`
+
+### 1. Optional dependencies in tests
+
+In test doubles, a nil function field can mean "use default behavior".
+
+```go
+type FakeNotifier struct {
+	SendFunc func(msg string) error
+}
+
+func (f FakeNotifier) Send(msg string) error {
+	if f.SendFunc == nil {
+		return nil // default no-op for tests
+	}
+	return f.SendFunc(msg)
+}
+```
+
+### 2. Distinguish "not loaded" vs "loaded empty"
+
+For API response shaping, nil and empty slices can communicate different states.
+
+```go
+type UserResponse struct {
+	Tags []string `json:"tags,omitempty"`
+}
+
+// Tags == nil       => field omitted with omitempty
+// Tags == []string{} => explicit empty list when omitempty is removed
+```
+
+### 3. Non-blocking select patterns with channels
+
+Setting a channel to nil disables that case in `select`.
+
+```go
+var in chan int
+// in is nil, so this case is disabled
+select {
+case v := <-in:
+	fmt.Println(v)
+default:
+	fmt.Println("no input")
+}
+```
+
+### 4. Pointer fields for optional input
+
+Use pointers in request structs when you must distinguish "not provided" from zero value.
+
+```go
+type UpdateUserInput struct {
+	DisplayName *string `json:"displayName"`
+}
+
+// nil  => client did not provide field
+// ""   => client provided an empty string
+```
+
+## Best Practices
+
+- Initialize maps with `make(...)` before writes.
+- Prefer returning empty slices in APIs when clients expect arrays.
+- Be careful with interface nil checks in error handling.
+- In table-driven tests, explicitly include nil and empty cases.
+
+Example test cases worth adding:
+
+- nil slice input
+- empty slice input
+- nil map read
+- nil map write (panic expected)
+- typed nil error inside interface
+
 ## Quick Exercises
 
 Try these short exercises before moving to the assignment.

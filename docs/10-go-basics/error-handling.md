@@ -2,17 +2,118 @@
 
 Go's error model is explicit: errors are values returned alongside results, not exceptions thrown out of band. For SDETs, this means test assertions can target exact error types and wrapped messages rather than catching broad exception classes.
 
-## The error Interface
+Go handles errors by treating them as values rather than exceptions. This avoids hidden control flow and encourages developers to handle potential failures immediately and explicitly.
 
-Go treats errors as values. The `error` interface is simple:
+## Core Concepts
 
-That simplicity is intentional. Instead of exceptions being thrown implicitly, functions return an `error` explicitly so callers decide how to handle failure. This keeps control flow visible and predictable.
+### The Error Interface
+
+In Go, an error is any type that implements the built-in `error` interface:
 
 ```go
 type error interface {
-    Error() string
+	Error() string
 }
 ```
+
+### Returning Errors
+
+Functions that can fail return an `error` as their last return value. When successful, they return `nil`.
+
+```go
+func ParseConfig(path string) (Config, error) {
+	if path == "" {
+		return Config{}, errors.New("path is required")
+	}
+
+	// parse config...
+	return Config{}, nil
+}
+```
+
+## Common Patterns
+
+### Checking Errors
+
+The idiomatic pattern is checking `err != nil` immediately after a call.
+
+```go
+cfg, err := ParseConfig("config.yml")
+if err != nil {
+	return fmt.Errorf("parse config: %w", err)
+}
+_ = cfg
+```
+
+### Sentinel Errors
+
+Sentinel errors are predefined variables used to represent specific conditions. Check them with `errors.Is`.
+
+```go
+var ErrCacheMiss = errors.New("cache miss")
+
+func FindUser(id string) error {
+	if id == "" {
+		return ErrCacheMiss
+	}
+	return nil
+}
+
+if err := FindUser(""); errors.Is(err, ErrCacheMiss) {
+	fmt.Println("fallback to database")
+}
+```
+
+### Custom Error Types
+
+For richer scenarios, define custom structs that implement `Error() string`. Use `errors.As` to inspect typed details.
+
+```go
+type ValidationError struct {
+	Field string
+	Msg   string
+}
+
+func (e *ValidationError) Error() string {
+	return fmt.Sprintf("invalid %s: %s", e.Field, e.Msg)
+}
+
+func ValidateEmail(email string) error {
+	if email == "" {
+		return &ValidationError{Field: "email", Msg: "cannot be empty"}
+	}
+	return nil
+}
+
+var ve *ValidationError
+if err := ValidateEmail(""); errors.As(err, &ve) {
+	fmt.Println("field:", ve.Field)
+}
+```
+
+### Error Wrapping
+
+Since Go 1.13, use `%w` with `fmt.Errorf` to add context while preserving the original cause.
+
+```go
+if err := saveUser(u); err != nil {
+	return fmt.Errorf("create user: %w", err)
+}
+```
+
+## Best Practices
+
+- Handle errors immediately; do not ignore them with `_`.
+- Add clear context while bubbling errors upward.
+- Use `panic` only for unrecoverable programmer/system faults.
+- Avoid over-wrapping; wrap when the added context is useful and intentional.
+- Prefer `errors.Is` and `errors.As` over string comparisons.
+
+## Why This Model Works
+
+The simple `error` interface scales well from small utilities to large services. Instead of implicit exception propagation, each call site decides whether to handle, transform, or return the error.
+
+For SDETs, this leads to deterministic behavior in tests: you can assert exact error classification (`errors.Is`, `errors.As`) and verify wrapped context at each layer.
 
 ## Creating Errors
 

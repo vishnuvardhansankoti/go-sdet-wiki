@@ -107,6 +107,8 @@ Then in VS Code:
 2. Run a test using the CodeLens `Run Test` link.
 3. Press `F5` to verify debugger (`dlv`) starts.
 
+For a focused debugging setup for a single Go file, see [Debug a Single Go File in VS Code](../95-appendix/debug-single-go-file-in-vscode.md).
+
 ### GoLand / IntelliJ IDEA
 
 #### 1. Install GoLand (recommended)
