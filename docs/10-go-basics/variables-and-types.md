@@ -264,6 +264,10 @@ type UpdateUserInput struct {
 // ""   => client provided an empty string
 ```
 
+## Next in Sequence
+
+Continue with [make, Arrays, Slices, Maps](make-arrays-slices-maps.md) to learn how Go collections are initialized, modeled, and used in real-world test and service code.
+
 ## Best Practices
 
 - Initialize maps with `make(...)` before writes.
