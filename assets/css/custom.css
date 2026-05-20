@@ -5,4 +5,62 @@
   --md-primary-bg-color: #fff;
 }
 
-/* Add custom CSS here */
+/* Desktop-only: toggle sidebars with buttons */
+@media screen and (min-width: 76.25em) {
+  .layout-toggle-controls {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 30;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .layout-toggle-btn {
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--md-default-fg-color--lightest);
+    background: var(--md-default-bg-color);
+    color: var(--md-default-fg-color);
+    border-radius: 0.4rem;
+    padding: 0;
+    cursor: pointer;
+    box-shadow: 0 0.08rem 0.3rem rgba(0, 0, 0, 0.12);
+  }
+
+  .layout-toggle-btn:hover {
+    border-color: var(--md-primary-fg-color);
+    color: var(--md-primary-fg-color);
+  }
+
+  body.hide-primary-sidebar .md-sidebar--primary {
+    display: none !important;
+  }
+
+  body.hide-secondary-sidebar .md-sidebar--secondary {
+    display: none !important;
+  }
+
+  body.hide-primary-sidebar.hide-secondary-sidebar .md-main__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.hide-primary-sidebar:not(.hide-secondary-sidebar) .md-main__inner {
+    grid-template-columns: minmax(0, 1fr) 12.1rem;
+  }
+
+  body.hide-secondary-sidebar:not(.hide-primary-sidebar) .md-main__inner {
+    grid-template-columns: 12.1rem minmax(0, 1fr);
+  }
+
+  .md-grid {
+    max-width: 96rem;
+  }
+
+  .md-content {
+    margin-inline: auto;
+  }
+}

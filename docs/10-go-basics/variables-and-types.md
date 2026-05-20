@@ -507,7 +507,7 @@ Try adding `ReadingProgress` as a domain type:
 ```go
 type ReadingProgress int
 
-const (
+const (infy
 	ProgressNotStarted ReadingProgress = 0
 	ProgressInProgress ReadingProgress = 50
 	ProgressCompleted  ReadingProgress = 100

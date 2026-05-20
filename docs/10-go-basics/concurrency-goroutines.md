@@ -164,6 +164,17 @@ func main() {
 
 ### Using time.Sleep (Not Recommended)
 
+`time.Sleep` pauses for a fixed duration, but goroutine completion time is not fixed. It depends on scheduler timing, CPU load, network latency, disk I/O, and other runtime factors.
+
+That creates two common problems:
+
+- **Sleep too short**: background goroutines may still be running when `main()` exits, so work is cut off.
+- **Sleep too long**: the program waits longer than necessary, slowing tests and pipelines.
+
+Because `Sleep` guesses timing instead of synchronizing on actual completion, it can introduce flaky behavior in CI and intermittent failures in test automation.
+
+Use `Sleep` for intentional delays (for example, retry backoff or pacing), not for coordinating goroutine lifecycle.
+
 ```go
 go say("Hello")
 time.Sleep(1 * time.Second)
@@ -212,6 +223,38 @@ Two practical rules matter here:
 - Make sure every goroutine that was counted eventually calls `Done()`, or `Wait()` can block forever
 
 For SDET workflows, `WaitGroup` is useful when running parallel API checks, launching multiple validation steps, or coordinating concurrent test helpers where you only care that all tasks finish, not that they exchange data.
+
+Why this is recommended over `time.Sleep`:
+
+- it waits for **real completion**, not an estimated delay
+- it improves reliability across machines and CI environments
+- it avoids unnecessary idle wait time once work is done
+- it makes intent explicit: "wait for these goroutines to finish"
+
+In short, `WaitGroup` gives deterministic synchronization, while `Sleep` gives timing guesses.
+
+### Quick Bad vs Good Snippet
+
+Bad (`time.Sleep` as synchronization):
+
+```go
+go runJob()
+time.Sleep(500 * time.Millisecond) // Guessing that work is done
+```
+
+Good (`WaitGroup` for completion):
+
+```go
+var wg sync.WaitGroup
+
+wg.Add(1)
+go func() {
+	defer wg.Done()
+	runJob()
+}()
+
+wg.Wait() // Waits until runJob actually finishes
+```
 
 ## Race Conditions
 
