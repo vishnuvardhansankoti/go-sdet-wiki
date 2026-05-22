@@ -61,6 +61,8 @@ require (
 - **`require` block** is equivalent to `<dependencies>` in Maven's `pom.xml` — every entry is version-pinned.
 - **`// indirect`** marks transitive dependencies (dependencies of your dependencies), similar to Maven's `<scope>compile</scope>` transitive resolution.
 
+If you want a directive-by-directive walkthrough of `module`, `go`, `toolchain`, `require`, `replace`, `exclude`, `retract`, and `ignore`, continue with [go.mod Reference & Commands](../10-go-basics/go-mod-reference-and-commands.md).
+
 ### The `go.sum` File
 
 `go.sum` is automatically generated and contains cryptographic hashes of every downloaded dependency:

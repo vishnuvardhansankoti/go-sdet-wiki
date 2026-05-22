@@ -66,6 +66,7 @@ nav:
       - Generics in Go: 10-go-basics/generics-in-go.md
       - Pointers in Go: 10-go-basics/pointers-in-go.md
       - Packages in Go: 10-go-basics/packages-in-go.md
+      - go.mod Reference & Commands: 10-go-basics/go-mod-reference-and-commands.md
       - Control Flow: 10-go-basics/control-flow.md
       - Functions & Methods: 10-go-basics/functions-and-methods.md
       - Structs & Interfaces: 10-go-basics/structs-and-interfaces.md

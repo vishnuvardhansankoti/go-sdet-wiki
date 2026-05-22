@@ -556,4 +556,4 @@ When architecture is package-clean:
 
 ## Next Step
 
-Continue with [Control Flow](control-flow.md), then revisit this chapter while designing your Bookshelf package boundaries.
+Continue with [go.mod Reference & Commands](go-mod-reference-and-commands.md), then move to [Control Flow](control-flow.md).
