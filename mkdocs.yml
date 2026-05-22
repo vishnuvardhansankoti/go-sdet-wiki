@@ -73,6 +73,7 @@ nav:
       - Concurrency (Goroutines): 10-go-basics/concurrency-goroutines.md
       - Channels & Select: 10-go-basics/channels-and-select.md
       - HTTP Client/Server: 10-go-basics/http-client-and-server-basics.md
+      - Unit Testing in Go: 10-go-basics/unit-testing-in-go.md
 
   - Microservices:
       - Overview: 20-microservices/microservices-overview.md

@@ -320,4 +320,4 @@ Stretch: Add exponential backoff between retries and make backoff configurable.
 
 ## Next Step
 
-Continue with [Microservices Overview](../20-microservices/microservices-overview.md).
+Continue with [Unit Testing in Go](unit-testing-in-go.md).
