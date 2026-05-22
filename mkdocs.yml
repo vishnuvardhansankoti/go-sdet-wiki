@@ -76,6 +76,7 @@ nav:
 
   - Microservices:
       - Overview: 20-microservices/microservices-overview.md
+      - Developing Microservices with Gin: 20-microservices/developing-microservices-with-gin.md
       - Folder Structure: 20-microservices/project-folder-structure.md
       - REST API Design: 20-microservices/rest-api-design.md
       - Dependency Injection: 20-microservices/dependency-injection.md
