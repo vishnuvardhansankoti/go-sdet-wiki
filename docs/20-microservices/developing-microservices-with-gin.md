@@ -334,9 +334,9 @@ Stretch: Assert that invalid payloads never call the service layer.
 ## Assignment: Build a Gin-Based Microservice
 
 ### Goal
-Create a small Gin service for a simple domain such as books, tasks, or users. The service should have routes, middleware, validation, and tests.
+Build the Bookshelf microservice with Gin. The service should expose the core Bookshelf routes, use middleware, validate input, and include tests.
 
-This assignment combines routing, request handling, and testable service design so you can practice the full HTTP layer of a microservice.
+This assignment combines routing, request handling, and testable service design so you can practice the full HTTP layer of the Bookshelf project.
 
 ### Tasks
 
@@ -361,11 +361,11 @@ internal/middleware/
 
 #### 2. Implement Two Endpoints
 
-Create at least two endpoints, such as:
+Create at least two Bookshelf endpoints, such as:
 
 - `GET /health`
-- `POST /items`
-- `GET /items/:id`
+- `POST /books`
+- `GET /books/:id`
 
 Return stable JSON responses and use `ShouldBindJSON` for request parsing.
 
@@ -396,6 +396,7 @@ Use `httptest` and assert status code plus response body fields.
 ### Acceptance Criteria
 
 - The service starts with Gin and serves JSON endpoints.
+- The service models the Bookshelf project domain rather than a generic example.
 - Validation failures return `400` with a clear error body.
 - The handler layer does not contain business rules.
 - At least one middleware is active on all routes.
