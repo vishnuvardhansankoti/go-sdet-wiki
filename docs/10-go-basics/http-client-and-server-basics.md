@@ -19,6 +19,14 @@ At a high level, every HTTP interaction follows this flow:
 4. Handler writes status code, headers, and response body.
 5. Client reads response and decides next action.
 
+<div class="mermaid">
+graph LR
+    C[Client] --> S[Server]
+    S --> H[Handler]
+    H --> R[Response]
+    R --> C
+</div>
+
 When you understand this lifecycle, test design becomes easier because you can assert each step explicitly.
 
 ## HTTP Server

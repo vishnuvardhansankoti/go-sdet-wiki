@@ -29,6 +29,8 @@ theme:
         name: Switch to light mode
 
 extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+  - assets/js/mermaid-init.js
   - assets/js/playground.js
   - assets/wasm/wasm_exec.js
   - assets/js/layout-toggle.js
@@ -39,6 +41,7 @@ extra_css:
 markdown_extensions:
   - admonition
   - codehilite
+  - pymdownx.superfences
   - pymdownx.snippets:
       base_path:
         - docs/_includes
@@ -70,6 +73,7 @@ nav:
       - Control Flow: 10-go-basics/control-flow.md
       - Functions & Methods: 10-go-basics/functions-and-methods.md
       - Structs & Interfaces: 10-go-basics/structs-and-interfaces.md
+      - Go ORM with PostgreSQL: 10-go-basics/go-orm-with-postgres.md
       - Error Handling: 10-go-basics/error-handling.md
       - Concurrency (Goroutines): 10-go-basics/concurrency-goroutines.md
       - Channels & Select: 10-go-basics/channels-and-select.md
