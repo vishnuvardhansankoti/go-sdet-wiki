@@ -38,6 +38,73 @@ Services communicate either synchronously (request/response) or asynchronously (
 
 Synchronous calls are easier to reason about but increase coupling at runtime. Downstream latency and failures directly affect upstream services.
 
+#### REST API (HTTP/JSON)
+
+REST is the most common synchronous pattern for service-to-service and client-to-service communication.
+
+- **Protocol and format**: HTTP with JSON payloads.
+- **Strengths**:
+	- Easy to inspect and debug with common tools (`curl`, browser dev tools, Postman).
+	- Human-readable payloads and broad ecosystem support.
+	- Natural fit for public APIs and frontend/mobile integration.
+- **Tradeoffs**:
+	- JSON serialization can be slower and larger than binary protocols.
+	- API contracts are often less strict unless you enforce OpenAPI/schema validation.
+	- Can become chatty if endpoints are poorly designed.
+
+Use REST when:
+
+1. External clients (web, mobile, partners) consume the API.
+2. Team interoperability and ease of debugging are priorities.
+3. Throughput/latency requirements are moderate.
+4. You need broad compatibility across many languages and tools.
+
+Common use cases:
+
+- API gateway to domain services.
+- Public-facing CRUD APIs (catalog, user profile, order lookup).
+- Admin/reporting endpoints where readability matters more than raw performance.
+
+#### gRPC (HTTP/2 + Protobuf)
+
+gRPC is a high-performance RPC framework with strongly typed contracts.
+
+- **Protocol and format**: HTTP/2 with Protocol Buffers (binary).
+- **Strengths**:
+	- Faster serialization and smaller payloads than JSON in many workloads.
+	- Strongly typed `.proto` contracts with generated client/server code.
+	- Built-in support for unary and streaming communication.
+	- Good fit for internal platforms where schema discipline is important.
+- **Tradeoffs**:
+	- Less human-readable on the wire; debugging usually needs specialized tooling.
+	- Browser support is indirect (often requires gRPC-Web or gateway translation).
+	- Requires schema management and code generation workflow.
+
+Use gRPC when:
+
+1. Low latency and high throughput are critical.
+2. Internal service-to-service calls dominate traffic.
+3. You need strict contracts and generated typed clients.
+4. Streaming is needed (live updates, telemetry, event feed style pull).
+
+Common use cases:
+
+- High-volume internal calls between core services.
+- Real-time or near real-time streaming (pricing, telemetry, notification fanout).
+- Platform APIs shared by multiple backend teams with strict versioning.
+
+#### REST vs gRPC: Practical Selection Guide
+
+Choose **REST** if your priority is accessibility, broad client support, and operational simplicity.
+
+Choose **gRPC** if your priority is efficient internal communication, strict contracts, and lower latency at scale.
+
+In many real systems, both coexist:
+
+- REST at the edge (client-facing APIs),
+- gRPC inside the platform (service-to-service communication),
+- plus an API gateway/BFF translating between them when needed.
+
 ### Asynchronous
 - Message Queues (RabbitMQ, Kafka)
 - Event Bus
