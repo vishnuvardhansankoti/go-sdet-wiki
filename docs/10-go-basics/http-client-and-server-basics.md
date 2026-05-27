@@ -113,6 +113,194 @@ func main() {
 
 This pattern improves testability because your handler can be created with mock or fake dependencies in unit tests.
 
+### Understanding `mux` in Go
+
+In Go HTTP code, **`mux` usually means multiplexer**. A multiplexer is the component that receives an incoming request and decides which handler should process it based on the request path and, in newer Go versions, optionally the HTTP method pattern too.
+
+In practical terms, a `mux` is your router.
+
+Instead of sending every request through one large `if`/`switch` block, you register route patterns with handlers and let the multiplexer dispatch requests cleanly.
+
+The standard library provides this through `http.ServeMux`.
+
+```go
+mux := http.NewServeMux()
+```
+
+That object becomes the central registry for your HTTP routes.
+
+#### Why `mux` matters
+
+As soon as an application has more than one endpoint, routing becomes an architectural concern rather than a tiny implementation detail.
+
+A `mux` helps you:
+
+- map URL patterns to handlers,
+- keep route definitions centralized,
+- separate routing from business logic,
+- make tests more focused by exercising specific endpoints,
+- scale from a tiny demo server to a multi-endpoint API.
+
+Without a multiplexer, handlers become harder to read because path matching, method checking, and business logic all get mixed together.
+
+#### Basic `ServeMux` example
+
+This expands the earlier simple server example into a small routed server with dedicated endpoints.
+
+```go
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, "welcome to the API")
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte(`{"status":"ok"}`))
+}
+
+func main() {
+    mux := http.NewServeMux()
+    mux.HandleFunc("/", homeHandler)
+    mux.HandleFunc("/health", healthHandler)
+
+    log.Fatal(http.ListenAndServe(":8080", mux))
+}
+```
+
+<div class="go-playground">
+  <textarea class="go-code" rows="18">func homeHandler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, "welcome to the API")
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte(`{"status":"ok"}`))
+}
+
+func main() {
+    mux := http.NewServeMux()
+    mux.HandleFunc("/", homeHandler)
+    mux.HandleFunc("/health", healthHandler)
+
+    log.Fatal(http.ListenAndServe(":8080", mux))
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+This is usually the first meaningful step from a single demo handler toward a real HTTP service.
+
+#### Detailed mental model
+
+Think of `ServeMux` as the traffic controller for your server:
+
+1. A request arrives at `:8080`.
+2. The server passes it to the mux.
+3. The mux compares the request path and route pattern.
+4. The matching handler is selected.
+5. That handler writes the response.
+
+This separation is important because it keeps routing concerns out of the handler body. Your handler can focus on validation, calling services, and writing responses.
+
+#### Using `mux` with struct-based handlers
+
+The earlier struct-based handler pattern becomes more useful when combined with a multiplexer, because each method can own one endpoint while still sharing injected dependencies.
+
+```go
+type Handler struct {
+    db *sql.DB
+}
+
+func (h *Handler) health(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte(`{"status":"ok"}`))
+}
+
+func (h *Handler) listUsers(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte(`{"data":[]}`))
+}
+
+func main() {
+    h := &Handler{db: db}
+
+    mux := http.NewServeMux()
+    mux.HandleFunc("/health", h.health)
+    mux.HandleFunc("/users", h.listUsers)
+
+    log.Fatal(http.ListenAndServe(":8080", mux))
+}
+```
+
+This is a clean pattern for small and medium services because:
+
+- handlers stay focused,
+- dependencies stay shared through the struct,
+- routes remain easy to discover in one place.
+
+#### Common use cases for `mux`
+
+You should reach for a `mux` whenever an application exposes multiple endpoints.
+
+Typical use cases:
+
+- REST APIs with endpoints like `/users`, `/books`, and `/reviews`
+- health, readiness, and metrics endpoints
+- internal tools with admin and status routes
+- test servers created with `httptest`
+- microservices that need clean routing before introducing heavier frameworks
+
+For SDET work, `mux` is especially useful because each route can be tested independently with predictable request/response assertions.
+
+#### Advantages of using `ServeMux`
+
+- **Built into the standard library**: no external dependency is required
+- **Simple to understand**: excellent for learning and for small services
+- **Easy to test**: pass the mux directly into `httptest.NewServer` or `httptest.NewRecorder`
+- **Clear separation of concerns**: routing stays outside business logic
+- **Good default choice**: often enough for internal tools, APIs, and course projects
+
+#### Example with method-aware route patterns
+
+In modern Go, `ServeMux` can also register method-aware patterns, which makes route declarations more expressive.
+
+```go
+func createUser(w http.ResponseWriter, r *http.Request) {
+    w.WriteHeader(http.StatusCreated)
+    w.Write([]byte(`{"message":"user created"}`))
+}
+
+func getHealth(w http.ResponseWriter, r *http.Request) {
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte(`{"status":"ok"}`))
+}
+
+func main() {
+    mux := http.NewServeMux()
+    mux.HandleFunc("POST /users", createUser)
+    mux.HandleFunc("GET /health", getHealth)
+
+    log.Fatal(http.ListenAndServe(":8080", mux))
+}
+```
+
+This reduces manual `if r.Method != ...` checks for many routing scenarios and keeps route intent visible at registration time.
+
+#### When `ServeMux` is enough and when it is not
+
+`http.ServeMux` is usually enough when:
+
+- routing is relatively straightforward,
+- you want minimal dependencies,
+- the service is small to medium sized,
+- you are teaching or learning core HTTP concepts.
+
+You might choose a third-party router when you need advanced middleware composition, richer path parameter features, or ecosystem-specific conventions. Even then, learning `ServeMux` first is valuable because it teaches the underlying HTTP model clearly.
+
 ## HTTP Client
 
 An HTTP client sends outbound requests to APIs. In automation, clients are used for health checks, contract checks, integration tests, and service orchestration.

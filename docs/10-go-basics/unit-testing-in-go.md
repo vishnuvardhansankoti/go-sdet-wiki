@@ -194,7 +194,19 @@ This is useful when your unit depends on:
 - Test error paths that are hard to trigger in real systems.
 - Verify behavior contracts between collaborators.
 
-### Mocking Example (Interface + Testify Mock)
+### Mocking vs Fake Implementation
+
+Both approaches replace real dependencies, but they optimize for different goals.
+
+- **Fake implementation**: You write a small in-memory or function-based substitute manually. It is simple and explicit, and works well when behavior is straightforward.
+- **Mock (framework-based)**: A framework records expected calls and arguments, then verifies they happened. This is useful when interaction contracts matter (for example, "must call `Charge` exactly once with the right values").
+
+Quick rule:
+
+- Prefer **fakes** for simple behavior-driven tests.
+- Prefer **mocks** when call expectations and argument verification are central to the test.
+
+### Shared Production Code
 
 Production code:
 
@@ -222,6 +234,8 @@ func (s *Service) Checkout(userID string, amount int64) error {
     return s.gateway.Charge(userID, amount)
 }
 ```
+
+### Example 1: Fake Implementation (Hand-Written)
 
 Test code:
 
@@ -269,7 +283,56 @@ func TestCheckout_GatewayError(t *testing.T) {
 }
 ```
 
-This snippet uses a fake implementation pattern. In larger systems, a mocking framework automates this and adds call-expectation verification.
+This fake gives controlled behavior with minimal setup. It is great when you mainly care about the service output.
+
+### Example 2: Mocking Framework (Simple Testify Mock)
+
+Test code:
+
+```go
+package order
+
+import (
+    "errors"
+    "testing"
+
+    "github.com/stretchr/testify/mock"
+    "github.com/stretchr/testify/require"
+)
+
+type gatewayMock struct {
+    mock.Mock
+}
+
+func (m *gatewayMock) Charge(userID string, amount int64) error {
+    args := m.Called(userID, amount)
+    return args.Error(0)
+}
+
+func TestCheckout_Success_WithMock(t *testing.T) {
+    g := &gatewayMock{}
+    g.On("Charge", "u1", int64(500)).Return(nil).Once()
+
+    svc := NewService(g)
+    err := svc.Checkout("u1", 500)
+
+    require.NoError(t, err)
+    g.AssertExpectations(t)
+}
+
+func TestCheckout_GatewayError_WithMock(t *testing.T) {
+    g := &gatewayMock{}
+    g.On("Charge", "u1", int64(500)).Return(errors.New("gateway timeout")).Once()
+
+    svc := NewService(g)
+    err := svc.Checkout("u1", 500)
+
+    require.EqualError(t, err, "gateway timeout")
+    g.AssertExpectations(t)
+}
+```
+
+Key difference in this mock example: the test defines expected interaction (`On(...).Return(...).Once()`) and verifies it (`AssertExpectations`). That interaction verification is what distinguishes mocks from basic fakes.
 
 ## Unit Testing Use Cases in Go Projects
 
@@ -348,11 +411,11 @@ Build a mini service package with clear business rules and a complete unit test 
 
 ## Common Anti-Patterns
 
-- Writing tests that depend on wall-clock time without controllable clock abstraction.
-- Sharing mutable global state across tests.
-- Asserting too much in one test (hard to diagnose failures).
-- Testing framework internals instead of your own behavior.
-- Chasing 100% coverage with weak assertions.
+- **Wall-clock dependent tests (no controllable clock)**: Tests that call `time.Now()` or rely on real delays (`time.Sleep`) often become flaky, especially in CI where machine load varies. These tests can fail intermittently even when behavior is correct. Prefer injecting a clock abstraction or passing explicit timestamps so time-dependent logic is deterministic and easy to verify.
+- **Shared mutable global state**: When tests read and write package-level variables, singleton caches, or shared maps, one test can accidentally affect another. This creates order-dependent failures that are hard to reproduce. Keep test state local to each test, create fresh fixtures per case, and always reset global state in setup/teardown when unavoidable.
+- **Too many assertions in one test**: A single test that validates many unrelated behaviors produces noisy failures and unclear root causes. If one assertion fails early, you may miss other regressions. Keep each test focused on one behavior or rule, and split complex scenarios into subtests so failures point to a specific contract.
+- **Testing framework/tool internals instead of business behavior**: Tests should prove your code's outcomes, not that a mocking library or assertion helper works. Over-verifying internal call details that do not matter to behavior makes tests brittle during refactors. Assert externally observable behavior first (return values, state changes, emitted errors) and only verify interactions that are part of the contract.
+- **Coverage chasing with weak assertions**: High coverage can be misleading when tests execute lines but do not validate meaningful outcomes. For example, checking only `err == nil` on a complex function may miss incorrect state or partial failures. Use coverage as a signal, not a goal: prioritize strong assertions, important edge cases, and failure paths that protect real business rules.
 
 ## Next Step
 
