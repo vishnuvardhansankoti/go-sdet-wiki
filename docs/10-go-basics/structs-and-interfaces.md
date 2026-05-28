@@ -42,6 +42,120 @@ p2 := Person{
 }
 ```
 
+### Method Receivers
+
+Method receivers let you attach behavior to a type. In Go, this is how structs gain methods and encapsulate domain logic.
+
+Think of receivers as the object instance argument made explicit. Instead of hidden `this`/`self`, Go shows it directly in the method signature.
+
+```go
+func (p Person) DisplayName() string {
+	return p.Name + " (" + p.City + ")"
+}
+```
+
+In the example above, `p` is the receiver. You call it as `person.DisplayName()`.
+
+#### Receiver Types: Value vs Pointer
+
+Go has two receiver styles, and choosing the right one matters.
+
+1. Value receiver: `func (b Book) Method() ...`
+2. Pointer receiver: `func (b *Book) Method() ...`
+
+Use value receivers when:
+
+- Method does not modify struct state.
+- Struct is small and cheap to copy.
+- You want immutable-style behavior.
+
+Use pointer receivers when:
+
+- Method must modify struct fields.
+- Struct is large (avoid copying).
+- Struct contains fields that should not be copied (for example mutexes).
+- You want method sets that satisfy interfaces requiring pointer methods.
+
+```go
+type Counter struct {
+	Value int
+}
+
+// Value receiver: reads state only.
+func (c Counter) Current() int {
+	return c.Value
+}
+
+// Pointer receiver: mutates state.
+func (c *Counter) Increment() {
+	c.Value++
+}
+```
+
+```go
+c := Counter{Value: 10}
+fmt.Println(c.Current()) // 10
+c.Increment()
+fmt.Println(c.Current()) // 11
+```
+
+Even though `Increment` has a pointer receiver, Go lets you call `c.Increment()` directly and handles address-taking when possible.
+
+#### Method Sets and Interfaces (Important)
+
+Receiver choice affects interface satisfaction.
+
+- A value of type `T` gets methods with receiver `T`.
+- A value of type `*T` gets methods with receiver `T` and `*T`.
+
+That means if an interface requires a method implemented with pointer receiver, you must use `*T` for that interface.
+
+```go
+type Closer interface {
+	Close() error
+}
+
+type FileResource struct{}
+
+func (f *FileResource) Close() error {
+	return nil
+}
+
+// var c Closer = FileResource{}   // compile error
+var c Closer = &FileResource{}     // OK
+_ = c
+```
+
+#### Practical Use Cases for SDETs
+
+Method receivers are especially useful in test-focused and service-focused code:
+
+1. Domain validation methods
+Example: `func (u *User) Activate()` enforces status transitions.
+
+2. Test fixture builders
+Example: `func (b *BookBuilder) WithAuthor(a string) *BookBuilder` for fluent setup.
+
+3. In-memory fakes and stubs
+Example: `func (r *FakeRepo) Save(book Book) error` records calls for assertions.
+
+4. Stateful test helpers
+Example: `func (c *APITestClient) SetToken(token string)` updates auth state across requests.
+
+5. Metrics/logging wrappers
+Example: `func (m *MetricsCollector) Inc(name string)` safely updates counters.
+
+These patterns keep behavior close to data, reduce global state, and make tests easier to read and maintain.
+
+#### Common Pitfalls
+
+- Accidentally using value receiver for mutating methods.
+- Mixing receiver types inconsistently on the same type.
+- Copying structs that hold synchronization primitives.
+- Assuming interface satisfaction without checking method set rules.
+
+Rule of thumb: if in doubt and the type has meaningful state, prefer pointer receivers consistently.
+
 ## Interfaces
 
 Interfaces define behavior, not data. A type satisfies an interface implicitly by implementing its methods; no explicit declaration is required.
