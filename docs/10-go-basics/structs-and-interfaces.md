@@ -250,7 +250,19 @@ Goal: Practice struct design and pointer/value receiver methods.
 
 Stretch: Prevent `ReadPages` from exceeding `Pages`.
 
-### Exercise 2: Interface-Based Search Service
+### Exercise 2: Method Receiver Drill
+
+Goal: Learn when to choose a value receiver vs a pointer receiver.
+
+1. Create a `Session` struct with fields: `UserID`, `Token`, `Active`.
+2. Add method `Summary() string` using a value receiver.
+3. Add method `Deactivate()` using a pointer receiver.
+4. Print the session before and after calling `Deactivate()`.
+5. Explain in a short note why `Summary` should use a value receiver and `Deactivate` should use a pointer receiver.
+
+Stretch: Add method `ResetToken(newToken string)` and decide which receiver type it needs.
+
+### Exercise 3: Interface-Based Search Service
 
 Goal: Use interfaces to decouple search behavior from implementation.
 
@@ -261,7 +273,7 @@ Goal: Use interfaces to decouple search behavior from implementation.
 
 Stretch: Return `(Book, error)` and define a custom `ErrBookNotFound`.
 
-### Exercise 3: Sort + Binary Search with Interfaces
+### Exercise 4: Sort + Binary Search with Interfaces
 
 Goal: Combine structs, interfaces, and algorithms in one practical exercise.
 
@@ -269,6 +281,16 @@ Goal: Combine structs, interfaces, and algorithms in one practical exercise.
 2. Update `FindByTitle` to use binary search on sorted data.
 3. Keep the interface contract unchanged (`FindByTitle(title string) (Book, bool)`).
 4. Write 3 table-driven test cases: first item, last item, missing item.
+
+### Exercise 5: Receiver Choice in Tests
+
+Goal: Practice verifying receiver behavior with unit tests.
+
+1. Create a `RetryCounter` struct with field `Attempts`.
+2. Add method `Count() int` with a value receiver.
+3. Add method `AddAttempt()` with a pointer receiver.
+4. Write a unit test proving that `AddAttempt()` changes the original struct.
+5. Write a second test showing that calling `Count()` does not mutate state.
 
 Hints:
 
@@ -278,7 +300,16 @@ Hints:
 ## Assignment: Part 2 - Build Domain Models with Methods
 
 ### Goal
-Create the core domain structs and implement methods for the Bookshelf API.
+Create the core domain structs and implement methods for the Bookshelf API, including deliberate use of value and pointer receivers.
+
+### Receiver Expectations for This Assignment
+
+As you implement domain methods, decide whether each method should use a value receiver or a pointer receiver.
+
+- Use value receivers for read-only methods such as getters or computed summaries.
+- Use pointer receivers for methods that mutate state, such as updating status, rating, or timestamps.
+- Be consistent on each domain type once the type has meaningful mutable state.
+- Be ready to explain your choice in tests or in your assignment notes.
 
 ### Tasks
 
@@ -412,13 +443,18 @@ func ValidateBookAuthor(author string) error {
 }
 
 // GetTitle returns the book title
-func (b *Book) GetTitle() string {
+func (b Book) GetTitle() string {
 	return b.Title
 }
 
 // GetAuthor returns the book author
-func (b *Book) GetAuthor() string {
+func (b Book) GetAuthor() string {
 	return b.Author
+}
+
+// Summary returns a display-friendly description of the book
+func (b Book) Summary() string {
+	return b.Title + " by " + b.Author
 }
 ```
 
@@ -468,12 +504,12 @@ func ValidateRating(rating int) error {
 }
 
 // GetRating returns the rating
-func (r *Review) GetRating() int {
+func (r Review) GetRating() int {
 	return r.Rating
 }
 
 // GetComment returns the review comment
-func (r *Review) GetComment() string {
+func (r Review) GetComment() string {
 	return r.Comment
 }
 
@@ -546,7 +582,7 @@ func (s *ShelfEntry) UpdateStatus(newStatus string) error {
 }
 
 // GetStatus returns the current status
-func (s *ShelfEntry) GetStatus() string {
+func (s ShelfEntry) GetStatus() string {
 	return s.Status
 }
 ```
@@ -578,6 +614,17 @@ func IsValidationError(err error) bool {
 }
 ```
 
+#### 6. Receiver Design Notes
+
+For each domain type above, identify which methods use value receivers and which use pointer receivers.
+
+Minimum expectation:
+
+1. Keep read-only methods such as `GetTitle`, `GetAuthor`, `GetRating`, and `GetStatus` as value receivers.
+2. Keep mutating methods such as `UpdateReview` and `UpdateStatus` as pointer receivers.
+3. Add at least one computed read-only method, such as `Summary()` on `Book`, using a value receiver.
+4. Write a short note in your README, assignment submission, or comments explaining one receiver choice you made.
+
 ### Why Structs with Methods?
 
 1. **Encapsulation** - Data and behavior together
@@ -585,6 +632,7 @@ func IsValidationError(err error) bool {
 3. **Type Safety** - NewBook() ensures we have a valid book, not just any struct
 4. **Immutability** - Certain fields (ID, CreatedAt) shouldn't change
 5. **Business Logic** - UpdateStatus() enforces valid transitions
+6. **Receiver Intent** - Value receivers signal read-only behavior, pointer receivers signal mutation
 
 ### Testing This Code
 
@@ -621,6 +669,37 @@ func TestNewUser_ShortPassword(t *testing.T) {
 		t.Fatalf("Expected validation error for short password")
 	}
 }
+
+func TestReview_UpdateReview_MutatesState(t *testing.T) {
+	review, err := NewReview("book-1", "user-1", 4, "good")
+	if err != nil {
+		t.Fatalf("NewReview failed: %v", err)
+	}
+
+	err = review.UpdateReview(5, "great")
+	if err != nil {
+		t.Fatalf("UpdateReview failed: %v", err)
+	}
+
+	if review.GetRating() != 5 {
+		t.Fatalf("expected updated rating 5, got %d", review.GetRating())
+	}
+}
+
+func TestBook_Summary_ReadOnly(t *testing.T) {
+	book, err := NewBook("Go in Action", "Alice", "123", 2024)
+	if err != nil {
+		t.Fatalf("NewBook failed: %v", err)
+	}
+
+	summary := book.Summary()
+	if summary == "" {
+		t.Fatal("expected non-empty summary")
+	}
+	if book.Title != "Go in Action" {
+		t.Fatalf("expected title to remain unchanged, got %s", book.Title)
+	}
+}
 ```
 
 Similarly, create tests for Book and Review:
@@ -645,6 +724,10 @@ Expected output:
 --- PASS: TestNewUser_InvalidEmail (0.001s)
 === RUN   TestNewUser_ShortPassword
 --- PASS: TestNewUser_ShortPassword (0.001s)
+=== RUN   TestReview_UpdateReview_MutatesState
+--- PASS: TestReview_UpdateReview_MutatesState (0.001s)
+=== RUN   TestBook_Summary_ReadOnly
+--- PASS: TestBook_Summary_ReadOnly (0.001s)
 ...
 ok      bookshelf-api/pkg/domain       0.003s
 ```
@@ -672,6 +755,9 @@ pkg/domain/
 - ✅ Constructor functions with validation
 - ✅ Error types defined
 - ✅ Basic tests written for validation logic
+- ✅ Receiver choices are intentional and consistent
+- ✅ At least one test proves a pointer receiver mutates state
+- ✅ At least one test proves a value receiver is read-only
 - ✅ Code compiles and tests pass
 
 ### What's Next
