@@ -18,19 +18,42 @@ Core components:
 
 This pattern validates both status code and response body for a simple endpoint.
 
+`hello.go` (actual package)
+
 ```go
+package handlers
+
+import "net/http"
+
+func HelloHandler(w http.ResponseWriter, r *http.Request) {
+    w.WriteHeader(http.StatusOK)
+    _, _ = w.Write([]byte("Hello, World!"))
+}
+```
+
+`hello_test.go` (test file)
+
+```go
+package handlers
+
+import (
+    "net/http"
+    "net/http/httptest"
+    "testing"
+)
+
 func TestHelloHandler(t *testing.T) {
     handler := http.HandlerFunc(HelloHandler)
-    
+
     req := httptest.NewRequest("GET", "/hello", nil)
     w := httptest.NewRecorder()
-    
+
     handler.ServeHTTP(w, req)
-    
+
     if w.Code != http.StatusOK {
         t.Errorf("status = %d; want %d", w.Code, http.StatusOK)
     }
-    
+
     if w.Body.String() != "Hello, World!" {
         t.Errorf("body = %s; want Hello, World!", w.Body.String())
     }
@@ -43,23 +66,57 @@ Use this structure as your baseline for most handler unit tests.
 
 Middleware tests should verify that wrapper behavior does not break downstream handler behavior and applies expected side effects.
 
+`middleware.go` (actual package)
+
 ```go
+package handlers
+
+import "net/http"
+
+func loggingMiddleware(logf func(string, ...any), next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        logf("%s %s", r.Method, r.URL.Path)
+        next.ServeHTTP(w, r)
+    })
+}
+```
+
+`middleware_test.go` (test file)
+
+```go
+package handlers
+
+import (
+    "fmt"
+    "net/http"
+    "net/http/httptest"
+    "strings"
+    "testing"
+)
+
 func TestLoggingMiddleware(t *testing.T) {
-    var logOutput string
-    
+    var logOutput strings.Builder
+
     handler := loggingMiddleware(
+        func(format string, args ...any) {
+            _, _ = fmt.Fprintf(&logOutput, format, args...)
+        },
         http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
             w.WriteHeader(http.StatusOK)
         }),
     )
-    
+
     req := httptest.NewRequest("GET", "/test", nil)
     w := httptest.NewRecorder()
-    
+
     handler.ServeHTTP(w, req)
-    
+
     if w.Code != http.StatusOK {
         t.Errorf("status = %d; want %d", w.Code, http.StatusOK)
+    }
+
+    if !strings.Contains(logOutput.String(), "GET /test") {
+        t.Errorf("log output = %q; want to contain GET /test", logOutput.String())
     }
 }
 ```
@@ -70,31 +127,71 @@ Depending on middleware type, also assert headers, context values, authenticatio
 
 JSON handler tests should validate decoding, input validation, and response serialization.
 
+`users.go` (actual package)
+
 ```go
-import "encoding/json"
+package handlers
+
+import (
+    "encoding/json"
+    "net/http"
+)
 
 type User struct {
     Name string `json:"name"`
     Age  int    `json:"age"`
 }
 
+func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+    var input User
+    if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+        http.Error(w, `{"error":"invalid JSON"}`+"\n", http.StatusBadRequest)
+        return
+    }
+
+    if input.Name == "" || input.Age <= 0 {
+        http.Error(w, `{"error":"invalid user payload"}`+"\n", http.StatusBadRequest)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusCreated)
+    _ = json.NewEncoder(w).Encode(input)
+}
+```
+
+`users_test.go` (test file)
+
+```go
+package handlers
+
+import (
+    "encoding/json"
+    "net/http"
+    "net/http/httptest"
+    "strings"
+    "testing"
+)
+
 func TestCreateUserHandler(t *testing.T) {
     body := `{"name":"John","age":30}`
-    
+
     req := httptest.NewRequest("POST", "/users", strings.NewReader(body))
     req.Header.Set("Content-Type", "application/json")
-    
+
     w := httptest.NewRecorder()
-    
+
     CreateUserHandler(w, req)
-    
+
     if w.Code != http.StatusCreated {
         t.Errorf("status = %d; want %d", w.Code, http.StatusCreated)
     }
-    
+
     var result User
-    json.NewDecoder(w.Body).Decode(&result)
-    
+    if err := json.NewDecoder(w.Body).Decode(&result); err != nil {
+        t.Fatalf("decode response: %v", err)
+    }
+
     if result.Name != "John" {
         t.Errorf("name = %s; want John", result.Name)
     }
@@ -112,6 +209,12 @@ Always check:
 `httptest.NewServer` is useful when you want end-to-end HTTP behavior (real round-trip) while staying in-process.
 
 ```go
+import (
+    "net/http"
+    "net/http/httptest"
+    "testing"
+)
+
 func TestWithCustomServer(t *testing.T) {
     server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(http.StatusOK)

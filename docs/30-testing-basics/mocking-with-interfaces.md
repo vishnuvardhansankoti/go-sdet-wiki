@@ -30,15 +30,14 @@ That keeps the test focused on service behavior. You can verify questions like "
 
 ### Complete Example
 
-This example includes the service, the `User` model, the repository and email interfaces, and test doubles for both dependencies.
+Split production code and tests so the package API is clear.
+
+`user/service.go` (actual package)
 
 ```go
 package user
 
-import (
-    "errors"
-    "testing"
-)
+import "fmt"
 
 type User struct {
     Name  string
@@ -62,6 +61,11 @@ func NewUserService(repo UserRepository, email EmailService) *UserService {
     return &UserService{repo: repo, email: email}
 }
 
+// NewDefaultUserService demonstrates wiring with concrete implementations.
+func NewDefaultUserService() *UserService {
+    return NewUserService(NewInMemoryUserRepository(), &ConsoleEmailService{})
+}
+
 func (s *UserService) CreateUser(name, email string) error {
     user := &User{Name: name, Email: email}
 
@@ -71,6 +75,37 @@ func (s *UserService) CreateUser(name, email string) error {
 
     return s.email.Send(email, "Welcome", "Welcome to our service!")
 }
+
+type InMemoryUserRepository struct {
+    users []*User
+}
+
+func NewInMemoryUserRepository() *InMemoryUserRepository {
+    return &InMemoryUserRepository{users: make([]*User, 0)}
+}
+
+func (r *InMemoryUserRepository) Save(user *User) error {
+    r.users = append(r.users, user)
+    return nil
+}
+
+type ConsoleEmailService struct{}
+
+func (s *ConsoleEmailService) Send(to, subject, body string) error {
+    fmt.Printf("sending email to=%s subject=%s body=%s\n", to, subject, body)
+    return nil
+}
+```
+
+`user/service_test.go` (test file)
+
+```go
+package user
+
+import (
+    "errors"
+    "testing"
+)
 
 type MockUserRepository struct {
     SaveCalled bool
@@ -165,8 +200,80 @@ The testify mock package provides expectation APIs that can reduce boilerplate w
 go get github.com/stretchr/testify
 ```
 
+Use the same production package shape and keep tests in a separate file.
+
+`user/service.go` (actual package)
+
 ```go
-import "github.com/stretchr/testify/mock"
+package user
+
+import "fmt"
+
+type User struct {
+    Name  string
+    Email string
+}
+
+type UserRepository interface {
+    Save(user *User) error
+}
+
+type EmailService interface {
+    Send(to, subject, body string) error
+}
+
+type UserService struct {
+    repo  UserRepository
+    email EmailService
+}
+
+func NewUserService(repo UserRepository, email EmailService) *UserService {
+    return &UserService{repo: repo, email: email}
+}
+
+func NewDefaultUserService() *UserService {
+    return NewUserService(NewInMemoryUserRepository(), &ConsoleEmailService{})
+}
+
+func (s *UserService) CreateUser(name, email string) error {
+    user := &User{Name: name, Email: email}
+    if err := s.repo.Save(user); err != nil {
+        return err
+    }
+    return s.email.Send(email, "Welcome", "Welcome to our service!")
+}
+
+type InMemoryUserRepository struct {
+    users []*User
+}
+
+func NewInMemoryUserRepository() *InMemoryUserRepository {
+    return &InMemoryUserRepository{users: make([]*User, 0)}
+}
+
+func (r *InMemoryUserRepository) Save(user *User) error {
+    r.users = append(r.users, user)
+    return nil
+}
+
+type ConsoleEmailService struct{}
+
+func (s *ConsoleEmailService) Send(to, subject, body string) error {
+    fmt.Printf("sending email to=%s subject=%s body=%s\n", to, subject, body)
+    return nil
+}
+```
+
+`user/service_test.go` (test file using testify)
+
+```go
+package user
+
+import (
+    "testing"
+
+    "github.com/stretchr/testify/mock"
+)
 
 type StubUserRepository struct{}
 
@@ -205,6 +312,8 @@ func TestCreateUser(t *testing.T) {
         "Welcome",
         "Welcome to our service!",
     )
+
+    mockEmail.AssertExpectations(t)
 }
 ```
 
