@@ -17,11 +17,38 @@ When tests rely on real infrastructure for every scenario, feedback gets slow an
 
 Go makes interface-based testing natural because interfaces are implicitly implemented. You can inject any type that satisfies the required methods.
 
-### Real Service
+The important design move is to put interfaces at the boundary where your code depends on something external or slow. The service only knows the behavior it needs, not the concrete database client or SMTP implementation.
 
-This service depends on a repository and email sender. In tests, both can be replaced with controlled doubles.
+In practice, that usually looks like this:
+
+- define a small interface for the dependency,
+- inject that interface into the service,
+- provide production implementations in real code,
+- provide mocks, fakes, or spies in tests.
+
+That keeps the test focused on service behavior. You can verify questions like "did we save the user?" and "did we send the welcome email?" without requiring a database or mail server.
+
+### Complete Example
+
+This example includes the service, the `User` model, the repository and email interfaces, and test doubles for both dependencies.
 
 ```go
+package user
+
+import (
+    "errors"
+    "testing"
+)
+
+type User struct {
+    Name  string
+    Email string
+}
+
+type UserRepository interface {
+    Save(user *User) error
+}
+
 type EmailService interface {
     Send(to, subject, body string) error
 }
@@ -31,52 +58,104 @@ type UserService struct {
     email EmailService
 }
 
+func NewUserService(repo UserRepository, email EmailService) *UserService {
+    return &UserService{repo: repo, email: email}
+}
+
 func (s *UserService) CreateUser(name, email string) error {
     user := &User{Name: name, Email: email}
+
     if err := s.repo.Save(user); err != nil {
         return err
     }
+
     return s.email.Send(email, "Welcome", "Welcome to our service!")
 }
-```
 
-### Mock Implementation
+type MockUserRepository struct {
+    SaveCalled bool
+    SavedUser  *User
+    SaveError  error
+}
 
-This mock records whether a method was called and can simulate success/failure by returning a configured error.
+func (m *MockUserRepository) Save(user *User) error {
+    m.SaveCalled = true
+    m.SavedUser = user
+    return m.SaveError
+}
 
-```go
 type MockEmailService struct {
     SendCalled bool
+    LastTo     string
+    LastBody   string
     SendError  error
 }
 
 func (m *MockEmailService) Send(to, subject, body string) error {
     m.SendCalled = true
+    m.LastTo = to
+    m.LastBody = body
     return m.SendError
 }
 
-func TestCreateUser(t *testing.T) {
+func TestCreateUser_SavesUserAndSendsWelcomeEmail(t *testing.T) {
     mockEmail := &MockEmailService{}
     mockRepo := &MockUserRepository{}
-    
-    service := &UserService{
-        repo:  mockRepo,
-        email: mockEmail,
-    }
-    
+
+    service := NewUserService(mockRepo, mockEmail)
+
     err := service.CreateUser("John", "john@example.com")
-    
+
     if err != nil {
-        t.Errorf("unexpected error: %v", err)
+        t.Fatalf("unexpected error: %v", err)
     }
-    
+
+    if !mockRepo.SaveCalled {
+        t.Fatal("repo.Save was not called")
+    }
+
+    if mockRepo.SavedUser == nil {
+        t.Fatal("saved user was nil")
+    }
+
+    if mockRepo.SavedUser.Email != "john@example.com" {
+        t.Fatalf("saved email = %s, want john@example.com", mockRepo.SavedUser.Email)
+    }
+
     if !mockEmail.SendCalled {
-        t.Error("email.Send was not called")
+        t.Fatal("email.Send was not called")
+    }
+
+    if mockEmail.LastTo != "john@example.com" {
+        t.Fatalf("email sent to %s, want john@example.com", mockEmail.LastTo)
+    }
+}
+
+func TestCreateUser_StopsWhenRepositoryFails(t *testing.T) {
+    mockRepo := &MockUserRepository{SaveError: errors.New("db unavailable")}
+    mockEmail := &MockEmailService{}
+
+    service := NewUserService(mockRepo, mockEmail)
+
+    err := service.CreateUser("John", "john@example.com")
+
+    if err == nil {
+        t.Fatal("expected error, got nil")
+    }
+
+    if mockEmail.SendCalled {
+        t.Fatal("email.Send should not be called when repo.Save fails")
     }
 }
 ```
 
-This style is useful when you need to verify interaction behavior, for example that welcome email is sent after successful user creation.
+Notice what the test is really asserting:
+
+- the service saves the new user,
+- the email is sent only after save succeeds,
+- the email is not sent when persistence fails.
+
+That is the core value of interface-based mocking in Go: you can verify decision-making and interaction flow without pulling real infrastructure into the test.
 
 ## Using testify/mock
 
@@ -89,6 +168,12 @@ go get github.com/stretchr/testify
 ```go
 import "github.com/stretchr/testify/mock"
 
+type StubUserRepository struct{}
+
+func (s *StubUserRepository) Save(user *User) error {
+    return nil
+}
+
 type MockEmailService struct {
     mock.Mock
 }
@@ -100,19 +185,21 @@ func (m *MockEmailService) Send(to, subject, body string) error {
 
 func TestCreateUser(t *testing.T) {
     mockEmail := new(MockEmailService)
+    stubRepo := &StubUserRepository{}
+
     mockEmail.On("Send",
         "john@example.com",
         "Welcome",
         "Welcome to our service!",
     ).Return(nil)
-    
-    service := &UserService{email: mockEmail}
+
+    service := NewUserService(stubRepo, mockEmail)
     err := service.CreateUser("John", "john@example.com")
-    
+
     if err != nil {
         t.Errorf("unexpected error: %v", err)
     }
-    
+
     mockEmail.AssertCalled(t, "Send",
         "john@example.com",
         "Welcome",
