@@ -73,6 +73,10 @@ func createUser(c *gin.Context) {}
 func getUser(c *gin.Context) {}
 ```
 
+In `r := gin.New()`, `gin.New()` creates a fresh Gin engine with no middleware attached by default.
+This gives you explicit control over which middleware to add (for example logging, panic recovery, auth, or request IDs).
+If you want a preconfigured engine, `gin.Default()` is the alternative that includes logger and recovery middleware automatically.
+
 In `r.Use(gin.Logger(), gin.Recovery())`, `gin.Recovery()` is panic-protection middleware.
 If a handler panics, it recovers the request instead of crashing the process, logs the panic, and returns `500 Internal Server Error`.
 This is important in microservices so one bad request does not take down the entire service.
