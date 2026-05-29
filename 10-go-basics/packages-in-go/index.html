@@ -1,0 +1,3729 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A complete Go learning portal for SDETs with runnable code, Testcontainers, and a capstone microservice.">
+      
+      
+      
+        <link rel="canonical" href="https://vishnuvardhansankoti.github.io/go-sdet-wiki/10-go-basics/packages-in-go/">
+      
+      
+        <link rel="prev" href="../pointers-in-go/">
+      
+      
+        <link rel="next" href="../go-mod-reference-and-commands/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
+    
+    
+      
+        <title>Packages in Go - Go SDET Wiki</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.fad675c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/css/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#packages-in-go" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Go SDET Wiki" class="md-header__button md-logo" aria-label="Go SDET Wiki" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Go SDET Wiki
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Packages in Go
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Go SDET Wiki" class="md-nav__button md-logo" aria-label="Go SDET Wiki" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Go SDET Wiki
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Introduction
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/why-go-for-sdets/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Why Go for SDETs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/hello-world-with-wasm/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hello World with WASM
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/official-go-playground/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Official Go Playground
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/install-and-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install & Setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/go-modules-and-workspaces/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Go Modules & Workspaces
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Go Basics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Go Basics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../variables-and-types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Variables & Types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../make-arrays-slices-maps/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    make, Arrays, Slices, Maps
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../generics-in-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generics in Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pointers-in-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pointers in Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Packages in Go
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Packages in Go
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-a-package-in-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Is a Package in Go?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-packages-matter" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Packages Matter
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#package-naming-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Package Naming Rules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exported-vs-unexported-identifiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exported vs Unexported Identifiers
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#import-basics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import Basics
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#import-aliases-and-special-imports" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import Aliases and Special Imports
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#package-initialization-and-init" class="md-nav__link">
+    <span class="md-ellipsis">
+      Package Initialization and init
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#package-layout-in-real-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      Package Layout in Real Projects
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#internal-package-gos-access-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      internal Package: Go's Access Boundary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#package-dependency-direction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Package Dependency Direction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cyclic-imports-what-and-why" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cyclic Imports: What and Why
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#packages-in-go-vs-java-and-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      Packages in Go vs Java and C++
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Packages in Go vs Java and C++">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parallel-with-java" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel with Java
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-with-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel with C++
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-comparison-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Comparison Table
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-domain-service-separation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 1: Domain + Service Separation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-interface-boundary-to-avoid-cycles" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 2: Interface Boundary to Avoid Cycles
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-package-design-mistakes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Package Design Mistakes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-exercises-sdet-focus" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Exercises (SDET Focus)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Exercises (SDET Focus)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exercise-1-package-boundary-refactor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exercise 1: Package Boundary Refactor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-2-interface-driven-repository-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exercise 2: Interface-Driven Repository Package
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assignment-design-packages-for-bookshelf-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assignment: Design Packages for Bookshelf API
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assignment: Design Packages for Bookshelf API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tasks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-or-validate-package-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Create or validate package structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-add-a-minimal-domain-package-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Add a minimal domain package API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-add-repository-interface-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Add repository interface package
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-add-service-package-depending-on-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Add service package depending on interface
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-add-a-unit-test-in-service-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Add a unit test in service package
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-enforce-boundary-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Enforce boundary rules
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expected Output
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verification
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extension
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deep-dive-package-design-as-a-quality-lever" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deep Dive: Package Design as a Quality Lever
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deep Dive: Package Design as a Quality Lever">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-sdets-should-care" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why SDETs Should Care
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#review-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Review Checklist
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Step
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../go-mod-reference-and-commands/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    go.mod Reference & Commands
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../control-flow/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Control Flow
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions-and-methods/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Functions & Methods
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../structs-and-interfaces/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Structs & Interfaces
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../go-orm-with-postgres/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Go ORM with PostgreSQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../error-handling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Error Handling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concurrency-goroutines/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Concurrency (Goroutines)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../channels-and-select/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Channels & Select
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../http-client-and-server-basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HTTP Client/Server
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../unit-testing-in-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unit Testing in Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Microservices
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Microservices
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/microservices-overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/developing-microservices-with-gin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developing Microservices with Gin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/project-folder-structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Folder Structure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/rest-api-design/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    REST API Design
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/dependency-injection/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dependency Injection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/configuration-and-env-vars/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Config & Env Vars
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/logging-and-observability/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Logging & Observability
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Testing Basics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Testing Basics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/testing-package-basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing Package
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/table-driven-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Table-Driven Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/mocking-with-interfaces/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Mocking with Interfaces
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/testing-http-handlers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing HTTP Handlers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/testing-database-code-with-fakes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing DB Code with Fakes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/test-organization-and-naming/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Organization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Integration Testing (Testcontainers)
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Integration Testing (Testcontainers)
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/intro-to-testcontainers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Intro
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/installing-testcontainers-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install Testcontainers-Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/first-container-test/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    First Container Test
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/postgres-integration-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Postgres Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/api-end-to-end-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API E2E Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/testcontainers-ci-considerations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CI Considerations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Contract Testing
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Contract Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/why-contract-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Why Contract Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/pact-go-basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pact-Go Basics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/consumer-contract-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Consumer Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/provider-verification-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Provider Verification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/pact-in-ci/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pact in CI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    CI/CD & Quality Gates
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            CI/CD & Quality Gates
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../60-ci-cd-and-quality-gates/github-actions-for-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GitHub Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../60-ci-cd-and-quality-gates/running-unit-and-integration-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Running Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../60-ci-cd-and-quality-gates/coverage-and-thresholds/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Coverage Thresholds
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../60-ci-cd-and-quality-gates/linting-and-static-analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linting & Static Analysis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Patterns & Recipes
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Patterns & Recipes
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../70-patterns-and-recipes/golden-files-pattern/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Golden Files
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../70-patterns-and-recipes/test-data-builders/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Data Builders
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../70-patterns-and-recipes/flaky-test-diagnostics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Flaky Test Diagnostics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../70-patterns-and-recipes/debugging-concurrent-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Debugging Concurrent Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    WASM Playground
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            WASM Playground
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../80-wasm-playground/playground-overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../80-wasm-playground/embedding-playground-in-pages/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Embedding Playground
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../80-wasm-playground/limitations-and-best-practices/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Limitations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Capstone Project
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            Capstone Project
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/capstone-overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/requirements-and-scope/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Requirements
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/domain-and-data-model/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Model
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/api-specification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Spec
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/implementation-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Implementation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/unit-testing-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unit Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/integration-testing-with-testcontainers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Integration Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/contract-testing-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contract Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/ci-pipeline-for-capstone/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CI Pipeline
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Final Project
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            Final Project
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../99-final-project/independent-practice-requirements/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Independent Practice Requirements
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Appendix
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            Appendix
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/testing-reltio-mdm-with-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing Reltio MDM with Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/reltio-relation-mdm-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reltio Relation MDM Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/rancher-desktop-setup-for-local-containers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rancher Desktop Setup for Local Containers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/how-to-report-issues/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    How to Report Issues
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/debug-single-go-file-in-vscode/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Debug a Single Go File in VS Code
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-a-package-in-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Is a Package in Go?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-packages-matter" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Packages Matter
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#package-naming-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Package Naming Rules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exported-vs-unexported-identifiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exported vs Unexported Identifiers
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#import-basics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import Basics
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#import-aliases-and-special-imports" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import Aliases and Special Imports
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#package-initialization-and-init" class="md-nav__link">
+    <span class="md-ellipsis">
+      Package Initialization and init
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#package-layout-in-real-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      Package Layout in Real Projects
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#internal-package-gos-access-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      internal Package: Go's Access Boundary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#package-dependency-direction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Package Dependency Direction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cyclic-imports-what-and-why" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cyclic Imports: What and Why
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#packages-in-go-vs-java-and-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      Packages in Go vs Java and C++
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Packages in Go vs Java and C++">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parallel-with-java" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel with Java
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-with-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel with C++
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-comparison-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Comparison Table
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-domain-service-separation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 1: Domain + Service Separation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-interface-boundary-to-avoid-cycles" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 2: Interface Boundary to Avoid Cycles
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-package-design-mistakes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Package Design Mistakes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-exercises-sdet-focus" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Exercises (SDET Focus)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Exercises (SDET Focus)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exercise-1-package-boundary-refactor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exercise 1: Package Boundary Refactor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-2-interface-driven-repository-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exercise 2: Interface-Driven Repository Package
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assignment-design-packages-for-bookshelf-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assignment: Design Packages for Bookshelf API
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assignment: Design Packages for Bookshelf API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tasks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-or-validate-package-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Create or validate package structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-add-a-minimal-domain-package-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Add a minimal domain package API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-add-repository-interface-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Add repository interface package
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-add-service-package-depending-on-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Add service package depending on interface
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-add-a-unit-test-in-service-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Add a unit test in service package
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-enforce-boundary-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Enforce boundary rules
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expected Output
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verification
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extension
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deep-dive-package-design-as-a-quality-lever" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deep Dive: Package Design as a Quality Lever
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deep Dive: Package Design as a Quality Lever">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-sdets-should-care" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why SDETs Should Care
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#review-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Review Checklist
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Step
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="packages-in-go">Packages in Go<a class="headerlink" href="#packages-in-go" title="Permanent link">&para;</a></h1>
+<p>Packages are Go's core unit of code organization, visibility control, and reuse. In production services, package boundaries shape dependency flow, testability, and long-term maintainability.</p>
+<p>For SDET-oriented backend systems, package design has direct impact on:</p>
+<ul>
+<li>how easily components can be mocked and tested,</li>
+<li>how clearly responsibilities are separated,</li>
+<li>and how safely teams can evolve code without creating cyclic dependencies.</li>
+</ul>
+<p>This section gives you a practical package model for real Go projects and maps it clearly to Java and C++ mental models.</p>
+<h2 id="what-is-a-package-in-go">What Is a Package in Go?<a class="headerlink" href="#what-is-a-package-in-go" title="Permanent link">&para;</a></h2>
+<p>A package is a directory of Go source files compiled together.</p>
+<ul>
+<li>All files in the same directory usually share one package name.</li>
+<li>Functions, types, variables, and constants declared in a package form that package's API surface.</li>
+<li>Other packages import this API using import paths.</li>
+</ul>
+<p>Simple example:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// file: mathutil/add.go</span>
+<span class="kn">package</span><span class="w"> </span><span class="nx">mathutil</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">Add</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">b</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1">// file: main.go</span>
+<span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;fmt&quot;</span>
+
+<span class="w">    </span><span class="s">&quot;example.com/myapp/mathutil&quot;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">mathutil</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">))</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="why-packages-matter">Why Packages Matter<a class="headerlink" href="#why-packages-matter" title="Permanent link">&para;</a></h2>
+<p>In small scripts, packages may feel optional. In real microservices, packages enforce structure.</p>
+<p>Good package boundaries help you:</p>
+<ul>
+<li>isolate domain logic from HTTP/framework code,</li>
+<li>avoid accidental cross-layer coupling,</li>
+<li>write focused unit tests with fewer mocks,</li>
+<li>keep import graphs understandable.</li>
+</ul>
+<h2 id="package-naming-rules">Package Naming Rules<a class="headerlink" href="#package-naming-rules" title="Permanent link">&para;</a></h2>
+<p>Use short, meaningful, lowercase names.</p>
+<p>Recommended:</p>
+<ul>
+<li><code>domain</code></li>
+<li><code>service</code></li>
+<li><code>repository</code></li>
+<li><code>handler</code></li>
+</ul>
+<p>Avoid:</p>
+<ul>
+<li><code>utils</code> as a catch-all dumping ground,</li>
+<li>names that repeat package context (<code>domainmodels</code>, <code>serviceimpl</code>),</li>
+<li>mixed casing (<code>MyPackage</code>).</li>
+</ul>
+<p>Good names read naturally at call sites, for example: <code>service.NewBookService()</code>.</p>
+<h2 id="exported-vs-unexported-identifiers">Exported vs Unexported Identifiers<a class="headerlink" href="#exported-vs-unexported-identifiers" title="Permanent link">&para;</a></h2>
+<p>Go uses capitalization for visibility.</p>
+<ul>
+<li><code>BookService</code> (capitalized) -&gt; exported (visible outside package)</li>
+<li><code>bookService</code> (lowercase) -&gt; unexported (package-private)</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">domain</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">Book</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ID</span><span class="w">    </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Title</span><span class="w"> </span><span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">NewBook</span><span class="p">(</span><span class="nx">title</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="nx">Book</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">Book</span><span class="p">{</span><span class="nx">Title</span><span class="p">:</span><span class="w"> </span><span class="nx">title</span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">validateTitle</span><span class="p">(</span><span class="nx">title</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">title</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Here, <code>Book</code> and <code>NewBook</code> are package API, while <code>validateTitle</code> stays internal.</p>
+<h2 id="import-basics">Import Basics<a class="headerlink" href="#import-basics" title="Permanent link">&para;</a></h2>
+<p>Go imports by module path + directory path.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;fmt&quot;</span>
+<span class="w">    </span><span class="s">&quot;net/http&quot;</span>
+
+<span class="w">    </span><span class="s">&quot;example.com/bookshelf-api/pkg/domain&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><code>go.mod</code> defines your module root, and import paths are resolved relative to it.</p>
+<h2 id="import-aliases-and-special-imports">Import Aliases and Special Imports<a class="headerlink" href="#import-aliases-and-special-imports" title="Permanent link">&para;</a></h2>
+<p>Go supports three useful import forms:</p>
+<ol>
+<li>Alias import</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="s">&quot;example.com/bookshelf-api/pkg/domain&quot;</span>
+</code></pre></div>
+<p>Use aliases when two packages share the same name or when local clarity improves.</p>
+<ol>
+<li>Blank import (side effects only)</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="s">&quot;github.com/lib/pq&quot;</span>
+</code></pre></div>
+<p>Use this rarely, typically for driver registration in initialization paths.</p>
+<ol>
+<li>Dot import</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="s">&quot;math&quot;</span>
+</code></pre></div>
+<p>This injects identifiers into current scope and is usually discouraged outside selective test scenarios because it harms readability.</p>
+<h2 id="package-initialization-and-init">Package Initialization and init<a class="headerlink" href="#package-initialization-and-init" title="Permanent link">&para;</a></h2>
+<p>A package can define <code>init()</code> functions. They run automatically when package is initialized.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">config</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="s">&quot;log&quot;</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">init</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;config package initialized&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Guideline:</p>
+<ul>
+<li>Keep <code>init()</code> small and deterministic.</li>
+<li>Avoid hidden behavior that makes tests brittle.</li>
+<li>Prefer explicit constructors in application code.</li>
+</ul>
+<h2 id="package-layout-in-real-projects">Package Layout in Real Projects<a class="headerlink" href="#package-layout-in-real-projects" title="Permanent link">&para;</a></h2>
+<p>Common Go backend shape:</p>
+<div class="highlight"><pre><span></span><code>bookshelf-api/
+  cmd/
+    server/
+      main.go
+  pkg/
+    domain/
+    repository/
+    service/
+    handler/
+  internal/
+    config/
+    middleware/
+</code></pre></div>
+<p>Typical intent:</p>
+<ul>
+<li><code>cmd/</code> -&gt; executable entry points</li>
+<li><code>pkg/</code> -&gt; reusable application packages</li>
+<li><code>internal/</code> -&gt; private implementation packages</li>
+</ul>
+<h2 id="internal-package-gos-access-boundary">internal Package: Go's Access Boundary<a class="headerlink" href="#internal-package-gos-access-boundary" title="Permanent link">&para;</a></h2>
+<p>Any package under an <code>internal/</code> directory can only be imported by code within the parent tree.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>project/
+  internal/config
+  pkg/service
+</code></pre></div>
+<p><code>internal/config</code> can be imported by <code>project</code> packages, but not by external modules.</p>
+<p>This is one of Go's strongest tools for controlling architectural boundaries.</p>
+<h2 id="package-dependency-direction">Package Dependency Direction<a class="headerlink" href="#package-dependency-direction" title="Permanent link">&para;</a></h2>
+<p>Prefer one-way dependencies:</p>
+<ol>
+<li><code>handler</code> depends on <code>service</code></li>
+<li><code>service</code> depends on <code>repository</code> and <code>domain</code></li>
+<li><code>repository</code> depends on <code>domain</code></li>
+<li><code>domain</code> depends on nothing application-specific</li>
+</ol>
+<p>Do not invert this direction. It leads to cyclic imports and fragile design.</p>
+<h2 id="cyclic-imports-what-and-why">Cyclic Imports: What and Why<a class="headerlink" href="#cyclic-imports-what-and-why" title="Permanent link">&para;</a></h2>
+<p>Go forbids cyclic imports.</p>
+<p>If package <code>A</code> imports <code>B</code>, then <code>B</code> cannot import <code>A</code>.</p>
+<p>This design keeps dependency graphs explicit and maintainable. If you hit a cycle:</p>
+<ul>
+<li>move shared abstractions to a lower-level package,</li>
+<li>introduce an interface boundary,</li>
+<li>or split responsibilities more clearly.</li>
+</ul>
+<h2 id="packages-in-go-vs-java-and-c">Packages in Go vs Java and C++<a class="headerlink" href="#packages-in-go-vs-java-and-c" title="Permanent link">&para;</a></h2>
+<p>Go package thinking has parallels with Java packages and C++ namespaces, but there are important differences.</p>
+<h3 id="parallel-with-java">Parallel with Java<a class="headerlink" href="#parallel-with-java" title="Permanent link">&para;</a></h3>
+<p>Similarities:</p>
+<ul>
+<li>both organize code into named modules/packages,</li>
+<li>both use import statements,</li>
+<li>both reduce naming collisions.</li>
+</ul>
+<p>Differences:</p>
+<ol>
+<li>
+<p>Visibility model</p>
+</li>
+<li>
+<p>Java: <code>public</code>, <code>protected</code>, package-private, <code>private</code></p>
+</li>
+<li>
+<p>Go: exported/unexported via capitalization</p>
+</li>
+<li>
+<p>File-to-type relationship</p>
+</li>
+<li>
+<p>Java often uses one public class per file convention</p>
+</li>
+<li>
+<p>Go has no class concept and multiple types/functions per file is common</p>
+</li>
+<li>
+<p>Package path alignment</p>
+</li>
+<li>
+<p>Java package names often mirror directory structure by convention</p>
+</li>
+<li>Go package import paths are tightly tied to module and directory structure</li>
+</ol>
+<h3 id="parallel-with-c">Parallel with C++<a class="headerlink" href="#parallel-with-c" title="Permanent link">&para;</a></h3>
+<p>Similarities:</p>
+<ul>
+<li>both use scoped names to avoid symbol collisions,</li>
+<li>both support code organization across multiple files.</li>
+</ul>
+<p>Differences:</p>
+<ol>
+<li>
+<p>Namespace vs package</p>
+</li>
+<li>
+<p>C++ namespaces are language scopes and can span files independent of directory layout</p>
+</li>
+<li>
+<p>Go packages are directory-based compilation units</p>
+</li>
+<li>
+<p>Header/source model</p>
+</li>
+<li>
+<p>C++ commonly separates declaration (<code>.h/.hpp</code>) and implementation (<code>.cpp</code>)</p>
+</li>
+<li>
+<p>Go keeps declarations and implementations directly in <code>.go</code> files</p>
+</li>
+<li>
+<p>Dependency complexity</p>
+</li>
+<li>
+<p>C++ can suffer from include-order and macro issues</p>
+</li>
+<li>Go's package/import model is simpler and explicit, with cycle prevention built in</li>
+</ol>
+<h2 id="quick-comparison-table">Quick Comparison Table<a class="headerlink" href="#quick-comparison-table" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Go Packages</th>
+<th>Java Packages</th>
+<th>C++ Namespaces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Primary unit</td>
+<td>Directory package</td>
+<td>Package + classes</td>
+<td>Namespace scope</td>
+</tr>
+<tr>
+<td>Visibility</td>
+<td>Export by capitalization</td>
+<td>Access modifiers</td>
+<td>public/private/protected in classes</td>
+</tr>
+<tr>
+<td>Import/include model</td>
+<td>Explicit imports</td>
+<td>Explicit imports</td>
+<td><code>#include</code> + namespace usage</td>
+</tr>
+<tr>
+<td>Cycle handling</td>
+<td>Cycles forbidden</td>
+<td>Cycles possible in class graphs</td>
+<td>Include/link complexity possible</td>
+</tr>
+<tr>
+<td>Header files</td>
+<td>No</td>
+<td>No</td>
+<td>Yes (common)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="practical-examples">Practical Examples<a class="headerlink" href="#practical-examples" title="Permanent link">&para;</a></h2>
+<h3 id="example-1-domain-service-separation">Example 1: Domain + Service Separation<a class="headerlink" href="#example-1-domain-service-separation" title="Permanent link">&para;</a></h3>
+<p><code>pkg/domain/book.go</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">domain</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">Book</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ID</span><span class="w">    </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Title</span><span class="w"> </span><span class="kt">string</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>pkg/service/book_service.go</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">service</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="s">&quot;example.com/bookshelf-api/pkg/domain&quot;</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">BookService</span><span class="w"> </span><span class="kd">struct</span><span class="p">{}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="nx">BookService</span><span class="p">)</span><span class="w"> </span><span class="nx">NormalizeTitle</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">Book</span><span class="p">)</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">Book</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// add normalization logic as needed</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">b</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Benefit: service logic depends on domain model without mixing HTTP or storage concerns.</p>
+<h3 id="example-2-interface-boundary-to-avoid-cycles">Example 2: Interface Boundary to Avoid Cycles<a class="headerlink" href="#example-2-interface-boundary-to-avoid-cycles" title="Permanent link">&para;</a></h3>
+<p><code>pkg/repository/book_repository.go</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">repository</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="s">&quot;example.com/bookshelf-api/pkg/domain&quot;</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">BookRepository</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Save</span><span class="p">(</span><span class="nx">book</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">Book</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>pkg/service/book_service.go</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">service</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;example.com/bookshelf-api/pkg/domain&quot;</span>
+<span class="w">    </span><span class="s">&quot;example.com/bookshelf-api/pkg/repository&quot;</span>
+<span class="p">)</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">BookService</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Repo</span><span class="w"> </span><span class="nx">repository</span><span class="p">.</span><span class="nx">BookRepository</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="nx">BookService</span><span class="p">)</span><span class="w"> </span><span class="nx">CreateBook</span><span class="p">(</span><span class="nx">title</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">Repo</span><span class="p">.</span><span class="nx">Save</span><span class="p">(</span><span class="nx">domain</span><span class="p">.</span><span class="nx">Book</span><span class="p">{</span><span class="nx">Title</span><span class="p">:</span><span class="w"> </span><span class="nx">title</span><span class="p">})</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Benefit: clean dependency direction and testability with repository mocks.</p>
+<h2 id="common-package-design-mistakes">Common Package Design Mistakes<a class="headerlink" href="#common-package-design-mistakes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Creating giant packages with mixed responsibilities</li>
+<li>Introducing <code>utils</code> package for unrelated helpers</li>
+<li>Exporting too much API surface accidentally</li>
+<li>Letting framework code leak into domain package</li>
+<li>Ignoring cycles until refactor becomes expensive</li>
+</ul>
+<h2 id="quick-exercises-sdet-focus">Quick Exercises (SDET Focus)<a class="headerlink" href="#quick-exercises-sdet-focus" title="Permanent link">&para;</a></h2>
+<p>Try these exercises before moving to the assignment.</p>
+<h3 id="exercise-1-package-boundary-refactor">Exercise 1: Package Boundary Refactor<a class="headerlink" href="#exercise-1-package-boundary-refactor" title="Permanent link">&para;</a></h3>
+<p>Goal: Practice separating domain logic from transport/framework concerns.</p>
+<ol>
+<li>Create <code>pkg/domain</code> with a <code>Book</code> struct and validation logic.</li>
+<li>Create <code>pkg/handler</code> with HTTP-specific DTOs and parsing.</li>
+<li>Ensure <code>pkg/domain</code> has no <code>net/http</code> imports.</li>
+<li>Write one unit test proving domain validation runs without handler code.</li>
+</ol>
+<p>Stretch: Add an <code>internal/config</code> package and show it is not imported by <code>pkg/domain</code>.</p>
+<h3 id="exercise-2-interface-driven-repository-package">Exercise 2: Interface-Driven Repository Package<a class="headerlink" href="#exercise-2-interface-driven-repository-package" title="Permanent link">&para;</a></h3>
+<p>Goal: Practice dependency direction for testability.</p>
+<ol>
+<li>Define <code>BookRepository</code> interface in <code>pkg/repository</code>.</li>
+<li>Inject it into <code>pkg/service.BookService</code>.</li>
+<li>Implement a fake repository in tests to simulate save failures.</li>
+<li>Write tests asserting service behavior for success and repository error.</li>
+</ol>
+<p>Stretch: Add a compile-time interface check to prevent signature drift.</p>
+<h2 id="assignment-design-packages-for-bookshelf-api">Assignment: Design Packages for Bookshelf API<a class="headerlink" href="#assignment-design-packages-for-bookshelf-api" title="Permanent link">&para;</a></h2>
+<h3 id="goal">Goal<a class="headerlink" href="#goal" title="Permanent link">&para;</a></h3>
+<p>Define a clear package boundary map for your Bookshelf implementation.</p>
+<h3 id="tasks">Tasks<a class="headerlink" href="#tasks" title="Permanent link">&para;</a></h3>
+<h4 id="1-create-or-validate-package-structure">1. Create or validate package structure<a class="headerlink" href="#1-create-or-validate-package-structure" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>pkg/
+  domain/
+  repository/
+  service/
+  handler/
+internal/
+  config/
+  middleware/
+</code></pre></div>
+<h4 id="2-add-a-minimal-domain-package-api">2. Add a minimal domain package API<a class="headerlink" href="#2-add-a-minimal-domain-package-api" title="Permanent link">&para;</a></h4>
+<p>Create <code>pkg/domain/book.go</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">domain</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">Book</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ID</span><span class="w">    </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Title</span><span class="w"> </span><span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">NewBook</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">title</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="nx">Book</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">Book</span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">Title</span><span class="p">:</span><span class="w"> </span><span class="nx">title</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="3-add-repository-interface-package">3. Add repository interface package<a class="headerlink" href="#3-add-repository-interface-package" title="Permanent link">&para;</a></h4>
+<p>Create <code>pkg/repository/book_repository.go</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">repository</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="s">&quot;example.com/bookshelf-api/pkg/domain&quot;</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">BookRepository</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Save</span><span class="p">(</span><span class="nx">book</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">Book</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Replace <code>example.com/bookshelf-api</code> with your module path from <code>go.mod</code>.</p>
+<h4 id="4-add-service-package-depending-on-interface">4. Add service package depending on interface<a class="headerlink" href="#4-add-service-package-depending-on-interface" title="Permanent link">&para;</a></h4>
+<p>Create <code>pkg/service/book_service.go</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">service</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;example.com/bookshelf-api/pkg/domain&quot;</span>
+<span class="w">    </span><span class="s">&quot;example.com/bookshelf-api/pkg/repository&quot;</span>
+<span class="p">)</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">BookService</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Repo</span><span class="w"> </span><span class="nx">repository</span><span class="p">.</span><span class="nx">BookRepository</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="nx">BookService</span><span class="p">)</span><span class="w"> </span><span class="nx">CreateBook</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">title</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">Repo</span><span class="p">.</span><span class="nx">Save</span><span class="p">(</span><span class="nx">domain</span><span class="p">.</span><span class="nx">NewBook</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">title</span><span class="p">))</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="5-add-a-unit-test-in-service-package">5. Add a unit test in service package<a class="headerlink" href="#5-add-a-unit-test-in-service-package" title="Permanent link">&para;</a></h4>
+<p>Create <code>pkg/service/book_service_test.go</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">service</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;testing&quot;</span>
+
+<span class="w">    </span><span class="s">&quot;example.com/bookshelf-api/pkg/domain&quot;</span>
+<span class="p">)</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">fakeRepo</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">saved</span><span class="w"> </span><span class="p">[]</span><span class="nx">domain</span><span class="p">.</span><span class="nx">Book</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">f</span><span class="w"> </span><span class="o">*</span><span class="nx">fakeRepo</span><span class="p">)</span><span class="w"> </span><span class="nx">Save</span><span class="p">(</span><span class="nx">book</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">Book</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">f</span><span class="p">.</span><span class="nx">saved</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">f</span><span class="p">.</span><span class="nx">saved</span><span class="p">,</span><span class="w"> </span><span class="nx">book</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestBookService_CreateBook</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">repo</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">fakeRepo</span><span class="p">{}</span>
+<span class="w">    </span><span class="nx">svc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">BookService</span><span class="p">{</span><span class="nx">Repo</span><span class="p">:</span><span class="w"> </span><span class="nx">repo</span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">svc</span><span class="p">.</span><span class="nx">CreateBook</span><span class="p">(</span><span class="s">&quot;b1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Go in Action&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">&quot;CreateBook returned error: %v&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">repo</span><span class="p">.</span><span class="nx">saved</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">&quot;expected 1 saved book, got %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">repo</span><span class="p">.</span><span class="nx">saved</span><span class="p">))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="6-enforce-boundary-rules">6. Enforce boundary rules<a class="headerlink" href="#6-enforce-boundary-rules" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Keep shared business entities in <code>pkg/domain</code>.</li>
+<li>Keep HTTP-specific request/response types in <code>pkg/handler</code>.</li>
+<li>Keep configuration loading in <code>internal/config</code>.</li>
+<li>Ensure no package import cycles.</li>
+</ul>
+<h3 id="expected-output">Expected Output<a class="headerlink" href="#expected-output" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>pkg/
+  domain/book.go
+  repository/book_repository.go
+  service/book_service.go
+  service/book_service_test.go
+</code></pre></div>
+<h3 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>go<span class="w"> </span>list<span class="w"> </span>./...
+go<span class="w"> </span>build<span class="w"> </span>./...
+go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./pkg/service<span class="w"> </span>-run<span class="w"> </span>BookService<span class="w"> </span>-count<span class="o">=</span><span class="m">1</span>
+</code></pre></div>
+<p>If cycle errors appear, inspect dependency direction and extract shared abstractions into lower-level packages.</p>
+<h3 id="extension">Extension<a class="headerlink" href="#extension" title="Permanent link">&para;</a></h3>
+<p>Add <code>pkg/handler/book_handler.go</code> that depends on <code>pkg/service</code> only (and not on repository directly), then verify dependency direction still remains one-way.</p>
+<h2 id="deep-dive-package-design-as-a-quality-lever">Deep Dive: Package Design as a Quality Lever<a class="headerlink" href="#deep-dive-package-design-as-a-quality-lever" title="Permanent link">&para;</a></h2>
+<h3 id="why-sdets-should-care">Why SDETs Should Care<a class="headerlink" href="#why-sdets-should-care" title="Permanent link">&para;</a></h3>
+<p>Package boundaries define test boundaries.</p>
+<p>When architecture is package-clean:</p>
+<ul>
+<li>unit tests become fast and focused,</li>
+<li>integration tests become intentional,</li>
+<li>and flaky cross-layer coupling is reduced.</li>
+</ul>
+<h3 id="review-checklist">Review Checklist<a class="headerlink" href="#review-checklist" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Does each package have one clear responsibility?</li>
+<li>Are exported APIs minimal and intentional?</li>
+<li>Is dependency direction one-way?</li>
+<li>Are domain packages free from transport/framework details?</li>
+<li>Are package-level side effects (<code>init</code>) small and deterministic?</li>
+</ul>
+<h2 id="next-step">Next Step<a class="headerlink" href="#next-step" title="Permanent link">&para;</a></h2>
+<p>Continue with <a href="../go-mod-reference-and-commands/">go.mod Reference &amp; Commands</a>, then move to <a href="../control-flow/">Control Flow</a>.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.annotate", "content.tabs.link", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.cd18aaf1.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../assets/js/mermaid-init.js"></script>
+      
+        <script src="../../assets/js/playground.js"></script>
+      
+        <script src="../../assets/wasm/wasm_exec.js"></script>
+      
+        <script src="../../assets/js/layout-toggle.js"></script>
+      
+    
+  </body>
+</html>

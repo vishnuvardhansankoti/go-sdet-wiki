@@ -1,0 +1,3342 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A complete Go learning portal for SDETs with runnable code, Testcontainers, and a capstone microservice.">
+      
+      
+      
+        <link rel="canonical" href="https://vishnuvardhansankoti.github.io/go-sdet-wiki/20-microservices/dependency-injection/">
+      
+      
+        <link rel="prev" href="../rest-api-design/">
+      
+      
+        <link rel="next" href="../configuration-and-env-vars/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
+    
+    
+      
+        <title>Dependency Injection - Go SDET Wiki</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.fad675c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/css/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dependency-injection" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Go SDET Wiki" class="md-header__button md-logo" aria-label="Go SDET Wiki" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Go SDET Wiki
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Dependency Injection
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Go SDET Wiki" class="md-nav__button md-logo" aria-label="Go SDET Wiki" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Go SDET Wiki
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Introduction
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/why-go-for-sdets/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Why Go for SDETs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/hello-world-with-wasm/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hello World with WASM
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/official-go-playground/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Official Go Playground
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/install-and-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install & Setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/go-modules-and-workspaces/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Go Modules & Workspaces
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Go Basics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Go Basics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/variables-and-types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Variables & Types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/make-arrays-slices-maps/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    make, Arrays, Slices, Maps
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/generics-in-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generics in Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/pointers-in-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pointers in Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/packages-in-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Packages in Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/go-mod-reference-and-commands/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    go.mod Reference & Commands
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/control-flow/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Control Flow
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/functions-and-methods/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Functions & Methods
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/structs-and-interfaces/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Structs & Interfaces
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/go-orm-with-postgres/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Go ORM with PostgreSQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/error-handling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Error Handling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/concurrency-goroutines/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Concurrency (Goroutines)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/channels-and-select/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Channels & Select
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/http-client-and-server-basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HTTP Client/Server
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-go-basics/unit-testing-in-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unit Testing in Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Microservices
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Microservices
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../microservices-overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developing-microservices-with-gin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developing Microservices with Gin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../project-folder-structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Folder Structure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rest-api-design/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    REST API Design
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Dependency Injection
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Dependency Injection
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-di" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is DI?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benefits
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constructor-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructor Injection
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interface-based-di" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interface-Based DI
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#wire-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      Wire Pattern
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-wire-code-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using Wire (Code Generation)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-exercises-sdet-focus" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Exercises (SDET Focus)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Exercises (SDET Focus)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exercise-1-config-health-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exercise 1: Config + Health Validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-2-api-contract-smoke-for-one-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exercise 2: API Contract Smoke for One Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assignment-implement-dependency-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assignment: Implement Dependency Injection
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assignment: Implement Dependency Injection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tasks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-define-repository-interfaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Define Repository Interfaces
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-fake-repositories-for-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Create Fake Repositories for Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-update-service-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Update Service Container
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-use-in-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Use in Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#files-created" class="md-nav__link">
+    <span class="md-ellipsis">
+      Files Created
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      What's Next
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#di-lifecycle-in-this-tutorial" class="md-nav__link">
+    <span class="md-ellipsis">
+      DI Lifecycle in This Tutorial
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deep-dive-di-patterns-and-test-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deep Dive: DI Patterns and Test Isolation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deep Dive: DI Patterns and Test Isolation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      Background
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-constructor-injection-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Constructor Injection First
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interface-scope-guidance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interface Scope Guidance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-strategy-with-di" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Strategy with DI
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-anti-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Anti-Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Anti-Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sdet-benefit" class="md-nav__link">
+    <span class="md-ellipsis">
+      SDET Benefit
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-di-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick DI Checklist
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Step
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration-and-env-vars/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Config & Env Vars
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logging-and-observability/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Logging & Observability
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Testing Basics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Testing Basics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/testing-package-basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing Package
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/table-driven-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Table-Driven Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/mocking-with-interfaces/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Mocking with Interfaces
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/testing-http-handlers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing HTTP Handlers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/testing-database-code-with-fakes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing DB Code with Fakes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/test-organization-and-naming/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Organization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Integration Testing (Testcontainers)
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Integration Testing (Testcontainers)
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/intro-to-testcontainers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Intro
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/installing-testcontainers-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install Testcontainers-Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/first-container-test/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    First Container Test
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/postgres-integration-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Postgres Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/api-end-to-end-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API E2E Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/testcontainers-ci-considerations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CI Considerations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Contract Testing
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Contract Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/why-contract-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Why Contract Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/pact-go-basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pact-Go Basics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/consumer-contract-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Consumer Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/provider-verification-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Provider Verification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/pact-in-ci/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pact in CI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    CI/CD & Quality Gates
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            CI/CD & Quality Gates
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../60-ci-cd-and-quality-gates/github-actions-for-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GitHub Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../60-ci-cd-and-quality-gates/running-unit-and-integration-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Running Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../60-ci-cd-and-quality-gates/coverage-and-thresholds/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Coverage Thresholds
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../60-ci-cd-and-quality-gates/linting-and-static-analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linting & Static Analysis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Patterns & Recipes
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Patterns & Recipes
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../70-patterns-and-recipes/golden-files-pattern/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Golden Files
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../70-patterns-and-recipes/test-data-builders/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Data Builders
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../70-patterns-and-recipes/flaky-test-diagnostics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Flaky Test Diagnostics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../70-patterns-and-recipes/debugging-concurrent-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Debugging Concurrent Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    WASM Playground
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            WASM Playground
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../80-wasm-playground/playground-overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../80-wasm-playground/embedding-playground-in-pages/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Embedding Playground
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../80-wasm-playground/limitations-and-best-practices/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Limitations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Capstone Project
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            Capstone Project
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/capstone-overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/requirements-and-scope/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Requirements
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/domain-and-data-model/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Model
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/api-specification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Spec
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/implementation-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Implementation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/unit-testing-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unit Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/integration-testing-with-testcontainers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Integration Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/contract-testing-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contract Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/ci-pipeline-for-capstone/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CI Pipeline
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Final Project
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            Final Project
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../99-final-project/independent-practice-requirements/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Independent Practice Requirements
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Appendix
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            Appendix
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/testing-reltio-mdm-with-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing Reltio MDM with Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/reltio-relation-mdm-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reltio Relation MDM Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/rancher-desktop-setup-for-local-containers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rancher Desktop Setup for Local Containers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/how-to-report-issues/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    How to Report Issues
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/debug-single-go-file-in-vscode/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Debug a Single Go File in VS Code
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-di" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is DI?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benefits
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constructor-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructor Injection
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interface-based-di" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interface-Based DI
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#wire-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      Wire Pattern
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-wire-code-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using Wire (Code Generation)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-exercises-sdet-focus" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Exercises (SDET Focus)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Exercises (SDET Focus)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exercise-1-config-health-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exercise 1: Config + Health Validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-2-api-contract-smoke-for-one-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exercise 2: API Contract Smoke for One Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assignment-implement-dependency-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assignment: Implement Dependency Injection
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assignment: Implement Dependency Injection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tasks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-define-repository-interfaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Define Repository Interfaces
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-fake-repositories-for-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Create Fake Repositories for Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-update-service-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Update Service Container
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-use-in-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Use in Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#files-created" class="md-nav__link">
+    <span class="md-ellipsis">
+      Files Created
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      What's Next
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#di-lifecycle-in-this-tutorial" class="md-nav__link">
+    <span class="md-ellipsis">
+      DI Lifecycle in This Tutorial
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deep-dive-di-patterns-and-test-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deep Dive: DI Patterns and Test Isolation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deep Dive: DI Patterns and Test Isolation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      Background
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-constructor-injection-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Constructor Injection First
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interface-scope-guidance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interface Scope Guidance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-strategy-with-di" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Strategy with DI
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-anti-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Anti-Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Anti-Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sdet-benefit" class="md-nav__link">
+    <span class="md-ellipsis">
+      SDET Benefit
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-di-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick DI Checklist
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Step
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="dependency-injection">Dependency Injection<a class="headerlink" href="#dependency-injection" title="Permanent link">&para;</a></h1>
+<p>Dependency Injection (DI) is one of the most important design practices in testable microservices. It helps you separate business logic from infrastructure concerns by passing dependencies into components instead of constructing them internally.</p>
+<p>In this section, you will learn how DI supports:</p>
+<ul>
+<li>cleaner architecture,</li>
+<li>easier unit testing,</li>
+<li>and safer refactoring as the codebase grows.</li>
+</ul>
+<h2 id="what-is-di">What is DI?<a class="headerlink" href="#what-is-di" title="Permanent link">&para;</a></h2>
+<p>Dependency Injection is a technique where objects receive their dependencies from external sources rather than creating them.</p>
+<p>In other words, a service should not decide how to create a database repository, logger, or HTTP client. It should only declare what it needs, and assembly code (composition root) should provide it.</p>
+<h2 id="benefits">Benefits<a class="headerlink" href="#benefits" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Testability</strong>: Easy to mock dependencies</li>
+<li><strong>Flexibility</strong>: Easy to swap implementations</li>
+<li><strong>Loose Coupling</strong>: Components don't depend on concrete types</li>
+<li><strong>Maintainability</strong>: Changes in one component don't affect others</li>
+</ul>
+<p>DI also improves startup clarity: you can see the full dependency graph in one place during application wiring.</p>
+<h2 id="constructor-injection">Constructor Injection<a class="headerlink" href="#constructor-injection" title="Permanent link">&para;</a></h2>
+<p>Constructor injection is the most common and safest DI style in Go. Dependencies are required at creation time, which prevents partially initialized objects.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">UserService</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">repo</span><span class="w"> </span><span class="nx">repository</span><span class="p">.</span><span class="nx">UserRepository</span>
+<span class="w">    </span><span class="nx">logger</span><span class="w"> </span><span class="o">*</span><span class="nx">log</span><span class="p">.</span><span class="nx">Logger</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">NewUserService</span><span class="p">(</span><span class="nx">repo</span><span class="w"> </span><span class="nx">repository</span><span class="p">.</span><span class="nx">UserRepository</span><span class="p">,</span><span class="w"> </span><span class="nx">logger</span><span class="w"> </span><span class="o">*</span><span class="nx">log</span><span class="p">.</span><span class="nx">Logger</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="nx">UserService</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">UserService</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">repo</span><span class="p">:</span><span class="w">   </span><span class="nx">repo</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">logger</span><span class="p">:</span><span class="w"> </span><span class="nx">logger</span><span class="p">,</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This pattern makes required dependencies explicit and discoverable from the constructor signature.</p>
+<h2 id="interface-based-di">Interface-Based DI<a class="headerlink" href="#interface-based-di" title="Permanent link">&para;</a></h2>
+<p>In Go, interfaces are implicitly implemented, which makes DI ergonomic. Consumers depend on behavior contracts, not concrete implementations.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">Repository</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">GetUser</span><span class="p">(</span><span class="nx">id</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">User</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">UserService</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">repo</span><span class="w"> </span><span class="nx">Repository</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">UserService</span><span class="p">)</span><span class="w"> </span><span class="nx">GetUser</span><span class="p">(</span><span class="nx">id</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">User</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">repo</span><span class="p">.</span><span class="nx">GetUser</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This allows seamless swapping between production repositories and in-memory fakes during tests.</p>
+<h2 id="wire-pattern">Wire Pattern<a class="headerlink" href="#wire-pattern" title="Permanent link">&para;</a></h2>
+<p>The wire pattern means creating dependencies in one assembly function and injecting them into higher-level services.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">setupDependencies</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="nx">UserService</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">db</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">database</span><span class="p">.</span><span class="nx">Connect</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">repo</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">repository</span><span class="p">.</span><span class="nx">NewPostgresUserRepository</span><span class="p">(</span><span class="nx">db</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">logger</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">log</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stdout</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;USER &quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">log</span><span class="p">.</span><span class="nx">LstdFlags</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">NewUserService</span><span class="p">(</span><span class="nx">repo</span><span class="p">,</span><span class="w"> </span><span class="nx">logger</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Keep this pattern near app startup (<code>main</code> or container package) so business code remains independent from construction details.</p>
+<h2 id="using-wire-code-generation">Using Wire (Code Generation)<a class="headerlink" href="#using-wire-code-generation" title="Permanent link">&para;</a></h2>
+<p>The Wire tool generates dependency injection code:</p>
+<p>Wire is optional. For small projects, manual wiring is often enough. For larger projects with many services, generated wiring can reduce boilerplate and wiring mistakes.</p>
+<div class="highlight"><pre><span></span><code>go<span class="w"> </span>install<span class="w"> </span>github.com/google/wire/cmd/wire@latest
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">provideUserRepository</span><span class="p">(</span><span class="nx">db</span><span class="w"> </span><span class="o">*</span><span class="nx">sql</span><span class="p">.</span><span class="nx">DB</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="nx">repository</span><span class="p">.</span><span class="nx">PostgresUserRepository</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">repository</span><span class="p">.</span><span class="nx">NewPostgresUserRepository</span><span class="p">(</span><span class="nx">db</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">setupUserService</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="nx">UserService</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">wire</span><span class="p">.</span><span class="nx">Build</span><span class="p">(</span>
+<span class="w">        </span><span class="nx">database</span><span class="p">.</span><span class="nx">Connect</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">provideUserRepository</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">NewUserService</span><span class="p">,</span>
+<span class="w">    </span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="quick-exercises-sdet-focus">Quick Exercises (SDET Focus)<a class="headerlink" href="#quick-exercises-sdet-focus" title="Permanent link">&para;</a></h2>
+<p>Try these exercises before moving to the next section.</p>
+<h3 id="exercise-1-config-health-validation">Exercise 1: Config + Health Validation<a class="headerlink" href="#exercise-1-config-health-validation" title="Permanent link">&para;</a></h3>
+<p>Goal: Verify service startup behavior under real config conditions.</p>
+<ol>
+<li>Create two env profiles: valid and invalid (missing required key).</li>
+<li>Start service and assert startup succeeds only for valid profile.</li>
+<li>Call <code>/health</code> and assert status and response shape.</li>
+<li>Add one negative test for malformed env value.</li>
+</ol>
+<p>Stretch: Capture startup logs and assert a clear config error message.</p>
+<h3 id="exercise-2-api-contract-smoke-for-one-endpoint">Exercise 2: API Contract Smoke for One Endpoint<a class="headerlink" href="#exercise-2-api-contract-smoke-for-one-endpoint" title="Permanent link">&para;</a></h3>
+<p>Goal: Validate one endpoint end-to-end with deterministic assertions.</p>
+<ol>
+<li>Pick one endpoint (for example create/list/get flow).</li>
+<li>Write tests for success, validation error, and not-found path.</li>
+<li>Assert status code, JSON schema shape, and key business fields.</li>
+<li>Verify error payload stays stable across runs.</li>
+</ol>
+<p>Stretch: Add idempotency or duplicate-request case.</p>
+<h2 id="assignment-implement-dependency-injection">Assignment: Implement Dependency Injection<a class="headerlink" href="#assignment-implement-dependency-injection" title="Permanent link">&para;</a></h2>
+<h3 id="goal">Goal<a class="headerlink" href="#goal" title="Permanent link">&para;</a></h3>
+<p>Create a robust DI pattern for easy testing and reconfiguration.</p>
+<p>This assignment establishes a DI-first architecture where repositories and services can be replaced per test type (unit/integration) without changing core logic.</p>
+<h3 id="tasks">Tasks<a class="headerlink" href="#tasks" title="Permanent link">&para;</a></h3>
+<h4 id="1-define-repository-interfaces">1. Define Repository Interfaces<a class="headerlink" href="#1-define-repository-interfaces" title="Permanent link">&para;</a></h4>
+<p>Define interfaces by consumer needs, not by database implementation details. Keep contracts focused and minimal.</p>
+<p>Create <code>pkg/repository/interfaces.go</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">repository</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;context&quot;</span>
+<span class="w">    </span><span class="s">&quot;github.com/yourusername/bookshelf-api/pkg/domain&quot;</span>
+<span class="p">)</span>
+
+<span class="c1">// UserRepository defines the interface for user data access</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">UserRepository</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Save</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">User</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<span class="w">    </span><span class="nx">FindByID</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">UserID</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">User</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">FindByEmail</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">email</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">User</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">Delete</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">UserID</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<span class="w">    </span><span class="nx">List</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">limit</span><span class="p">,</span><span class="w"> </span><span class="nx">offset</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">User</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// BookRepository defines the interface for book data access</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">BookRepository</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Save</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">book</span><span class="w"> </span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">Book</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<span class="w">    </span><span class="nx">FindByID</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">BookID</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">Book</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">FindByISBN</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">isbn</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">Book</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">List</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">limit</span><span class="p">,</span><span class="w"> </span><span class="nx">offset</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">Book</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">Delete</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">BookID</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="2-create-fake-repositories-for-testing">2. Create Fake Repositories for Testing<a class="headerlink" href="#2-create-fake-repositories-for-testing" title="Permanent link">&para;</a></h4>
+<p>In-memory fakes should be deterministic, thread-safe where needed, and fast. They are ideal for unit tests that validate service behavior without external systems.</p>
+<p>Create <code>tests/mocks/mock_user_repo.go</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">mocks</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;context&quot;</span>
+<span class="w">    </span><span class="s">&quot;sync&quot;</span>
+<span class="w">    </span><span class="s">&quot;github.com/yourusername/bookshelf-api/pkg/domain&quot;</span>
+<span class="p">)</span>
+
+<span class="c1">// InMemoryUserRepository is a fake implementation</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">InMemoryUserRepository</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">users</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">User</span>
+<span class="w">    </span><span class="nx">mu</span><span class="w">    </span><span class="nx">sync</span><span class="p">.</span><span class="nx">RWMutex</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">NewInMemoryUserRepository</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="nx">InMemoryUserRepository</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">InMemoryUserRepository</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">users</span><span class="p">:</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">User</span><span class="p">),</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">InMemoryUserRepository</span><span class="p">)</span><span class="w"> </span><span class="nx">Save</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">User</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">users</span><span class="p">[</span><span class="nx">user</span><span class="p">.</span><span class="nx">ID</span><span class="p">.</span><span class="nx">String</span><span class="p">()]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">user</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">InMemoryUserRepository</span><span class="p">)</span><span class="w"> </span><span class="nx">FindByID</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">UserID</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">User</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">user</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">users</span><span class="p">[</span><span class="nx">id</span><span class="p">.</span><span class="nx">String</span><span class="p">()]</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">NewNotFoundError</span><span class="p">(</span><span class="s">&quot;user&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">.</span><span class="nx">String</span><span class="p">())</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">user</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">InMemoryUserRepository</span><span class="p">)</span><span class="w"> </span><span class="nx">FindByEmail</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">email</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">User</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">users</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">user</span><span class="p">.</span><span class="nx">Email</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">email</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">user</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">NewNotFoundError</span><span class="p">(</span><span class="s">&quot;user&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">email</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">InMemoryUserRepository</span><span class="p">)</span><span class="w"> </span><span class="nx">Delete</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="nx">domain</span><span class="p">.</span><span class="nx">UserID</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">    </span><span class="nb">delete</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">users</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">.</span><span class="nx">String</span><span class="p">())</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">InMemoryUserRepository</span><span class="p">)</span><span class="w"> </span><span class="nx">List</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">limit</span><span class="p">,</span><span class="w"> </span><span class="nx">offset</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">User</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">users</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">User</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">u</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">users</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">users</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">users</span><span class="p">,</span><span class="w"> </span><span class="nx">u</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">users</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="3-update-service-container">3. Update Service Container<a class="headerlink" href="#3-update-service-container" title="Permanent link">&para;</a></h4>
+<p>The service container becomes your composition root: one place where dependencies are assembled and passed into services.</p>
+<p>Update <code>pkg/service/container.go</code> to accept repositories:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">Container</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">UserService</span><span class="w">       </span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">UserService</span>
+<span class="w">    </span><span class="nx">BookService</span><span class="w">       </span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">BookService</span><span class="w">  </span>
+<span class="w">    </span><span class="nx">ReviewService</span><span class="w">     </span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">ReviewService</span>
+<span class="w">    </span><span class="nx">ShelfService</span><span class="w">      </span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">ShelfService</span>
+<span class="w">    </span><span class="nx">BulkImportService</span><span class="w"> </span><span class="o">*</span><span class="nx">domain</span><span class="p">.</span><span class="nx">BulkImportService</span>
+
+<span class="w">    </span><span class="nx">UserRepository</span><span class="w">  </span><span class="nx">repository</span><span class="p">.</span><span class="nx">UserRepository</span><span class="w">    </span><span class="c1">// NEW</span>
+<span class="w">    </span><span class="nx">BookRepository</span><span class="w">  </span><span class="nx">repository</span><span class="p">.</span><span class="nx">BookRepository</span><span class="w">    </span><span class="c1">// NEW</span>
+
+<span class="w">    </span><span class="nx">Logger</span><span class="w"> </span><span class="o">*</span><span class="nx">slog</span><span class="p">.</span><span class="nx">Logger</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">NewContainer</span><span class="p">(</span>
+<span class="w">    </span><span class="nx">logger</span><span class="w"> </span><span class="o">*</span><span class="nx">slog</span><span class="p">.</span><span class="nx">Logger</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">userRepo</span><span class="w"> </span><span class="nx">repository</span><span class="p">.</span><span class="nx">UserRepository</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">bookRepo</span><span class="w"> </span><span class="nx">repository</span><span class="p">.</span><span class="nx">BookRepository</span><span class="p">,</span>
+<span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="nx">Container</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// ... services initialization ...</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Container</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">UserService</span><span class="p">:</span><span class="w">     </span><span class="nx">userService</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">BookService</span><span class="p">:</span><span class="w">     </span><span class="nx">bookService</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">ReviewService</span><span class="p">:</span><span class="w">   </span><span class="nx">reviewService</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">ShelfService</span><span class="p">:</span><span class="w">    </span><span class="nx">shelfService</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">UserRepository</span><span class="p">:</span><span class="w">  </span><span class="nx">userRepo</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">BookRepository</span><span class="p">:</span><span class="w">  </span><span class="nx">bookRepo</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Logger</span><span class="p">:</span><span class="w">          </span><span class="nx">logger</span><span class="p">,</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="4-use-in-tests">4. Use in Tests<a class="headerlink" href="#4-use-in-tests" title="Permanent link">&para;</a></h4>
+<p>Tests should inject dependencies explicitly so test setup is obvious and reproducible.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// In test file</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestCreateUser</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">userRepo</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">mocks</span><span class="p">.</span><span class="nx">NewInMemoryUserRepository</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">bookRepo</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">mocks</span><span class="p">.</span><span class="nx">NewInMemoryBookRepository</span><span class="p">()</span>
+
+<span class="w">    </span><span class="nx">container</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">service</span><span class="p">.</span><span class="nx">NewContainer</span><span class="p">(</span>
+<span class="w">        </span><span class="nx">logger</span><span class="p">.</span><span class="nx">NewNullLogger</span><span class="p">(),</span>
+<span class="w">        </span><span class="nx">userRepo</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">bookRepo</span><span class="p">,</span>
+<span class="w">    </span><span class="p">)</span>
+
+<span class="w">    </span><span class="c1">// Now use container services in tests</span>
+<span class="w">    </span><span class="c1">// No database needed!</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="files-created">Files Created<a class="headerlink" href="#files-created" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>- pkg/repository/interfaces.go
+- tests/mocks/mock_user_repo.go
+- tests/mocks/mock_book_repo.go (similar)
+</code></pre></div>
+<h3 id="whats-next">What's Next<a class="headerlink" href="#whats-next" title="Permanent link">&para;</a></h3>
+<p>Next you'll add logging to track DI initialization and injected dependencies.</p>
+<h2 id="di-lifecycle-in-this-tutorial">DI Lifecycle in This Tutorial<a class="headerlink" href="#di-lifecycle-in-this-tutorial" title="Permanent link">&para;</a></h2>
+<p>Use this progression to keep architecture consistent:</p>
+<ol>
+<li>Define interfaces in repository/service boundaries.</li>
+<li>Inject fakes in unit tests.</li>
+<li>Inject real infrastructure in integration tests.</li>
+<li>Keep handlers/services free from direct infrastructure creation.</li>
+</ol>
+<p>This lifecycle keeps each test layer focused and avoids accidental coupling.</p>
+<h2 id="deep-dive-di-patterns-and-test-isolation">Deep Dive: DI Patterns and Test Isolation<a class="headerlink" href="#deep-dive-di-patterns-and-test-isolation" title="Permanent link">&para;</a></h2>
+<h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h3>
+<p>Dependency Injection lets you control what code under test talks to. This is foundational for deterministic tests and safer refactors.</p>
+<h3 id="why-constructor-injection-first">Why Constructor Injection First<a class="headerlink" href="#why-constructor-injection-first" title="Permanent link">&para;</a></h3>
+<p>Constructor injection makes dependencies explicit at creation time and prevents partially initialized objects.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">NewHandler</span><span class="p">(</span><span class="nx">userSvc</span><span class="w"> </span><span class="nx">UserService</span><span class="p">,</span><span class="w"> </span><span class="nx">bookSvc</span><span class="w"> </span><span class="nx">BookService</span><span class="p">,</span><span class="w"> </span><span class="nx">log</span><span class="w"> </span><span class="o">*</span><span class="nx">slog</span><span class="p">.</span><span class="nx">Logger</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="nx">Handler</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Handler</span><span class="p">{</span><span class="nx">userService</span><span class="p">:</span><span class="w"> </span><span class="nx">userSvc</span><span class="p">,</span><span class="w"> </span><span class="nx">bookService</span><span class="p">:</span><span class="w"> </span><span class="nx">bookSvc</span><span class="p">,</span><span class="w"> </span><span class="nx">logger</span><span class="p">:</span><span class="w"> </span><span class="nx">log</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="interface-scope-guidance">Interface Scope Guidance<a class="headerlink" href="#interface-scope-guidance" title="Permanent link">&para;</a></h3>
+<p>Define small interfaces by behavior needed by the consumer, not by repository implementation details.</p>
+<p>Prefer narrow interfaces such as <code>FindByID</code>/<code>Save</code> over broad "do everything" contracts.</p>
+<h3 id="testing-strategy-with-di">Testing Strategy with DI<a class="headerlink" href="#testing-strategy-with-di" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Unit tests inject in-memory fakes.</li>
+<li>Integration tests inject real Postgres repositories.</li>
+<li>Contract tests inject real handlers but controlled state setup.</li>
+</ol>
+<p>This strategy gives you fast feedback at unit layer and realistic confidence at integration/contract layers.</p>
+<h2 id="common-anti-patterns">Common Anti-Patterns<a class="headerlink" href="#common-anti-patterns" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Creating concrete repositories directly inside handlers.</li>
+<li>Global singleton service containers.</li>
+<li>Overly broad interfaces with unused methods.</li>
+<li>Hiding dependency creation inside helper functions that are hard to override in tests.</li>
+<li>Mixing environment/config loading inside business services.</li>
+</ul>
+<h3 id="sdet-benefit">SDET Benefit<a class="headerlink" href="#sdet-benefit" title="Permanent link">&para;</a></h3>
+<p>DI enables fast and stable test suites by replacing slow external dependencies with deterministic in-process doubles when appropriate.</p>
+<p>It also improves failure analysis because dependency boundaries are explicit, making it easier to pinpoint whether a defect is in domain logic, wiring, or infrastructure.</p>
+<h2 id="quick-di-checklist">Quick DI Checklist<a class="headerlink" href="#quick-di-checklist" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Are all service dependencies injected through constructors rather than created internally?</li>
+<li>Do unit tests inject in-memory fakes instead of real infrastructure?</li>
+<li>Are interfaces narrow — each consumer receives only the methods it needs?</li>
+<li>Is wiring code (container, main) separated from business logic?</li>
+</ul>
+<h2 id="next-step">Next Step<a class="headerlink" href="#next-step" title="Permanent link">&para;</a></h2>
+<p>Continue with <a href="../configuration-and-env-vars/">Configuration and Environment Variables</a>.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.annotate", "content.tabs.link", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.cd18aaf1.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../assets/js/mermaid-init.js"></script>
+      
+        <script src="../../assets/js/playground.js"></script>
+      
+        <script src="../../assets/wasm/wasm_exec.js"></script>
+      
+        <script src="../../assets/js/layout-toggle.js"></script>
+      
+    
+  </body>
+</html>

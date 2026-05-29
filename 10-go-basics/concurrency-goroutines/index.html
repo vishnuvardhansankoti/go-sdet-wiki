@@ -1,0 +1,4372 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A complete Go learning portal for SDETs with runnable code, Testcontainers, and a capstone microservice.">
+      
+      
+      
+        <link rel="canonical" href="https://vishnuvardhansankoti.github.io/go-sdet-wiki/10-go-basics/concurrency-goroutines/">
+      
+      
+        <link rel="prev" href="../error-handling/">
+      
+      
+        <link rel="next" href="../channels-and-select/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
+    
+    
+      
+        <title>Concurrency (Goroutines) - Go SDET Wiki</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.fad675c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/css/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#concurrency-goroutines" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Go SDET Wiki" class="md-header__button md-logo" aria-label="Go SDET Wiki" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Go SDET Wiki
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Concurrency (Goroutines)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Go SDET Wiki" class="md-nav__button md-logo" aria-label="Go SDET Wiki" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Go SDET Wiki
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Introduction
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/why-go-for-sdets/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Why Go for SDETs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/hello-world-with-wasm/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hello World with WASM
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/official-go-playground/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Official Go Playground
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/install-and-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install & Setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-intro/go-modules-and-workspaces/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Go Modules & Workspaces
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Go Basics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Go Basics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../variables-and-types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Variables & Types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../make-arrays-slices-maps/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    make, Arrays, Slices, Maps
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../generics-in-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generics in Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pointers-in-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pointers in Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../packages-in-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Packages in Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../go-mod-reference-and-commands/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    go.mod Reference & Commands
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../control-flow/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Control Flow
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../functions-and-methods/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Functions & Methods
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../structs-and-interfaces/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Structs & Interfaces
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../go-orm-with-postgres/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Go ORM with PostgreSQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../error-handling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Error Handling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Concurrency (Goroutines)
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Concurrency (Goroutines)
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-are-goroutines" class="md-nav__link">
+    <span class="md-ellipsis">
+      What are Goroutines?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Is Concurrency?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-go-goroutines-handle-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      How Go Goroutines Handle Concurrency
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Go Goroutines Handle Concurrency">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-go-scheduler-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      What the Go Scheduler Does
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-this-is-useful" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why This Is Useful
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concurrency-vs-parallelism-in-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      Concurrency vs Parallelism in Go
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advantages-of-goroutines-over-other-languages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advantages of Goroutines Over Other Languages
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thread-vs-goroutine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Thread vs Goroutine
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Thread vs Goroutine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lower-overhead-than-os-threads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lower Overhead Than OS Threads
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simpler-programming-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simpler Programming Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#built-in-scheduling-by-the-go-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      Built-In Scheduling by the Go Runtime
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#channels-make-coordination-clear" class="md-nav__link">
+    <span class="md-ellipsis">
+      Channels Make Coordination Clear
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#great-fit-for-io-bound-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      Great Fit for I/O-Bound Work
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#easier-to-read-in-test-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Easier to Read in Test Code
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standard-library-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standard Library Support
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-goroutines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating Goroutines
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#waiting-for-goroutines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Waiting for Goroutines
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Waiting for Goroutines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-timesleep-not-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using time.Sleep (Not Recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-syncwaitgroup-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using sync.WaitGroup (Recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-bad-vs-good-snippet" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Bad vs Good Snippet
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#race-conditions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Race Conditions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synchronization-primitives" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synchronization Primitives
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Synchronization Primitives">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syncmutex" class="md-nav__link">
+    <span class="md-ellipsis">
+      sync.Mutex
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#syncrwmutex" class="md-nav__link">
+    <span class="md-ellipsis">
+      sync.RWMutex
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synccond" class="md-nav__link">
+    <span class="md-ellipsis">
+      sync.Cond
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synconce" class="md-nav__link">
+    <span class="md-ellipsis">
+      sync.Once
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parallel-in-java-and-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel in Java and C
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parallel in Java and C">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#java" class="md-nav__link">
+    <span class="md-ellipsis">
+      Java
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c" class="md-nav__link">
+    <span class="md-ellipsis">
+      C
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#main-difference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Main Difference
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-go-is-often-simpler-for-sdets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Go Is Often Simpler for SDETs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional Reading
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-exercises-sdet-focus" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Exercises (SDET Focus)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Exercises (SDET Focus)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exercise-1-parallel-endpoint-health-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exercise 1: Parallel Endpoint Health Checks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-2-race-safe-shared-counter" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exercise 2: Race-Safe Shared Counter
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assignment-part-5-concurrent-book-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assignment: Part 5 - Concurrent Book Processing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assignment: Part 5 - Concurrent Book Processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tasks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-csv-data-model-pkgdomainbulk_importgo" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Create CSV Data Model - pkg/domain/bulk_import.go
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-bulk-import-service-pkgdomainbulk_import_servicego" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Create Bulk Import Service - pkg/domain/bulk_import_service.go
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-write-tests-pkgdomainbulk_import_testgo" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Write Tests - pkg/domain/bulk_import_test.go
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Patterns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#race-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Race Detection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verification
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#files-created-this-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      Files Created This Section
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-world-use-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-World Use Case
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      What's Next
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deep-dive-concurrency-patterns-for-reliable-test-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deep Dive: Concurrency Patterns for Reliable Test Automation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deep Dive: Concurrency Patterns for Reliable Test Automation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      Background
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#practical-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Guidelines
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-context-aware-worker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: Context-Aware Worker
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sdet-relevance" class="md-nav__link">
+    <span class="md-ellipsis">
+      SDET Relevance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-anti-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Anti-Patterns
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-goroutine-safety-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Goroutine Safety Checklist
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Step
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../channels-and-select/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Channels & Select
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../http-client-and-server-basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HTTP Client/Server
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../unit-testing-in-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unit Testing in Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Microservices
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Microservices
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/microservices-overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/developing-microservices-with-gin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developing Microservices with Gin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/project-folder-structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Folder Structure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/rest-api-design/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    REST API Design
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/dependency-injection/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dependency Injection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/configuration-and-env-vars/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Config & Env Vars
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../20-microservices/logging-and-observability/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Logging & Observability
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Testing Basics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Testing Basics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/testing-package-basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing Package
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/table-driven-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Table-Driven Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/mocking-with-interfaces/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Mocking with Interfaces
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/testing-http-handlers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing HTTP Handlers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/testing-database-code-with-fakes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing DB Code with Fakes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../30-testing-basics/test-organization-and-naming/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Organization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Integration Testing (Testcontainers)
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Integration Testing (Testcontainers)
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/intro-to-testcontainers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Intro
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/installing-testcontainers-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install Testcontainers-Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/first-container-test/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    First Container Test
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/postgres-integration-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Postgres Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/api-end-to-end-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API E2E Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../40-integration-testing-testcontainers/testcontainers-ci-considerations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CI Considerations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Contract Testing
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Contract Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/why-contract-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Why Contract Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/pact-go-basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pact-Go Basics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/consumer-contract-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Consumer Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/provider-verification-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Provider Verification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../50-contract-testing/pact-in-ci/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pact in CI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    CI/CD & Quality Gates
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            CI/CD & Quality Gates
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../60-ci-cd-and-quality-gates/github-actions-for-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GitHub Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../60-ci-cd-and-quality-gates/running-unit-and-integration-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Running Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../60-ci-cd-and-quality-gates/coverage-and-thresholds/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Coverage Thresholds
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../60-ci-cd-and-quality-gates/linting-and-static-analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linting & Static Analysis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Patterns & Recipes
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Patterns & Recipes
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../70-patterns-and-recipes/golden-files-pattern/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Golden Files
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../70-patterns-and-recipes/test-data-builders/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Data Builders
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../70-patterns-and-recipes/flaky-test-diagnostics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Flaky Test Diagnostics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../70-patterns-and-recipes/debugging-concurrent-tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Debugging Concurrent Tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    WASM Playground
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            WASM Playground
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../80-wasm-playground/playground-overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../80-wasm-playground/embedding-playground-in-pages/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Embedding Playground
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../80-wasm-playground/limitations-and-best-practices/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Limitations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Capstone Project
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            Capstone Project
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/capstone-overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/requirements-and-scope/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Requirements
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/domain-and-data-model/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Model
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/api-specification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Spec
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/implementation-guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Implementation Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/unit-testing-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unit Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/integration-testing-with-testcontainers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Integration Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/contract-testing-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contract Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../90-capstone/ci-pipeline-for-capstone/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CI Pipeline
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Final Project
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            Final Project
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../99-final-project/independent-practice-requirements/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Independent Practice Requirements
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Appendix
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            Appendix
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/testing-reltio-mdm-with-go/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Testing Reltio MDM with Go
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/reltio-relation-mdm-testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reltio Relation MDM Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/rancher-desktop-setup-for-local-containers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rancher Desktop Setup for Local Containers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/how-to-report-issues/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    How to Report Issues
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../95-appendix/debug-single-go-file-in-vscode/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Debug a Single Go File in VS Code
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-are-goroutines" class="md-nav__link">
+    <span class="md-ellipsis">
+      What are Goroutines?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Is Concurrency?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-go-goroutines-handle-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      How Go Goroutines Handle Concurrency
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Go Goroutines Handle Concurrency">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-go-scheduler-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      What the Go Scheduler Does
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-this-is-useful" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why This Is Useful
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concurrency-vs-parallelism-in-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      Concurrency vs Parallelism in Go
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advantages-of-goroutines-over-other-languages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advantages of Goroutines Over Other Languages
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thread-vs-goroutine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Thread vs Goroutine
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Thread vs Goroutine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lower-overhead-than-os-threads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lower Overhead Than OS Threads
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simpler-programming-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simpler Programming Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#built-in-scheduling-by-the-go-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      Built-In Scheduling by the Go Runtime
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#channels-make-coordination-clear" class="md-nav__link">
+    <span class="md-ellipsis">
+      Channels Make Coordination Clear
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#great-fit-for-io-bound-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      Great Fit for I/O-Bound Work
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#easier-to-read-in-test-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Easier to Read in Test Code
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standard-library-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standard Library Support
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-goroutines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating Goroutines
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#waiting-for-goroutines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Waiting for Goroutines
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Waiting for Goroutines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-timesleep-not-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using time.Sleep (Not Recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-syncwaitgroup-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using sync.WaitGroup (Recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-bad-vs-good-snippet" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Bad vs Good Snippet
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#race-conditions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Race Conditions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synchronization-primitives" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synchronization Primitives
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Synchronization Primitives">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syncmutex" class="md-nav__link">
+    <span class="md-ellipsis">
+      sync.Mutex
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#syncrwmutex" class="md-nav__link">
+    <span class="md-ellipsis">
+      sync.RWMutex
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synccond" class="md-nav__link">
+    <span class="md-ellipsis">
+      sync.Cond
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synconce" class="md-nav__link">
+    <span class="md-ellipsis">
+      sync.Once
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parallel-in-java-and-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel in Java and C
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parallel in Java and C">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#java" class="md-nav__link">
+    <span class="md-ellipsis">
+      Java
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c" class="md-nav__link">
+    <span class="md-ellipsis">
+      C
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#main-difference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Main Difference
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-go-is-often-simpler-for-sdets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Go Is Often Simpler for SDETs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional Reading
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-exercises-sdet-focus" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Exercises (SDET Focus)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Exercises (SDET Focus)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exercise-1-parallel-endpoint-health-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exercise 1: Parallel Endpoint Health Checks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-2-race-safe-shared-counter" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exercise 2: Race-Safe Shared Counter
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assignment-part-5-concurrent-book-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assignment: Part 5 - Concurrent Book Processing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assignment: Part 5 - Concurrent Book Processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tasks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-csv-data-model-pkgdomainbulk_importgo" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Create CSV Data Model - pkg/domain/bulk_import.go
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-bulk-import-service-pkgdomainbulk_import_servicego" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Create Bulk Import Service - pkg/domain/bulk_import_service.go
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-write-tests-pkgdomainbulk_import_testgo" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Write Tests - pkg/domain/bulk_import_test.go
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Patterns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#race-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Race Detection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verification
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#files-created-this-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      Files Created This Section
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-world-use-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-World Use Case
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      What's Next
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deep-dive-concurrency-patterns-for-reliable-test-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deep Dive: Concurrency Patterns for Reliable Test Automation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deep Dive: Concurrency Patterns for Reliable Test Automation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      Background
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#practical-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Guidelines
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-context-aware-worker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: Context-Aware Worker
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sdet-relevance" class="md-nav__link">
+    <span class="md-ellipsis">
+      SDET Relevance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-anti-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Anti-Patterns
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-goroutine-safety-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Goroutine Safety Checklist
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Step
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="concurrency-goroutines">Concurrency: Goroutines<a class="headerlink" href="#concurrency-goroutines" title="Permanent link">&para;</a></h1>
+<p>Goroutines are lightweight execution units that make concurrent patterns cheap to express in Go. For SDETs, goroutine patterns power parallel API calls, fan-out test workers, and timeout-controlled probes.</p>
+<h2 id="what-are-goroutines">What are Goroutines?<a class="headerlink" href="#what-are-goroutines" title="Permanent link">&para;</a></h2>
+<p>Goroutines are lightweight threads managed by the Go runtime. They're much cheaper than OS threads.</p>
+<h2 id="what-is-concurrency">What Is Concurrency?<a class="headerlink" href="#what-is-concurrency" title="Permanent link">&para;</a></h2>
+<p>Concurrency means structuring a program so it can make progress on more than one task in the same period of time. It does not always mean tasks run at the exact same instant; it means the program can manage multiple in-flight activities without waiting for one to finish before starting the next.</p>
+<p>In practice, concurrency helps when your application needs to:</p>
+<ul>
+<li>Handle many requests at once</li>
+<li>Wait on I/O without blocking the whole program</li>
+<li>Split large work into smaller tasks</li>
+<li>Keep the program responsive while other work continues</li>
+</ul>
+<p>Parallelism is related but different. Parallelism means tasks are literally executing at the same time on multiple CPU cores. Go supports both, but concurrency is the core idea you design for first.</p>
+<h2 id="how-go-goroutines-handle-concurrency">How Go Goroutines Handle Concurrency<a class="headerlink" href="#how-go-goroutines-handle-concurrency" title="Permanent link">&para;</a></h2>
+<p>Go uses a runtime scheduler to manage goroutines. You can think of it as a very small task runner that maps many goroutines onto a smaller pool of operating system threads.</p>
+<p>The important idea is this:</p>
+<ul>
+<li>You write goroutines as if they are independent units of work.</li>
+<li>The Go runtime decides when and where they run.</li>
+<li>The runtime can pause one goroutine and resume another very quickly.</li>
+</ul>
+<p>This makes goroutines cheap compared with OS threads. You can often launch thousands or even millions of goroutines, depending on memory and workload, because each goroutine starts with a small stack and grows as needed.</p>
+<h3 id="what-the-go-scheduler-does">What the Go Scheduler Does<a class="headerlink" href="#what-the-go-scheduler-does" title="Permanent link">&para;</a></h3>
+<p>The scheduler handles:</p>
+<ul>
+<li>Starting goroutines</li>
+<li>Pausing goroutines that are waiting</li>
+<li>Resuming goroutines when they can continue</li>
+<li>Sharing CPU time across runnable goroutines</li>
+</ul>
+<p>When a goroutine waits on a channel, timer, network call, or other blocking operation, the runtime can switch to another goroutine instead of blocking the entire program.</p>
+<h3 id="why-this-is-useful">Why This Is Useful<a class="headerlink" href="#why-this-is-useful" title="Permanent link">&para;</a></h3>
+<p>This model is a strong fit for servers and test automation because many tasks are I/O bound:</p>
+<ul>
+<li>HTTP requests</li>
+<li>Database calls</li>
+<li>File processing</li>
+<li>Bulk imports</li>
+</ul>
+<p>Instead of waiting for each operation one by one, Go can keep many of them active and interleave their execution efficiently.</p>
+<h3 id="concurrency-vs-parallelism-in-go">Concurrency vs Parallelism in Go<a class="headerlink" href="#concurrency-vs-parallelism-in-go" title="Permanent link">&para;</a></h3>
+<p>Concurrency is about program structure. Parallelism is about actual simultaneous execution.</p>
+<p>For example:</p>
+<ul>
+<li>One goroutine can still be concurrent even on a single CPU core.</li>
+<li>Multiple goroutines can run in parallel when Go has more than one processor available.</li>
+</ul>
+<p>So in Go, concurrency is the design pattern, while parallelism is an optimization the runtime can use when hardware allows it.</p>
+<h2 id="advantages-of-goroutines-over-other-languages">Advantages of Goroutines Over Other Languages<a class="headerlink" href="#advantages-of-goroutines-over-other-languages" title="Permanent link">&para;</a></h2>
+<p>Go's goroutine model is especially attractive when compared with the most common concurrency models in Java and C#.</p>
+<h2 id="thread-vs-goroutine">Thread vs Goroutine<a class="headerlink" href="#thread-vs-goroutine" title="Permanent link">&para;</a></h2>
+<p>The table below summarizes practical differences between OS threads and Go goroutines.</p>
+<table>
+<thead>
+<tr>
+<th>Thread</th>
+<th>Goroutine</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS threads are managed by the kernel and have hardware/OS-level scheduling dependencies.</td>
+<td>Goroutines are managed by the Go runtime and are multiplexed over OS threads.</td>
+</tr>
+<tr>
+<td>OS threads generally have a fixed stack size (often around 1-2 MB by default, platform-dependent).</td>
+<td>Goroutines start with a very small stack (historically a few KB) and grow/shrink dynamically as needed.</td>
+</tr>
+<tr>
+<td>Stack size is usually allocated upfront and does not grow in the same lightweight way as goroutine stacks.</td>
+<td>Goroutine stack size is managed at runtime and can grow significantly (up to implementation/runtime limits) by moving data as needed.</td>
+</tr>
+<tr>
+<td>There is no built-in language primitive for thread-to-thread communication; coordination often relies on locks/condition variables and may add overhead.</td>
+<td>Goroutines use <code>channels</code> for structured communication and synchronization, often with lower coordination overhead in Go code paths (<a href="https://blog.twitch.tv/gos-march-to-low-latency-gc-a6fa96f06eb7">read more</a>).</td>
+</tr>
+<tr>
+<td>Threads have identity (for example, TID at OS level).</td>
+<td>Goroutines intentionally do not expose stable identity in the language/runtime model. This aligns with Go's design (no direct TLS-style goroutine identity API) (<a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms686749(v=vs.85).aspx">Thread Local Storage reference</a>).</td>
+</tr>
+<tr>
+<td>Threads have higher setup/teardown cost because they involve heavier OS resource allocation.</td>
+<td>Goroutines are created and destroyed by the Go runtime and are typically much cheaper than creating OS threads.</td>
+</tr>
+<tr>
+<td>Threads are preemptively scheduled by the OS; context switches are relatively expensive due to full thread state management.</td>
+<td>Goroutines are scheduled by Go's runtime scheduler; modern Go (1.14+) supports asynchronous preemption and low-cost goroutine switching compared with OS thread switching (<a href="https://stackoverflow.com/questions/4147221/preemptive-threads-vs-non-preemptive-threads">preemptive threads</a>, <a href="https://stackoverflow.com/questions/37469995/goroutines-are-cooperatively-scheduled-does-that-mean-that-goroutines-that-don">goroutine scheduling discussion</a>).</td>
+</tr>
+</tbody>
+</table>
+<p>SDET note: this is why fan-out I/O checks (API probes, health checks, parallel validations) are often simpler and more resource-efficient with goroutines than one-thread-per-task designs.</p>
+<h3 id="lower-overhead-than-os-threads">Lower Overhead Than OS Threads<a class="headerlink" href="#lower-overhead-than-os-threads" title="Permanent link">&para;</a></h3>
+<p>Goroutines are much lighter than Java or C# threads. That means you can create many more concurrent tasks without paying the same memory and scheduling cost that traditional threads require.</p>
+<h3 id="simpler-programming-model">Simpler Programming Model<a class="headerlink" href="#simpler-programming-model" title="Permanent link">&para;</a></h3>
+<p>You usually start a goroutine with just the <code>go</code> keyword. In Java and C#, concurrency often involves more ceremony, such as thread pools, futures, tasks, executors, or async state machines.</p>
+<h3 id="built-in-scheduling-by-the-go-runtime">Built-In Scheduling by the Go Runtime<a class="headerlink" href="#built-in-scheduling-by-the-go-runtime" title="Permanent link">&para;</a></h3>
+<p>Go handles goroutine scheduling for you. In Java and C#, the runtime also helps, but developers often need to think more explicitly about thread pools, task scheduling, or async coordination.</p>
+<h3 id="channels-make-coordination-clear">Channels Make Coordination Clear<a class="headerlink" href="#channels-make-coordination-clear" title="Permanent link">&para;</a></h3>
+<p>Go gives you channels as a first-class way to pass data and signal completion. This often makes concurrent code easier to understand than shared-memory approaches with locks alone.</p>
+<h3 id="great-fit-for-io-bound-work">Great Fit for I/O-Bound Work<a class="headerlink" href="#great-fit-for-io-bound-work" title="Permanent link">&para;</a></h3>
+<p>For HTTP calls, database access, queue consumers, and test automation, goroutines make it easy to keep many operations in flight without blocking the whole program.</p>
+<h3 id="easier-to-read-in-test-code">Easier to Read in Test Code<a class="headerlink" href="#easier-to-read-in-test-code" title="Permanent link">&para;</a></h3>
+<p>In SDET work, you often need to launch parallel checks, wait for results, and clean up safely. Goroutines plus <code>WaitGroup</code> usually stay shorter and clearer than equivalent Java thread or C# task code.</p>
+<h3 id="standard-library-support">Standard Library Support<a class="headerlink" href="#standard-library-support" title="Permanent link">&para;</a></h3>
+<p>Go's standard library works very well with concurrency patterns, especially <code>sync</code>, <code>time</code>, <code>context</code>, and <code>net/http</code>. This reduces the need for extra frameworks.</p>
+<h2 id="creating-goroutines">Creating Goroutines<a class="headerlink" href="#creating-goroutines" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="k">go</span><span class="w"> </span><span class="nx">functionName</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">say</span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="nx">say</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">say</span><span class="p">(</span><span class="s">&quot;World&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="go-playground">
+  <textarea class="go-code" rows="12">package main
+
+import (
+    "fmt"
+    "time"
+)
+func say(s string) {
+    for i := 0; i < 5; i++ {
+        fmt.Println(s)
+        time.Sleep(100 * time.Millisecond)
+    }
+}
+
+func main() {
+    go say("Hello")
+    say("World")
+}
+  </textarea>
+
+  <button class="go-run-btn" onclick="runGoPlayground(this)">Run</button>
+
+  <pre class="go-output"></pre>
+</div>
+
+<h2 id="waiting-for-goroutines">Waiting for Goroutines<a class="headerlink" href="#waiting-for-goroutines" title="Permanent link">&para;</a></h2>
+<h3 id="using-timesleep-not-recommended">Using time.Sleep (Not Recommended)<a class="headerlink" href="#using-timesleep-not-recommended" title="Permanent link">&para;</a></h3>
+<p><code>time.Sleep</code> pauses for a fixed duration, but goroutine completion time is not fixed. It depends on scheduler timing, CPU load, network latency, disk I/O, and other runtime factors.</p>
+<p>That creates two common problems:</p>
+<ul>
+<li><strong>Sleep too short</strong>: background goroutines may still be running when <code>main()</code> exits, so work is cut off.</li>
+<li><strong>Sleep too long</strong>: the program waits longer than necessary, slowing tests and pipelines.</li>
+</ul>
+<p>Because <code>Sleep</code> guesses timing instead of synchronizing on actual completion, it can introduce flaky behavior in CI and intermittent failures in test automation.</p>
+<p>Use <code>Sleep</code> for intentional delays (for example, retry backoff or pacing), not for coordinating goroutine lifecycle.</p>
+<div class="highlight"><pre><span></span><code><span class="k">go</span><span class="w"> </span><span class="nx">say</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span>
+<span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="using-syncwaitgroup-recommended">Using sync.WaitGroup (Recommended)<a class="headerlink" href="#using-syncwaitgroup-recommended" title="Permanent link">&para;</a></h3>
+<p><code>sync.WaitGroup</code> lets one part of your program wait until a set of goroutines finishes. This is important because <code>main()</code> does not automatically wait for background goroutines. If <code>main()</code> returns too early, the program exits and any still-running goroutines are stopped.</p>
+<p>Think of a <code>WaitGroup</code> as a counter:</p>
+<ul>
+<li><code>wg.Add(n)</code> says, "there are <code>n</code> goroutines I need to wait for"</li>
+<li><code>wg.Done()</code> reduces that counter by 1 when one goroutine finishes</li>
+<li><code>wg.Wait()</code> blocks until the counter reaches 0</li>
+</ul>
+<p>That makes it a good fit when you want to start several independent tasks and continue only after all of them complete.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">wg</span><span class="w"> </span><span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
+
+<span class="nx">wg</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Goroutine 1&quot;</span><span class="p">)</span>
+<span class="p">}()</span>
+
+<span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Goroutine 2&quot;</span><span class="p">)</span>
+<span class="p">}()</span>
+
+<span class="nx">wg</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span>
+</code></pre></div>
+<p>In this example:</p>
+<ul>
+<li><code>wg.Add(2)</code> tells Go that two goroutines must finish</li>
+<li>each goroutine uses <code>defer wg.Done()</code> so the counter is decremented even if the function returns early</li>
+<li><code>wg.Wait()</code> blocks the main goroutine until both worker goroutines call <code>Done()</code></li>
+</ul>
+<p>The <code>defer</code> pattern is recommended because it keeps the bookkeeping next to the goroutine start and reduces the chance of forgetting to signal completion.</p>
+<p>Two practical rules matter here:</p>
+<ul>
+<li>Call <code>Add()</code> before starting the goroutine, so the counter is correct before work begins</li>
+<li>Make sure every goroutine that was counted eventually calls <code>Done()</code>, or <code>Wait()</code> can block forever</li>
+</ul>
+<p>For SDET workflows, <code>WaitGroup</code> is useful when running parallel API checks, launching multiple validation steps, or coordinating concurrent test helpers where you only care that all tasks finish, not that they exchange data.</p>
+<p>Why this is recommended over <code>time.Sleep</code>:</p>
+<ul>
+<li>it waits for <strong>real completion</strong>, not an estimated delay</li>
+<li>it improves reliability across machines and CI environments</li>
+<li>it avoids unnecessary idle wait time once work is done</li>
+<li>it makes intent explicit: "wait for these goroutines to finish"</li>
+</ul>
+<p>In short, <code>WaitGroup</code> gives deterministic synchronization, while <code>Sleep</code> gives timing guesses.</p>
+<h3 id="quick-bad-vs-good-snippet">Quick Bad vs Good Snippet<a class="headerlink" href="#quick-bad-vs-good-snippet" title="Permanent link">&para;</a></h3>
+<p>Bad (<code>time.Sleep</code> as synchronization):</p>
+<div class="highlight"><pre><span></span><code><span class="k">go</span><span class="w"> </span><span class="nx">runJob</span><span class="p">()</span>
+<span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">500</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span><span class="w"> </span><span class="c1">// Guessing that work is done</span>
+</code></pre></div>
+<p>Good (<code>WaitGroup</code> for completion):</p>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">wg</span><span class="w"> </span><span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
+
+<span class="nx">wg</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">runJob</span><span class="p">()</span>
+<span class="p">}()</span>
+
+<span class="nx">wg</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span><span class="w"> </span><span class="c1">// Waits until runJob actually finishes</span>
+</code></pre></div>
+<h2 id="race-conditions">Race Conditions<a class="headerlink" href="#race-conditions" title="Permanent link">&para;</a></h2>
+<p>A race condition happens when two or more goroutines access the same data at the same time, and at least one of them writes to that data without proper synchronization.</p>
+<p>The danger is not just that the program may produce the wrong answer. A race means the result depends on timing, so the bug can appear in one run and disappear in the next. That makes race bugs frustrating in test automation and service code because they are often intermittent.</p>
+<p>For example, this code has a race:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">counter</span><span class="w"> </span><span class="kt">int</span>
+
+<span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">counter</span><span class="o">++</span>
+<span class="p">}()</span>
+
+<span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">counter</span><span class="o">++</span>
+<span class="p">}()</span>
+</code></pre></div>
+<p>Both goroutines read, modify, and write <code>counter</code>. Those operations are not guaranteed to happen atomically, so the updates can overlap and produce inconsistent results.</p>
+<p>Common signs of a race include:</p>
+<ul>
+<li>flaky tests that sometimes pass and sometimes fail</li>
+<li>counters, maps, or shared structs ending in unexpected states</li>
+<li>crashes caused by unsafe concurrent access</li>
+</ul>
+<p>Go provides a built-in race detector that instruments your program and reports suspicious concurrent accesses while the code runs.</p>
+<p>Use the race detector:</p>
+<div class="highlight"><pre><span></span><code>go<span class="w"> </span>run<span class="w"> </span>-race<span class="w"> </span>main.go
+go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-race<span class="w"> </span>./...
+</code></pre></div>
+<p>Use it regularly when writing concurrent code, especially around shared maps, cached state, counters, or test helpers reused across goroutines.</p>
+<p>The main ways to prevent race conditions are:</p>
+<ul>
+<li>avoid sharing mutable state when possible</li>
+<li>use channels to pass data between goroutines</li>
+<li>protect shared state with synchronization primitives like <code>Mutex</code> or <code>RWMutex</code></li>
+</ul>
+<h2 id="synchronization-primitives">Synchronization Primitives<a class="headerlink" href="#synchronization-primitives" title="Permanent link">&para;</a></h2>
+<p>Synchronization primitives are tools from the <code>sync</code> package that help goroutines coordinate safely. You use them when goroutines share data or when one goroutine must wait for a specific condition created by another.</p>
+<p>These primitives solve different problems, so choosing the right one matters.</p>
+<ul>
+<li><strong>sync.Mutex</strong>: Mutual exclusion lock</li>
+<li><strong>sync.RWMutex</strong>: Read-write lock</li>
+<li><strong>sync.Cond</strong>: Condition variable</li>
+<li><strong>sync.Once</strong>: Execute exactly once</li>
+</ul>
+<h3 id="syncmutex">sync.Mutex<a class="headerlink" href="#syncmutex" title="Permanent link">&para;</a></h3>
+<p>A <code>Mutex</code> protects shared data so only one goroutine can access the critical section at a time.</p>
+<p>Use it when multiple goroutines need to update the same variable, map, or struct.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">mu</span><span class="w"> </span><span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">counter</span><span class="w"> </span><span class="kt">int</span>
+
+<span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<span class="nx">counter</span><span class="o">++</span>
+<span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+</code></pre></div>
+<p>Without the lock, concurrent writes can race. With the lock, only one goroutine updates <code>counter</code> at a time.</p>
+<h3 id="syncrwmutex">sync.RWMutex<a class="headerlink" href="#syncrwmutex" title="Permanent link">&para;</a></h3>
+<p>An <code>RWMutex</code> is similar to <code>Mutex</code>, but it distinguishes between readers and writers:</p>
+<ul>
+<li>many readers can hold the lock at the same time</li>
+<li>only one writer can hold it, and writers exclude readers</li>
+</ul>
+<p>This is useful when reads happen much more often than writes, such as reading a cached configuration or shared lookup table.</p>
+<h3 id="synccond">sync.Cond<a class="headerlink" href="#synccond" title="Permanent link">&para;</a></h3>
+<p>A <code>Cond</code> lets goroutines wait until some condition becomes true.</p>
+<p>This is more specialized than <code>Mutex</code> or <code>WaitGroup</code>. You usually use it when goroutines need to sleep until shared state changes, such as waiting for work to appear in a queue.</p>
+<p>In day-to-day Go code, channels often provide a simpler alternative, but <code>sync.Cond</code> is still useful for lower-level coordination.</p>
+<h3 id="synconce">sync.Once<a class="headerlink" href="#synconce" title="Permanent link">&para;</a></h3>
+<p><code>Once</code> guarantees that a piece of code runs exactly one time, even if many goroutines call it concurrently.</p>
+<p>This is commonly used for one-time initialization, such as loading configuration, creating a shared client, or setting up expensive resources.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">once</span><span class="w"> </span><span class="nx">sync</span><span class="p">.</span><span class="nx">Once</span>
+
+<span class="nx">once</span><span class="p">.</span><span class="nx">Do</span><span class="p">(</span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Initialize shared resource&quot;</span><span class="p">)</span>
+<span class="p">})</span>
+</code></pre></div>
+<p>If multiple goroutines call <code>Do</code>, only the first call executes the function; the rest wait and then continue.</p>
+<p>For SDET work, these primitives are especially useful when test workers share counters, result collectors, caches, or setup logic. The general rule is:</p>
+<ul>
+<li>use <code>WaitGroup</code> to wait for work to finish</li>
+<li>use <code>Mutex</code> or <code>RWMutex</code> to protect shared mutable state</li>
+<li>use <code>Once</code> for one-time setup</li>
+<li>prefer channels when goroutines should communicate by passing data</li>
+</ul>
+<h2 id="parallel-in-java-and-c">Parallel in Java and C<a class="headerlink" href="#parallel-in-java-and-c" title="Permanent link">&para;</a></h2>
+<p>Go goroutines are conceptually similar to lightweight tasks, but the way you work with concurrency in Java and C# is different.</p>
+<h3 id="java">Java<a class="headerlink" href="#java" title="Permanent link">&para;</a></h3>
+<p>In Java, you often use <code>Thread</code>, <code>ExecutorService</code>, <code>CompletableFuture</code>, or the newer virtual threads in modern Java.</p>
+<div class="highlight"><pre><span></span><code><span class="n">ExecutorService</span><span class="w"> </span><span class="n">executor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Executors</span><span class="p">.</span><span class="na">newFixedThreadPool</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+
+<span class="n">executor</span><span class="p">.</span><span class="na">submit</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Task 1&quot;</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="n">executor</span><span class="p">.</span><span class="na">submit</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Task 2&quot;</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="n">executor</span><span class="p">.</span><span class="na">shutdown</span><span class="p">();</span>
+</code></pre></div>
+<p>Java threads are typically heavier than goroutines, so developers often use thread pools to control resource usage. With newer Java versions, virtual threads reduce the cost of blocking, but the programming model still centers around executors and futures rather than goroutines and channels.</p>
+<h3 id="c">C<a class="headerlink" href="#c" title="Permanent link">&para;</a></h3>
+<p>In C#, concurrency is commonly expressed through <code>Task</code>, <code>async</code>, and <code>await</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="n">Task</span><span class="w"> </span><span class="nf">RunAsync</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="kt">var</span><span class="w"> </span><span class="n">task1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Task</span><span class="p">.</span><span class="n">Run</span><span class="p">(()</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&quot;Task 1&quot;</span><span class="p">));</span>
+<span class="w">    </span><span class="kt">var</span><span class="w"> </span><span class="n">task2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Task</span><span class="p">.</span><span class="n">Run</span><span class="p">(()</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&quot;Task 2&quot;</span><span class="p">));</span>
+
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="n">Task</span><span class="p">.</span><span class="n">WhenAll</span><span class="p">(</span><span class="n">task1</span><span class="p">,</span><span class="w"> </span><span class="n">task2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>C# makes asynchronous programming very ergonomic, especially for I/O-heavy work. The runtime schedules tasks efficiently, but you usually coordinate work with tasks and async/await rather than channels.</p>
+<h3 id="main-difference">Main Difference<a class="headerlink" href="#main-difference" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Go emphasizes goroutines and channels as first-class concurrency tools.</li>
+<li>Java often emphasizes threads, executors, and futures.</li>
+<li>C# often emphasizes tasks, async/await, and task combinators.</li>
+</ul>
+<p>The shared goal is the same: keep the program responsive and efficient while multiple operations are in flight.</p>
+<h3 id="why-go-is-often-simpler-for-sdets">Why Go Is Often Simpler for SDETs<a class="headerlink" href="#why-go-is-often-simpler-for-sdets" title="Permanent link">&para;</a></h3>
+<p>Go usually requires less ceremony for concurrent test code:</p>
+<ul>
+<li>Launch a goroutine with <code>go func() { ... }()</code>.</li>
+<li>Coordinate completion with <code>sync.WaitGroup</code>.</li>
+<li>Share data safely with mutexes or channels.</li>
+</ul>
+<p>That simplicity is why Go is a strong fit for test automation, load tooling, and service orchestration.</p>
+<h2 id="additional-reading">Additional Reading<a class="headerlink" href="#additional-reading" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=f6kdp27TYZs">Go concurrency video</a></li>
+</ul>
+<h2 id="quick-exercises-sdet-focus">Quick Exercises (SDET Focus)<a class="headerlink" href="#quick-exercises-sdet-focus" title="Permanent link">&para;</a></h2>
+<p>Try these exercises before moving to the assignment.</p>
+<h3 id="exercise-1-parallel-endpoint-health-checks">Exercise 1: Parallel Endpoint Health Checks<a class="headerlink" href="#exercise-1-parallel-endpoint-health-checks" title="Permanent link">&para;</a></h3>
+<p>Goal: Practice goroutines + <code>WaitGroup</code> with deterministic test assertions.</p>
+<ol>
+<li>Implement <code>CheckEndpoints(endpoints []string) map[string]error</code>.</li>
+<li>Launch one goroutine per endpoint.</li>
+<li>Use <code>sync.WaitGroup</code> to wait for completion.</li>
+<li>Store results safely (mutex or channel collector).</li>
+<li>Write tests for all-success and partial-failure scenarios.</li>
+</ol>
+<p>Stretch: Add per-endpoint timeout using <code>context.WithTimeout</code>.</p>
+<h3 id="exercise-2-race-safe-shared-counter">Exercise 2: Race-Safe Shared Counter<a class="headerlink" href="#exercise-2-race-safe-shared-counter" title="Permanent link">&para;</a></h3>
+<p>Goal: Understand race conditions and safe synchronization.</p>
+<ol>
+<li>Create <code>ConcurrentCounter</code> with methods <code>Inc()</code> and <code>Value()</code>.</li>
+<li>Run 100 goroutines that increment the counter 100 times each.</li>
+<li>Verify final value is exactly <code>10000</code>.</li>
+<li>Run with race detector and ensure no data races.</li>
+</ol>
+<p>Stretch: Implement the same counter using channels and compare readability.</p>
+<h2 id="assignment-part-5-concurrent-book-processing">Assignment: Part 5 - Concurrent Book Processing<a class="headerlink" href="#assignment-part-5-concurrent-book-processing" title="Permanent link">&para;</a></h2>
+<h3 id="goal">Goal<a class="headerlink" href="#goal" title="Permanent link">&para;</a></h3>
+<p>Build concurrent batch processing for importing books into the Bookshelf API using goroutines and WaitGroup.</p>
+<h3 id="tasks">Tasks<a class="headerlink" href="#tasks" title="Permanent link">&para;</a></h3>
+<h4 id="1-create-csv-data-model-pkgdomainbulk_importgo">1. Create CSV Data Model - <code>pkg/domain/bulk_import.go</code><a class="headerlink" href="#1-create-csv-data-model-pkgdomainbulk_importgo" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">domain</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="s">&quot;sync&quot;</span>
+
+<span class="c1">// BookImportRecord represents a single book record from bulk import</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">BookImportRecord</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Title</span><span class="w">         </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Author</span><span class="w">        </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">ISBN</span><span class="w">          </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">PublishedYear</span><span class="w"> </span><span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="c1">// BulkImportResult contains results of a bulk operation</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">BulkImportResult</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">SuccessfulBooks</span><span class="w"> </span><span class="p">[]</span><span class="o">*</span><span class="nx">Book</span>
+<span class="w">    </span><span class="nx">FailedBooks</span><span class="w">     </span><span class="p">[]</span><span class="nx">FailedBookImport</span>
+<span class="w">    </span><span class="nx">TotalProcessed</span><span class="w">  </span><span class="kt">int</span>
+<span class="w">    </span><span class="nx">mu</span><span class="w">              </span><span class="nx">sync</span><span class="p">.</span><span class="nx">RWMutex</span>
+<span class="p">}</span>
+
+<span class="c1">// FailedBookImport represents a failed import attempt</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">FailedBookImport</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Record</span><span class="w"> </span><span class="nx">BookImportRecord</span>
+<span class="w">    </span><span class="nx">Error</span><span class="w">  </span><span class="kt">error</span>
+<span class="w">    </span><span class="nx">Index</span><span class="w">  </span><span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="c1">// NewBulkImportResult creates a new BulkImportResult</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">NewBulkImportResult</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="nx">BulkImportResult</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">BulkImportResult</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">SuccessfulBooks</span><span class="p">:</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="o">*</span><span class="nx">Book</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">        </span><span class="nx">FailedBooks</span><span class="p">:</span><span class="w">     </span><span class="nb">make</span><span class="p">([]</span><span class="nx">FailedBookImport</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// AddSuccessfulBook adds a successfully imported book (thread-safe)</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">BulkImportResult</span><span class="p">)</span><span class="w"> </span><span class="nx">AddSuccessfulBook</span><span class="p">(</span><span class="nx">book</span><span class="w"> </span><span class="o">*</span><span class="nx">Book</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">SuccessfulBooks</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">SuccessfulBooks</span><span class="p">,</span><span class="w"> </span><span class="nx">book</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// AddFailedBook adds a failed import (thread-safe)</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">BulkImportResult</span><span class="p">)</span><span class="w"> </span><span class="nx">AddFailedBook</span><span class="p">(</span><span class="nx">record</span><span class="w"> </span><span class="nx">BookImportRecord</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">,</span><span class="w"> </span><span class="nx">index</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">FailedBooks</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">FailedBooks</span><span class="p">,</span><span class="w"> </span><span class="nx">FailedBookImport</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">Record</span><span class="p">:</span><span class="w"> </span><span class="nx">record</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Error</span><span class="p">:</span><span class="w">  </span><span class="nx">err</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Index</span><span class="p">:</span><span class="w">  </span><span class="nx">index</span><span class="p">,</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="p">}</span>
+
+<span class="c1">// GetStats returns statistics about the import</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">BulkImportResult</span><span class="p">)</span><span class="w"> </span><span class="nx">GetStats</span><span class="p">()</span><span class="w"> </span><span class="p">(</span><span class="nx">successful</span><span class="p">,</span><span class="w"> </span><span class="nx">failed</span><span class="p">,</span><span class="w"> </span><span class="nx">total</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">SuccessfulBooks</span><span class="p">),</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">FailedBooks</span><span class="p">),</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">SuccessfulBooks</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">FailedBooks</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// SuccessRate returns the percentage of successful imports</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">BulkImportResult</span><span class="p">)</span><span class="w"> </span><span class="nx">SuccessRate</span><span class="p">()</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">total</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">SuccessfulBooks</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">FailedBooks</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">total</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mf">0.0</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">float64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">SuccessfulBooks</span><span class="p">))</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">float64</span><span class="p">(</span><span class="nx">total</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="2-create-bulk-import-service-pkgdomainbulk_import_servicego">2. Create Bulk Import Service - <code>pkg/domain/bulk_import_service.go</code><a class="headerlink" href="#2-create-bulk-import-service-pkgdomainbulk_import_servicego" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">domain</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;sync&quot;</span>
+<span class="p">)</span>
+
+<span class="c1">// BulkImportService handles concurrent book imports</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">BulkImportService</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">maxWorkers</span><span class="w"> </span><span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="c1">// NewBulkImportService creates a new BulkImportService</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">NewBulkImportService</span><span class="p">(</span><span class="nx">maxWorkers</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="nx">BulkImportService</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">maxWorkers</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">maxWorkers</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="c1">// default</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">BulkImportService</span><span class="p">{</span><span class="nx">maxWorkers</span><span class="p">:</span><span class="w"> </span><span class="nx">maxWorkers</span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// ImportBooksParallel imports multiple books concurrently</span>
+<span class="c1">// It processes records using multiple goroutines (workers)</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">bis</span><span class="w"> </span><span class="o">*</span><span class="nx">BulkImportService</span><span class="p">)</span><span class="w"> </span><span class="nx">ImportBooksParallel</span><span class="p">(</span>
+<span class="w">    </span><span class="nx">records</span><span class="w"> </span><span class="p">[]</span><span class="nx">BookImportRecord</span><span class="p">,</span>
+<span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="nx">BulkImportResult</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">result</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewBulkImportResult</span><span class="p">()</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">records</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">result</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Create channels for work distribution</span>
+<span class="w">    </span><span class="nx">recordsChan</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">chan</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">record</span><span class="w"> </span><span class="nx">BookImportRecord</span>
+<span class="w">        </span><span class="nx">index</span><span class="w">  </span><span class="kt">int</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="nx">bis</span><span class="p">.</span><span class="nx">maxWorkers</span><span class="p">)</span>
+
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">wg</span><span class="w"> </span><span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
+
+<span class="w">    </span><span class="c1">// Start workers</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">bis</span><span class="p">.</span><span class="nx">maxWorkers</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">wg</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">defer</span><span class="w"> </span><span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
+<span class="w">            </span><span class="nx">bis</span><span class="p">.</span><span class="nx">worker</span><span class="p">(</span><span class="nx">recordsChan</span><span class="p">,</span><span class="w"> </span><span class="nx">result</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}()</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Send records to workers</span>
+<span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">record</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">records</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">recordsChan</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">record</span><span class="w"> </span><span class="nx">BookImportRecord</span>
+<span class="w">                </span><span class="nx">index</span><span class="w">  </span><span class="kt">int</span>
+<span class="w">            </span><span class="p">}{</span><span class="nx">record</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nb">close</span><span class="p">(</span><span class="nx">recordsChan</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}()</span>
+
+<span class="w">    </span><span class="c1">// Wait for all workers to complete</span>
+<span class="w">    </span><span class="nx">wg</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">result</span>
+<span class="p">}</span>
+
+<span class="c1">// worker processes records from the channel</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">bis</span><span class="w"> </span><span class="o">*</span><span class="nx">BulkImportService</span><span class="p">)</span><span class="w"> </span><span class="nx">worker</span><span class="p">(</span>
+<span class="w">    </span><span class="nx">recordsChan</span><span class="w"> </span><span class="o">&lt;-</span><span class="kd">chan</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">record</span><span class="w"> </span><span class="nx">BookImportRecord</span>
+<span class="w">        </span><span class="nx">index</span><span class="w">  </span><span class="kt">int</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">result</span><span class="w"> </span><span class="o">*</span><span class="nx">BulkImportResult</span><span class="p">,</span>
+<span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">item</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">recordsChan</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Try to create the book</span>
+<span class="w">        </span><span class="nx">book</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewBook</span><span class="p">(</span>
+<span class="w">            </span><span class="nx">item</span><span class="p">.</span><span class="nx">record</span><span class="p">.</span><span class="nx">Title</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">item</span><span class="p">.</span><span class="nx">record</span><span class="p">.</span><span class="nx">Author</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">item</span><span class="p">.</span><span class="nx">record</span><span class="p">.</span><span class="nx">ISBN</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">item</span><span class="p">.</span><span class="nx">record</span><span class="p">.</span><span class="nx">PublishedYear</span><span class="p">,</span>
+<span class="w">        </span><span class="p">)</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">result</span><span class="p">.</span><span class="nx">AddFailedBook</span><span class="p">(</span><span class="nx">item</span><span class="p">.</span><span class="nx">record</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">item</span><span class="p">.</span><span class="nx">index</span><span class="p">)</span>
+<span class="w">            </span><span class="k">continue</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Simulate processing time (validation, deduplication, etc.)</span>
+<span class="w">        </span><span class="c1">// In real app, might check for duplicates, normalize data, etc.</span>
+<span class="w">        </span><span class="nx">book</span><span class="p">.</span><span class="nx">ID</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">NewBookID</span><span class="p">(</span><span class="nx">book</span><span class="p">.</span><span class="nx">ISBN</span><span class="p">)</span><span class="w"> </span><span class="c1">// Use ISBN as ID for this exercise</span>
+
+<span class="w">        </span><span class="nx">result</span><span class="p">.</span><span class="nx">AddSuccessfulBook</span><span class="p">(</span><span class="nx">book</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// ImportBooksSequential imports books one at a time (for comparison)</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">bis</span><span class="w"> </span><span class="o">*</span><span class="nx">BulkImportService</span><span class="p">)</span><span class="w"> </span><span class="nx">ImportBooksSequential</span><span class="p">(</span>
+<span class="w">    </span><span class="nx">records</span><span class="w"> </span><span class="p">[]</span><span class="nx">BookImportRecord</span><span class="p">,</span>
+<span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="nx">BulkImportResult</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">result</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewBulkImportResult</span><span class="p">()</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">record</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">records</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">book</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewBook</span><span class="p">(</span>
+<span class="w">            </span><span class="nx">record</span><span class="p">.</span><span class="nx">Title</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">record</span><span class="p">.</span><span class="nx">Author</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">record</span><span class="p">.</span><span class="nx">ISBN</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">record</span><span class="p">.</span><span class="nx">PublishedYear</span><span class="p">,</span>
+<span class="w">        </span><span class="p">)</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">result</span><span class="p">.</span><span class="nx">AddFailedBook</span><span class="p">(</span><span class="nx">record</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span>
+<span class="w">            </span><span class="k">continue</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="nx">book</span><span class="p">.</span><span class="nx">ID</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">NewBookID</span><span class="p">(</span><span class="nx">book</span><span class="p">.</span><span class="nx">ISBN</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">result</span><span class="p">.</span><span class="nx">AddSuccessfulBook</span><span class="p">(</span><span class="nx">book</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">result</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="3-write-tests-pkgdomainbulk_import_testgo">3. Write Tests - <code>pkg/domain/bulk_import_test.go</code><a class="headerlink" href="#3-write-tests-pkgdomainbulk_import_testgo" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">domain</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;testing&quot;</span>
+<span class="w">    </span><span class="s">&quot;time&quot;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestBulkImportResult_ThreadSafety</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">result</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewBulkImportResult</span><span class="p">()</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">wg</span><span class="w"> </span><span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
+
+<span class="w">    </span><span class="c1">// Simulate concurrent additions</span>
+<span class="w">    </span><span class="nx">numGoroutines</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">    </span><span class="nx">itemsPerGoroutine</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">100</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">numGoroutines</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">wg</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">id</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">defer</span><span class="w"> </span><span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">itemsPerGoroutine</span><span class="p">;</span><span class="w"> </span><span class="nx">j</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">book</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewBook</span><span class="p">(</span>
+<span class="w">                    </span><span class="s">&quot;Test Book&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s">&quot;Test Author&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="s">&quot;ISBN&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">2023</span><span class="p">,</span>
+<span class="w">                </span><span class="p">)</span>
+<span class="w">                </span><span class="nx">result</span><span class="p">.</span><span class="nx">AddSuccessfulBook</span><span class="p">(</span><span class="nx">book</span><span class="p">)</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}(</span><span class="nx">i</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">wg</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span>
+
+<span class="w">    </span><span class="nx">successful</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">GetStats</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">expected</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">numGoroutines</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">itemsPerGoroutine</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">successful</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">expected</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;expected %d successful, got %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">expected</span><span class="p">,</span><span class="w"> </span><span class="nx">successful</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestBulkImportService_ImportBooksParallel</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">records</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">BookImportRecord</span><span class="p">{</span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Go Programming&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Author</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;John Doe&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">ISBN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ISBN001&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">PublishedYear</span><span class="p">:</span><span class="w"> </span><span class="mi">2020</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Clean Code&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Author</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Robert Martin&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">ISBN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ISBN002&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">PublishedYear</span><span class="p">:</span><span class="w"> </span><span class="mi">2008</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Design Patterns&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Author</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Gang of Four&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">ISBN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ISBN003&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">PublishedYear</span><span class="p">:</span><span class="w"> </span><span class="mi">1994</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;The Pragmatic Programmer&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Author</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Hunt &amp; Thomas&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">ISBN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ISBN004&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">PublishedYear</span><span class="p">:</span><span class="w"> </span><span class="mi">1999</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Code Complete&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Author</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Steve McConnell&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">ISBN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ISBN005&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">PublishedYear</span><span class="p">:</span><span class="w"> </span><span class="mi">2004</span><span class="p">},</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">service</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewBulkImportService</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">result</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">service</span><span class="p">.</span><span class="nx">ImportBooksParallel</span><span class="p">(</span><span class="nx">records</span><span class="p">)</span>
+
+<span class="w">    </span><span class="nx">successful</span><span class="p">,</span><span class="w"> </span><span class="nx">failed</span><span class="p">,</span><span class="w"> </span><span class="nx">total</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">GetStats</span><span class="p">()</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">total</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">records</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;expected %d total, got %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">records</span><span class="p">),</span><span class="w"> </span><span class="nx">total</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">failed</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;expected 0 failures, got %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">failed</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">successful</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">records</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;expected %d successful, got %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">records</span><span class="p">),</span><span class="w"> </span><span class="nx">successful</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">SuccessRate</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mf">100.0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;expected 100%% success rate, got %.2f%%&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">SuccessRate</span><span class="p">())</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestBulkImportService_InvalidRecords</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">records</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">BookImportRecord</span><span class="p">{</span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Author</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Author&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">ISBN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ISBN001&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">PublishedYear</span><span class="p">:</span><span class="w"> </span><span class="mi">2020</span><span class="p">},</span><span class="w"> </span><span class="c1">// Empty title - invalid</span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Valid Book&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Author</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Author&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">ISBN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ISBN002&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">PublishedYear</span><span class="p">:</span><span class="w"> </span><span class="mi">2020</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Another Book&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Author</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">ISBN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ISBN003&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">PublishedYear</span><span class="p">:</span><span class="w"> </span><span class="mi">2020</span><span class="p">},</span><span class="w"> </span><span class="c1">// Empty author - invalid</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">service</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewBulkImportService</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">result</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">service</span><span class="p">.</span><span class="nx">ImportBooksParallel</span><span class="p">(</span><span class="nx">records</span><span class="p">)</span>
+
+<span class="w">    </span><span class="nx">successful</span><span class="p">,</span><span class="w"> </span><span class="nx">failed</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">GetStats</span><span class="p">()</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">successful</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;expected 1 successful, got %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">successful</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">failed</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;expected 2 failures, got %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">failed</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestBulkImportService_ParallelVsSequential</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Create 100 records</span>
+<span class="w">    </span><span class="nx">records</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="nx">BookImportRecord</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">records</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">BookImportRecord</span><span class="p">{</span>
+<span class="w">            </span><span class="nx">Title</span><span class="p">:</span><span class="w">         </span><span class="s">&quot;Book &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">string</span><span class="p">(</span><span class="nb">rune</span><span class="p">(</span><span class="nx">i</span><span class="p">)),</span>
+<span class="w">            </span><span class="nx">Author</span><span class="p">:</span><span class="w">        </span><span class="s">&quot;Author &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">string</span><span class="p">(</span><span class="nb">rune</span><span class="p">(</span><span class="nx">i</span><span class="p">)),</span>
+<span class="w">            </span><span class="nx">ISBN</span><span class="p">:</span><span class="w">          </span><span class="s">&quot;ISBN&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">string</span><span class="p">(</span><span class="nb">rune</span><span class="p">(</span><span class="nx">i</span><span class="p">)),</span>
+<span class="w">            </span><span class="nx">PublishedYear</span><span class="p">:</span><span class="w"> </span><span class="mi">2000</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">service</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewBulkImportService</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c1">// Parallel import</span>
+<span class="w">    </span><span class="nx">startParallel</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">resultParallel</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">service</span><span class="p">.</span><span class="nx">ImportBooksParallel</span><span class="p">(</span><span class="nx">records</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">parallelTime</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Since</span><span class="p">(</span><span class="nx">startParallel</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c1">// Sequential import</span>
+<span class="w">    </span><span class="nx">startSequential</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">resultSequential</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">service</span><span class="p">.</span><span class="nx">ImportBooksSequential</span><span class="p">(</span><span class="nx">records</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">sequentialTime</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Since</span><span class="p">(</span><span class="nx">startSequential</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c1">// Both should process same number</span>
+<span class="w">    </span><span class="nx">pSucc</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">resultParallel</span><span class="p">.</span><span class="nx">GetStats</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">sSucc</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">resultSequential</span><span class="p">.</span><span class="nx">GetStats</span><span class="p">()</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">pSucc</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">sSucc</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;parallel processed %d, sequential processed %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">pSucc</span><span class="p">,</span><span class="w"> </span><span class="nx">sSucc</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">t</span><span class="p">.</span><span class="nx">Logf</span><span class="p">(</span><span class="s">&quot;Parallel import time: %v&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">parallelTime</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">t</span><span class="p">.</span><span class="nx">Logf</span><span class="p">(</span><span class="s">&quot;Sequential import time: %v&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">sequentialTime</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">// Note: Sequential might be faster for small datasets due to goroutine overhead</span>
+<span class="p">}</span>
+
+<span class="c1">// Helper function</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">contains</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">substr</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="nx">substr</span><span class="p">);</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">s</span><span class="p">[</span><span class="nx">i</span><span class="p">:</span><span class="nx">i</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="nx">substr</span><span class="p">)]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">substr</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="key-patterns">Key Patterns<a class="headerlink" href="#key-patterns" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Worker Pool Pattern</strong> - Multiple goroutines (workers) process items from a channel</li>
+<li><strong>WaitGroup</strong> - Ensure all workers complete before continuing</li>
+<li><strong>Mutex for Shared State</strong> - Protect concurrent access to the result object</li>
+<li><strong>Channel for Work Distribution</strong> - Send work items to workers without blocking</li>
+</ol>
+<h3 id="race-detection">Race Detection<a class="headerlink" href="#race-detection" title="Permanent link">&para;</a></h3>
+<p>Run with race detector to catch potential issues:</p>
+<div class="highlight"><pre><span></span><code>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-race<span class="w"> </span>-v<span class="w"> </span>./pkg/domain
+</code></pre></div>
+<h3 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h3>
+<p>Run tests:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>pkg/domain
+go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-v<span class="w"> </span>-run<span class="w"> </span>BulkImport
+</code></pre></div>
+<p>Expected output:
+<div class="highlight"><pre><span></span><code>ok      bookshelf-api/pkg/domain       0.005s
+</code></pre></div></p>
+<h3 id="files-created-this-section">Files Created This Section<a class="headerlink" href="#files-created-this-section" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>pkg/domain/
+├── bulk_import.go             # Data models for bulk operations
+├── bulk_import_service.go     # Concurrent import service
+├── bulk_import_test.go        # Tests with concurrency
+└── (previous files...)
+</code></pre></div>
+<h3 id="real-world-use-case">Real-World Use Case<a class="headerlink" href="#real-world-use-case" title="Permanent link">&para;</a></h3>
+<p>This pattern is used in the Bookshelf API for:
+- <strong>Initial data loading</strong> - Import thousands of books from a catalog
+- <strong>Batch user operations</strong> - Migrate user data from legacy system
+- <strong>Periodic sync</strong> - Update book ratings from external sources
+- <strong>Batch notifications</strong> - Send emails to multiple users</p>
+<h3 id="whats-next">What's Next<a class="headerlink" href="#whats-next" title="Permanent link">&para;</a></h3>
+<p>In <strong>Section 20 (Microservices &amp; REST API)</strong>, you'll expose these bulk operations via HTTP endpoints and add dependency injection to wire services together.</p>
+<h2 id="deep-dive-concurrency-patterns-for-reliable-test-automation">Deep Dive: Concurrency Patterns for Reliable Test Automation<a class="headerlink" href="#deep-dive-concurrency-patterns-for-reliable-test-automation" title="Permanent link">&para;</a></h2>
+<h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h3>
+<p>Goroutines make it easy to scale work, but concurrency correctness is hard. Deterministic synchronization and bounded worker pools are critical for stable systems.</p>
+<h3 id="practical-guidelines">Practical Guidelines<a class="headerlink" href="#practical-guidelines" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Prefer bounded concurrency (<code>maxWorkers</code>) over unbounded goroutine spawning.</li>
+<li>Protect shared mutable state with mutexes or channel ownership.</li>
+<li>Always define shutdown/completion signals (<code>WaitGroup</code>, context cancellation).</li>
+<li>Run race detector frequently (<code>-race</code>).</li>
+</ol>
+<h3 id="example-context-aware-worker">Example: Context-Aware Worker<a class="headerlink" href="#example-context-aware-worker" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">worker</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">jobs</span><span class="w"> </span><span class="o">&lt;-</span><span class="kd">chan</span><span class="w"> </span><span class="nx">BookImportRecord</span><span class="p">,</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="kd">chan</span><span class="o">&lt;-</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span>
+<span class="w">            </span><span class="k">return</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">record</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">jobs</span><span class="p">:</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">return</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewBook</span><span class="p">(</span><span class="nx">record</span><span class="p">.</span><span class="nx">Title</span><span class="p">,</span><span class="w"> </span><span class="nx">record</span><span class="p">.</span><span class="nx">Author</span><span class="p">,</span><span class="w"> </span><span class="nx">record</span><span class="p">.</span><span class="nx">ISBN</span><span class="p">,</span><span class="w"> </span><span class="nx">record</span><span class="p">.</span><span class="nx">PublishedYear</span><span class="p">)</span>
+<span class="w">            </span><span class="nx">out</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="sdet-relevance">SDET Relevance<a class="headerlink" href="#sdet-relevance" title="Permanent link">&para;</a></h3>
+<p>These patterns directly apply to parallel test execution, batch API checks, and multi-environment validation runs.</p>
+<h2 id="common-anti-patterns">Common Anti-Patterns<a class="headerlink" href="#common-anti-patterns" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Launching goroutines without a <code>WaitGroup</code> or channel to track completion, causing test races.</li>
+<li>Sharing mutable state across goroutines without a mutex or channel-based handoff.</li>
+<li>Skipping the race detector (<code>-race</code> flag) in test runs, missing data races silently.</li>
+<li>Starting goroutines inside tests without guaranteed cleanup when the test exits.</li>
+</ul>
+<h2 id="quick-goroutine-safety-checklist">Quick Goroutine Safety Checklist<a class="headerlink" href="#quick-goroutine-safety-checklist" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Is every goroutine launched in a test paired with a <code>WaitGroup.Wait()</code> or completion channel?</li>
+<li>Are all shared data structures protected by a mutex or accessed through a single owning goroutine?</li>
+<li>Does CI run tests with <code>-race</code> to surface data race conditions?</li>
+<li>Are goroutine leaks checked using <code>goleak</code> or equivalent in long-running test suites?</li>
+</ul>
+<h2 id="next-step">Next Step<a class="headerlink" href="#next-step" title="Permanent link">&para;</a></h2>
+<p>Continue with <a href="../channels-and-select/">Channels and Select</a>.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.annotate", "content.tabs.link", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.cd18aaf1.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../assets/js/mermaid-init.js"></script>
+      
+        <script src="../../assets/js/playground.js"></script>
+      
+        <script src="../../assets/wasm/wasm_exec.js"></script>
+      
+        <script src="../../assets/js/layout-toggle.js"></script>
+      
+    
+  </body>
+</html>
