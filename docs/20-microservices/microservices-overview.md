@@ -52,6 +52,38 @@ REST is the most common synchronous pattern for service-to-service and client-to
 	- API contracts are often less strict unless you enforce OpenAPI/schema validation.
 	- Can become chatty if endpoints are poorly designed.
 
+How REST works in practice:
+
+1. Clients call resource-oriented endpoints (`/users`, `/orders/{id}`, `/books/{id}/reviews`).
+2. HTTP methods communicate intent (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`).
+3. The server returns status codes and JSON payloads.
+4. Clients interpret both payload and status code to decide behavior.
+5. Caching, retries, auth, and rate limits are handled at HTTP/API gateway layers.
+
+REST design principles that improve service quality:
+
+- Use nouns for resources and keep URI structure consistent.
+- Keep operations idempotent where expected (`GET`, `PUT`, `DELETE`).
+- Return clear status codes (`200`, `201`, `204`, `400`, `404`, `409`, `500`).
+- Standardize error payloads so consumers can handle failures predictably.
+- Use pagination/filter/sort conventions for list endpoints.
+- Version APIs deliberately (URI versioning or header-based versioning).
+
+Operational guidance for microservices:
+
+- Set client and server timeouts to prevent request pileups.
+- Add retry with backoff only for safe/idempotent operations.
+- Use correlation/request IDs for distributed tracing.
+- Enforce schema validation at the edge (OpenAPI + runtime validation).
+- Apply gateway controls: authentication, authorization, rate limiting, and quotas.
+
+SDET testing focus for REST APIs:
+
+1. Contract tests against OpenAPI schema (request + response validation).
+2. Endpoint tests for status code correctness and stable error formats.
+3. Integration tests for persistence side effects and transaction boundaries.
+4. Non-functional checks for pagination, filtering, rate limiting, and idempotency.
+
 Use REST when:
 
 1. External clients (web, mobile, partners) consume the API.
@@ -79,6 +111,38 @@ gRPC is a high-performance RPC framework with strongly typed contracts.
 	- Less human-readable on the wire; debugging usually needs specialized tooling.
 	- Browser support is indirect (often requires gRPC-Web or gateway translation).
 	- Requires schema management and code generation workflow.
+
+How gRPC works in practice:
+
+1. You define request/response messages and service methods in a `.proto` file.
+2. Build tools generate server interfaces and typed clients for your language.
+3. The server implements those generated interfaces.
+4. Clients call remote methods as normal function calls.
+5. gRPC serializes data with Protobuf and sends it over HTTP/2.
+
+Compared to JSON APIs, this gives stricter contracts and efficient payloads, but also requires disciplined schema versioning.
+
+RPC patterns supported by gRPC:
+
+- **Unary RPC**: one request, one response (most CRUD-like operations).
+- **Server streaming**: one request, many responses (log/telemetry feeds, progress updates).
+- **Client streaming**: many requests, one response (batch upload/aggregation patterns).
+- **Bidirectional streaming**: many-to-many stream (real-time collaboration or event pipelines).
+
+Operational guidance for microservices:
+
+- Always set **deadlines/timeouts** on calls to avoid hanging requests.
+- Use retries carefully, and only for idempotent operations.
+- Map failures to clear gRPC status codes (`InvalidArgument`, `NotFound`, `Unavailable`, `DeadlineExceeded`).
+- Use interceptors/middleware for auth, logging, tracing, and metrics.
+- Prefer mTLS for internal service-to-service traffic when required by security policy.
+
+SDET testing focus for gRPC services:
+
+1. Contract compatibility tests for `.proto` evolution.
+2. Unit tests for status code mapping and validation behavior.
+3. Integration tests with real gRPC server + dependencies (DB, queues, cache).
+4. Streaming tests for backpressure, cancellation, and reconnect behavior.
 
 Use gRPC when:
 
