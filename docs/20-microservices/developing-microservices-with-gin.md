@@ -28,7 +28,7 @@ Gin is a strong fit when you want to build:
 - CRUD-style microservices,
 - internal APIs for service-to-service communication,
 - public JSON APIs with clear request/response contracts,
-- lightweight gateways or BFFs,
+- lightweight gateways or BFFs (Backend for Frontend layers that tailor APIs for specific UI clients),
 - and services that need middleware-driven request handling.
 
 It is usually a good choice when your service is mostly HTTP and JSON. If you need a very small dependency surface and full control, `net/http` may still be enough. If you want strong conventions and a larger ecosystem, other frameworks may fit better.
@@ -72,6 +72,13 @@ func listUsers(c *gin.Context) {
 func createUser(c *gin.Context) {}
 func getUser(c *gin.Context) {}
 ```
+
+In `r.Use(gin.Logger(), gin.Recovery())`, `gin.Recovery()` is panic-protection middleware.
+If a handler panics, it recovers the request instead of crashing the process, logs the panic, and returns `500 Internal Server Error`.
+This is important in microservices so one bad request does not take down the entire service.
+
+In `c.JSON(http.StatusOK, gin.H{"data": []string{}})`, `gin.H` is Gin's shortcut for a JSON object (`map[string]any`).
+That line returns HTTP `200 OK` with `{"data":[]}`. Using `[]string{}` (empty slice) returns an empty array instead of `null`, which keeps response shape predictable for clients and tests.
 
 Group-based routing keeps related endpoints together and makes versioning easier later.
 
